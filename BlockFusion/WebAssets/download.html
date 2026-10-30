@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Download Block Rush 2K for Android, Smart TV & Web. Merge numbers, conquer 200+ levels across 8 worlds, play offline and compete on global leaderboards.">
+    <title>Download Block Rush 2K - Available on Android, Smart TV & Web</title>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-surface: #131b2e;
+            --bg-card: rgba(26, 36, 56, 0.85);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(247, 201, 72, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-gold: #f59e0b;
+            --accent-green: #22c55e;
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.08) 0px, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 8px 16px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+            transform: translateX(-3px);
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 19px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 24px 16px 40px;
+        }
+
+        .hero-logo {
+            max-width: 260px;
+            width: 80%;
+            height: auto;
+            max-height: 100px;
+            object-fit: contain;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 8px 30px rgba(245, 158, 11, 0.35));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.15;
+            margin-bottom: 14px;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, #f7c948 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(15px, 2.5vw, 18px);
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        /* Detected Device Banner */
+        .device-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #86efac;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.2);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Main Download Cards Grid */
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .download-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            position: relative;
+            transition: all 0.25s ease;
+            overflow: hidden;
+        }
+
+        .download-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-highlight);
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        .download-card.primary {
+            border: 1.5px solid rgba(245, 158, 11, 0.4);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(20, 28, 48, 0.98) 100%);
+        }
+
+        .badge-recommended {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: linear-gradient(135deg, #f7c948, #f59e0b);
+            color: #0f172a;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }
+
+        .card-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .icon-android { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .icon-web { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+        .icon-tv { background: linear-gradient(135deg, #a855f7, #7e22ce); }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .feature-bullets {
+            list-style: none;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feature-bullets li {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-bullets li::before {
+            content: "✓";
+            color: var(--accent-green);
+            font-weight: 900;
+        }
+
+        .btn {
+            width: 100%;
+            height: 50px;
+            border-radius: var(--radius-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #f7c948 0%, #d97706 100%);
+            color: #0f172a;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+        }
+
+        .btn-gold:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* QR Code Showcase */
+        .qr-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+            margin-bottom: 48px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+        }
+
+        .qr-info {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .qr-info h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .qr-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .qr-box {
+            background: #ffffff;
+            padding: 14px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .qr-code-img {
+            width: 140px;
+            height: 140px;
+            display: block;
+        }
+
+        .qr-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Game Highlights Grid */
+        .highlights-section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .highlight-item {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .highlight-item:hover {
+            border-color: rgba(247, 201, 72, 0.3);
+            background: rgba(30, 41, 59, 0.75);
+            transform: translateY(-2px);
+        }
+
+        .highlight-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .highlight-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .highlight-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        @media (max-width: 600px) {
+            .qr-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .qr-info {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Top Nav -->
+        <nav class="top-nav">
+            <a href="/" class="back-btn">← Back to Game</a>
+            <div class="brand-badge">
+                <img src="images/logo.png" alt="Block Rush 2K" class="brand-logo" onerror="this.src='images/icon.svg'">
+                <span class="brand-name">Block Rush 2K</span>
+            </div>
+            <a href="/tv" class="back-btn" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.3);color:var(--accent-purple);">📺 Smart TV</a>
+        </nav>
+
+        <!-- Hero -->
+        <header class="hero">
+            <img src="images/logo.png" alt="Block Rush 2K Logo" class="hero-logo" onerror="this.style.display='none'">
+            <h1 class="hero-title">Experience the Ultimate <span>Number Puzzle</span></h1>
+            <p class="hero-subtitle">
+                Merge numbered tiles, unlock 8 mythical worlds, solve daily challenges, and rise to the top of global leaderboards on any screen.
+            </p>
+
+            <div class="device-pill" id="device-pill">
+                <span id="device-icon">📱</span>
+                <span id="device-text">Detecting your device...</span>
+            </div>
+        </header>
+
+        <!-- Download Cards Grid -->
+        <section class="download-grid">
+            <!-- 1. Mobile App (Android & Huawei) -->
+            <div class="download-card primary" id="card-android">
+                <div class="badge-recommended" id="badge-android">Recommended</div>
+                <div>
+                    <div class="card-icon icon-android">📱</div>
+                    <h2 class="card-title">Mobile App</h2>
+                    <p class="card-desc">The official native mobile app for Android and Huawei devices.</p>
+                    <ul class="feature-bullets">
+                        <li>100% Offline Mode (No WiFi required)</li>
+                        <li>In-app store for coin packs & themes</li>
+                        <li>Silky smooth 60 FPS tile animations</li>
+                        <li>Cloud sync & achievement tracking</li>
+                    </ul>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <a href="https://play.google.com/store/apps/details?id=com.eisen.blockrush2k" id="btn-google-play" target="_blank" rel="noopener noreferrer" class="btn btn-gold" onclick="recordStoreClick('android_playstore')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3.6 1.8c-.3.3-.4.8-.4 1.4v17.6c0 .6.1 1.1.4 1.4l9.4-9.4L3.6 1.8zm11.7 8.3L12.5 13l2.8 2.8 3.5-2c1-.6 1-1.6 0-2.2l-3.5-2.1zM4.7 1.1l8.5 8.5 2.1-2.1L6.7.7C5.9.3 5.1.4 4.7 1.1zm0 21.8c.4.7 1.2.8 2 .4l8.6-4.8-2.1-2.1-8.5 8.5z"/>
+                        </svg>
+                        Get on Google Play
+                    </a>
+                    <a href="https://appgallery.huawei.com/app/com.eisen.blockrush2k" id="btn-huawei-gallery" target="_blank" rel="noopener noreferrer" class="btn btn-outline" onclick="recordStoreClick('huawei_appgallery')" style="background:rgba(239, 68, 68, 0.15);border-color:rgba(239,68,68,0.4);color:#fff;">
+                        <span style="font-size:18px;">🔴</span>
+                        Huawei AppGallery
+                    </a>
+                </div>
+            </div>
+
+            <!-- 2. Web Instant Play -->
+            <div class="download-card" id="card-web">
+                <div>
+                    <div class="card-icon icon-web">🌐</div>
+                    <h2 class="card-title">Play in Browser</h2>
+                    <p class="card-desc">No download needed. Jump straight into the game instantly in Chrome, Safari, Edge, or Firefox.</p>
+                    <ul class="feature-bullets">
+                        <li>Instant launch without storage space</li>
+                        <li>Full keyboard controls (Arrow keys + 1-5)</li>
+                        <li>Responsive on Mobile, Tablet & PC</li>
+                        <li>Free cloud backup with Google Login</li>
+                    </ul>
+                </div>
+                <a href="/" class="btn btn-outline">
+                    🎮 Play Instantly Now
+                </a>
+            </div>
+
+            <!-- 3. Smart TV -->
+            <div class="download-card" id="card-tv">
+                <div>
+                    <div class="card-icon icon-tv">📺</div>
+                    <h2 class="card-title">Smart TV & Google TV</h2>
+                    <p class="card-desc">Play on your big screen from the comfort of your couch using remote control navigation.</p>
+                    <ul class="feature-bullets">
+                        <li>Full TV D-Pad remote navigation</li>
+                        <li>Instant phone pairing with 6-digit code</li>
+                        <li>4K HDR visual themes & particle effects</li>
+                        <li>Synced progress with your mobile account</li>
+                    </ul>
+                </div>
+                <a href="/tv" class="btn btn-outline">
+                    📺 Open TV Link / Pairing
+                </a>
+            </div>
+        </section>
+
+        <!-- QR Code Section for Desktop Visitors -->
+        <section class="qr-section" id="qr-section">
+            <div class="qr-info">
+                <h3>📱 Scan with your Phone to Install</h3>
+                <p>On your computer? Open your phone camera, scan the QR code to open Block Rush 2K directly in Google Play and start merging!</p>
+            </div>
+            <div class="qr-box">
+                <!-- High Contrast SVG QR Code representation pointing to Play Store -->
+                <svg class="qr-code-img" viewBox="0 0 100 100" fill="#0f172a">
+                    <!-- Standard QR corner markers -->
+                    <rect x="5" y="5" width="28" height="28" rx="4" fill="none" stroke="#0f172a" stroke-width="6"/>
+                    <rect x="13" y="13" width="12" height="12" fill="#0f172a"/>
+                    <rect x="67" y="5" width="28" height="28" rx="4" fill="none" stroke="#0f172a" stroke-width="6"/>
+                    <rect x="75" y="13" width="12" height="12" fill="#0f172a"/>
+                    <rect x="5" y="67" width="28" height="28" rx="4" fill="none" stroke="#0f172a" stroke-width="6"/>
+                    <rect x="13" y="75" width="12" height="12" fill="#0f172a"/>
+                    <!-- Data points representation -->
+                    <rect x="38" y="10" width="8" height="8"/>
+                    <rect x="50" y="18" width="8" height="8"/>
+                    <rect x="38" y="26" width="8" height="8"/>
+                    <rect x="10" y="38" width="8" height="8"/>
+                    <rect x="22" y="46" width="8" height="8"/>
+                    <rect x="38" y="42" width="16" height="16" rx="2" fill="#f59e0b"/>
+                    <rect x="60" y="42" width="8" height="8"/>
+                    <rect x="75" y="38" width="12" height="8"/>
+                    <rect x="42" y="66" width="8" height="16"/>
+                    <rect x="54" y="66" width="14" height="8"/>
+                    <rect x="75" y="66" width="8" height="8"/>
+                    <rect x="68" y="80" width="16" height="8"/>
+                    <rect x="54" y="84" width="8" height="8"/>
+                </svg>
+                <span class="qr-label">Mobile App</span>
+            </div>
+        </section>
+
+        <!-- Highlights Grid -->
+        <section class="highlights-section">
+            <h2 class="section-title">Why Players Love Block Rush 2K</h2>
+            <div class="highlights-grid">
+                <div class="highlight-item">
+                    <div class="highlight-icon">📴</div>
+                    <div class="highlight-name">Offline Mode</div>
+                    <div class="highlight-desc">Play on flights, subway commutes, or off the grid without internet.</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🌍</div>
+                    <div class="highlight-name">8 Unique Worlds</div>
+                    <div class="highlight-desc">From Forest and Desert to Galaxy, Volcano, and South Africa.</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">⭐</div>
+                    <div class="highlight-name">200+ Levels</div>
+                    <div class="highlight-desc">Strategic progression designed to test and sharpen your mind.</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-icon">🏆</div>
+                    <div class="highlight-name">Leaderboards</div>
+                    <div class="highlight-desc">Compete with friends locally and climb international rankings.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="/">Play Game</a>
+                <a href="/tv">Link Smart TV</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/refund-policy">Refund Policy</a>
+                <a href="/delete-data">Delete Account</a>
+            </div>
+            <p>© 2026 Block Rush 2K. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Firebase SDKs for Promo Tracking and Attribution -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        // Initialize Firebase for visit recording
+        let db = null;
+        try {
+            const config = (typeof ACTIVE_FIREBASE_CONFIG !== 'undefined') ? ACTIVE_FIREBASE_CONFIG : FIREBASE_CONFIG;
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+            db = firebase.database();
+        } catch (e) {
+            console.warn('Firebase init on download page:', e.message);
+        }
+
+        // Detect device platform
+        function detectDevice() {
+            const ua = navigator.userAgent || '';
+            const pill = document.getElementById('device-pill');
+            const icon = document.getElementById('device-icon');
+            const text = document.getElementById('device-text');
+            const badgeAndroid = document.getElementById('badge-android');
+            const cardAndroid = document.getElementById('card-android');
+            const cardWeb = document.getElementById('card-web');
+            const cardTv = document.getElementById('card-tv');
+
+            const isHuawei = /huawei|honor|harmonyos|hms/i.test(ua);
+            const isAndroid = /Android/i.test(ua);
+            const isIOS = /iPhone|iPad|iPod/i.test(ua);
+            const isTV = /TV|SmartTV|GoogleTV|HbbTV|BRAVIA|NetCast|Tizen/i.test(ua);
+            const isDesktop = !isAndroid && !isIOS && !isTV;
+
+            if (isHuawei) {
+                icon.textContent = '📱';
+                text.textContent = 'Huawei Device Detected — Available on Huawei AppGallery & Direct Install!';
+                cardAndroid.classList.add('primary');
+                if (badgeAndroid) badgeAndroid.style.display = 'block';
+            } else if (isAndroid) {
+                icon.textContent = '🤖';
+                text.textContent = 'Android Device Detected — Install from Google Play or AppGallery!';
+                cardAndroid.classList.add('primary');
+                if (badgeAndroid) badgeAndroid.style.display = 'block';
+            } else if (isTV) {
+                icon.textContent = '📺';
+                text.textContent = 'Smart TV Detected — Pair your phone or play on the big screen!';
+                if (badgeAndroid) badgeAndroid.style.display = 'none';
+                cardTv.classList.add('primary');
+            } else if (isIOS) {
+                icon.textContent = '🍎';
+                text.textContent = 'iOS Detected — Play directly in Safari, or add to Home Screen!';
+                if (badgeAndroid) badgeAndroid.style.display = 'none';
+                cardWeb.classList.add('primary');
+            } else {
+                icon.textContent = '💻';
+                text.textContent = 'Desktop PC Detected — Play instantly in your browser or scan QR code to install on phone!';
+                cardWeb.classList.add('primary');
+            }
+        }
+
+        // Record clicks on store download buttons with promo attribution
+        function recordStoreClick(target) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const promo = params.get('promo') || params.get('campaign') || params.get('src') || localStorage.getItem('blockrush_promo_source') || 'direct';
+                
+                if (db) {
+                    const cleanKey = promo.replace(/[.#$[\]/]/g, '_').toUpperCase();
+                    db.ref(`promo_tracking/${cleanKey}/stats/downloads`).transaction(val => (val || 0) + 1);
+                    db.ref(`promo_tracking/${cleanKey}/events`).push({
+                        type: 'download_click',
+                        target: target,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            } catch (err) {
+                console.warn('Could not record store click:', err);
+            }
+        }
+
+        // Track promo page views
+        (function trackPromoLanding() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const promo = params.get('promo') || params.get('campaign') || params.get('src');
+                if (promo) {
+                    localStorage.setItem('blockrush_promo_source', promo.trim().toUpperCase());
+                    if (db) {
+                        const cleanKey = promo.trim().replace(/[.#$[\]/]/g, '_').toUpperCase();
+                        db.ref(`promo_tracking/${cleanKey}/stats/totalVisits`).transaction(val => (val || 0) + 1);
+                        db.ref(`promo_tracking/${cleanKey}/events`).push({
+                            type: 'download_page_view',
+                            referrer: document.referrer || 'direct',
+                            timestamp: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                }
+            } catch (e) { }
+        })();
+
+        detectDevice();
+    </script>
+</body>
+
+</html>

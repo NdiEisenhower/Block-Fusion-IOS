@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="volcanoSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#180202"/>
+      <stop offset="30%" stop-color="#360606"/>
+      <stop offset="60%" stop-color="#650e0e"/>
+      <stop offset="85%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#1c0303"/>
+    </linearGradient>
+
+    <radialGradient id="magmaGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#ef4444" stop-opacity="0.6"/>
+      <stop offset="80%" stop-color="#7f1d1d" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#180202" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="volcanoGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1000" height="1800" fill="url(#volcanoSky)"/>
+
+  <!-- Eruption Light Core -->
+  <circle cx="500" cy="650" r="220" fill="url(#magmaGlow)"/>
+
+  <!-- Volcanic Mountain Silhouette Range -->
+  <g fill="#0e0202" opacity="0.95">
+    <!-- Volcano Peak Center -->
+    <path d="M 0 1100 L 220 950 L 380 720 L 440 700 L 560 700 L 620 720 L 780 950 L 1000 1100 L 1000 1800 L 0 1800 Z"/>
+  </g>
+
+  <!-- Crater Magma Lava Flowing Down Center Peak -->
+  <g opacity="0.85" filter="url(#volcanoGlow)">
+    <!-- Molten Crater Top -->
+    <ellipse cx="500" cy="705" rx="55" ry="12" fill="#fef08a"/>
+    <!-- Lava Rivers -->
+    <path d="M 470 710 Q 450 820 480 920 Q 520 1020 490 1150 Q 460 1280 500 1400" fill="none" stroke="#f97316" stroke-width="22" stroke-linecap="round"/>
+    <path d="M 470 710 Q 450 820 480 920 Q 520 1020 490 1150 Q 460 1280 500 1400" fill="none" stroke="#fef08a" stroke-width="8" stroke-linecap="round"/>
+
+    <path d="M 530 710 Q 570 800 540 900 Q 510 1000 560 1120" fill="none" stroke="#ef4444" stroke-width="16" stroke-linecap="round"/>
+  </g>
+
+  <!-- Foreground Molten Lava Lake Bottom -->
+  <g opacity="0.75" filter="url(#volcanoGlow)">
+    <path d="M 0 1450 Q 250 1400 500 1460 Q 750 1420 1000 1480 L 1000 1800 L 0 1800 Z" fill="#b91c1c"/>
+    <path d="M 0 1520 Q 300 1480 600 1540 Q 800 1500 1000 1550 L 1000 1800 L 0 1800 Z" fill="#f97316"/>
+  </g>
+
+  <!-- Eruption Sparks & Floating Burning Embers -->
+  <g fill="#fef08a" opacity="0.75">
+    <circle cx="480" cy="620" r="4" filter="url(#volcanoGlow)"/>
+    <circle cx="520" cy="580" r="6" filter="url(#volcanoGlow)"/>
+    <circle cx="450" cy="500" r="5" filter="url(#volcanoGlow)"/>
+    <circle cx="550" cy="450" r="7" filter="url(#volcanoGlow)"/>
+    <circle cx="380" cy="400" r="4" filter="url(#volcanoGlow)"/>
+    <circle cx="620" cy="380" r="6" filter="url(#volcanoGlow)"/>
+    <circle cx="500" cy="320" r="8" filter="url(#volcanoGlow)"/>
+    <circle cx="280" cy="300" r="5" filter="url(#volcanoGlow)"/>
+    <circle cx="720" cy="280" r="4" filter="url(#volcanoGlow)"/>
+    <circle cx="420" cy="200" r="7" filter="url(#volcanoGlow)"/>
+    <circle cx="600" cy="180" r="5" filter="url(#volcanoGlow)"/>
+  </g>
+</svg>

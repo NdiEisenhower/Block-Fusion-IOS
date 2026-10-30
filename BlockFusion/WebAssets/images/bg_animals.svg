@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="savannahSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d0606"/>
+      <stop offset="30%" stop-color="#4a150b"/>
+      <stop offset="60%" stop-color="#7c2d12"/>
+      <stop offset="85%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#180505"/>
+    </linearGradient>
+
+    <radialGradient id="sun" cx="50%" cy="35%" r="40%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#fb923c" stop-opacity="0.6"/>
+      <stop offset="70%" stop-color="#ea580c" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#2d0606" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="blurGlow">
+      <feGaussianBlur stdDeviation="6" />
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1000" height="1800" fill="url(#savannahSky)"/>
+
+  <!-- Golden Sun -->
+  <circle cx="500" cy="500" r="180" fill="url(#sun)"/>
+
+  <!-- Distant Savannah Mountain Ranges -->
+  <path d="M 0 950 L 150 880 L 320 940 L 550 860 L 780 930 L 1000 870 L 1000 1800 L 0 1800 Z" fill="#3a100a" opacity="0.6"/>
+  <path d="M 0 1100 L 250 1020 L 480 1080 L 720 1000 L 1000 1060 L 1000 1800 L 0 1800 Z" fill="#240a06" opacity="0.8"/>
+
+  <!-- Birds in Flight Upper Sky -->
+  <g fill="#0f0303" opacity="0.65">
+    <path d="M 320 250 Q 330 240 340 250 Q 350 240 360 250 Q 350 246 340 252 Q 330 246 320 250 Z" />
+    <path d="M 360 220 Q 367 212 375 220 Q 382 212 390 220 Q 382 217 375 222 Q 367 217 360 220 Z" />
+    <path d="M 290 280 Q 298 270 307 280 Q 315 270 324 280 Q 315 276 307 282 Q 298 276 290 280 Z" />
+    <path d="M 720 320 Q 732 308 745 320 Q 758 308 770 320 Q 758 315 745 322 Q 732 315 720 320 Z" />
+  </g>
+
+  <!-- Giant Acacia Tree Silhouette Left -->
+  <g fill="#0e0202" opacity="0.85">
+    <!-- Trunk -->
+    <path d="M 120 1200 C 140 1050 110 900 80 820 C 130 800 180 780 220 720 C 180 770 140 820 110 850 C 130 780 160 700 200 620 C 150 670 110 750 90 800 C 70 700 50 620 20 560 C 45 630 65 720 75 790 C 50 780 20 770 -30 760 L -30 1200 Z" />
+    <!-- Flat Canopy Top -->
+    <ellipse cx="180" cy="580" rx="140" ry="25" />
+    <ellipse cx="80" cy="540" rx="160" ry="30" />
+    <ellipse cx="-10" cy="620" rx="120" ry="22" />
+    <ellipse cx="220" cy="680" rx="100" ry="20" />
+  </g>
+
+  <!-- Elephant Family Silhouette Center Right Ground -->
+  <g fill="#0a0202" opacity="0.9">
+    <!-- Adult Elephant -->
+    <path d="M 700 1180 C 670 1120 680 1060 730 1040 C 780 1020 840 1030 870 1070 C 890 1050 920 1050 930 1080 C 940 1100 930 1140 910 1150 C 920 1170 910 1180 890 1180 L 890 1240 L 870 1240 L 870 1180 L 820 1180 L 820 1240 L 800 1240 L 800 1180 L 740 1180 L 740 1240 L 720 1240 L 720 1180 Z" />
+    <!-- Baby Elephant -->
+    <path d="M 610 1200 C 590 1160 600 1120 630 1110 C 660 1100 700 1110 720 1130 L 720 1240 L 705 1240 L 705 1200 L 670 1200 L 670 1240 L 655 1240 L 655 1200 L 620 1200 L 620 1240 L 605 1240 L 605 1200 Z" />
+  </g>
+
+  <!-- Giraffe Silhouette Center Left -->
+  <g fill="#0e0202" opacity="0.88">
+    <!-- Long neck & legs -->
+    <path d="M 400 1240 L 410 1120 L 400 1120 L 390 1240 Z" />
+    <path d="M 430 1240 L 420 1120 L 410 1120 L 420 1240 Z" />
+    <path d="M 390 1130 C 370 1110 380 1080 410 1070 L 440 900 L 430 860 L 450 850 L 455 865 L 460 900 L 430 1080 C 450 1100 440 1130 420 1130 Z" />
+  </g>
+
+  <!-- Lion Silhouette Right Foreground -->
+  <g fill="#080101" opacity="0.95">
+    <path d="M 220 1580 C 200 1540 210 1500 240 1480 C 270 1460 300 1480 310 1510 C 330 1500 350 1520 360 1550 L 360 1620 L 340 1620 L 340 1580 L 300 1580 L 300 1620 L 280 1620 L 280 1580 L 240 1580 L 240 1620 L 220 1620 Z" />
+  </g>
+
+  <!-- Foreground Ground & Grasses -->
+  <path d="M 0 1220 Q 250 1200 500 1230 Q 750 1210 1000 1240 L 1000 1800 L 0 1800 Z" fill="#0c0202" />
+
+  <!-- Warm Floating Dust Orbs -->
+  <g fill="#fde047" opacity="0.3">
+    <circle cx="250" cy="700" r="6" filter="url(#blurGlow)"/>
+    <circle cx="780" cy="650" r="9" filter="url(#blurGlow)"/>
+    <circle cx="520" cy="900" r="12" filter="url(#blurGlow)"/>
+    <circle cx="120" cy="1100" r="8" filter="url(#blurGlow)"/>
+    <circle cx="880" cy="1350" r="10" filter="url(#blurGlow)"/>
+  </g>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="40%" stop-color="#0369a1"/>
+      <stop offset="80%" stop-color="#075985"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+
+    <radialGradient id="skySun" cx="50%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1000" height="1800" fill="url(#skyGrad)"/>
+  <rect width="1000" height="1800" fill="url(#skySun)"/>
+
+  <!-- Sun Rays -->
+  <g fill="#fef08a" opacity="0.15">
+    <polygon points="500,100 200,1800 300,1800"/>
+    <polygon points="500,100 450,1800 550,1800"/>
+    <polygon points="500,100 700,1800 800,1800"/>
+  </g>
+
+  <!-- Fluffy Cloud Layers -->
+  <g fill="#e0f2fe" opacity="0.35">
+    <!-- Cloud 1 Top -->
+    <path d="M 200 350 C 150 350 120 300 160 250 C 180 200 250 200 280 230 C 320 200 380 220 390 270 C 420 280 430 330 380 350 Z"/>
+    <!-- Cloud 2 Right -->
+    <path d="M 650 550 C 600 550 580 500 620 450 C 650 400 720 400 750 430 C 800 400 850 420 860 470 C 890 480 900 530 850 550 Z"/>
+    <!-- Cloud 3 Center Bottom -->
+    <path d="M 100 1250 C 50 1250 20 1200 60 1150 C 80 1100 150 1100 180 1130 C 220 1100 280 1120 290 1170 C 320 1180 330 1230 280 1250 Z"/>
+  </g>
+
+  <!-- Birds in Flight -->
+  <g fill="#075985" opacity="0.65">
+    <path d="M 420 450 Q 430 440 440 450 Q 450 440 460 450 Q 450 446 440 452 Q 430 446 420 450 Z" />
+    <path d="M 470 420 Q 477 412 485 420 Q 492 412 500 420 Q 492 417 485 422 Q 477 417 470 420 Z" />
+  </g>
+</svg>

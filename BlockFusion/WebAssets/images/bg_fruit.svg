@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#052e16"/>
+      <stop offset="30%" stop-color="#14532d"/>
+      <stop offset="70%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="20%" r="60%">
+      <stop offset="0%" stop-color="#86efac" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#fef08a" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#052e16" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1000" height="1800" fill="url(#bgGrad)"/>
+  <rect width="1000" height="1800" fill="url(#sunGlow)"/>
+
+  <!-- Sun Rays -->
+  <g opacity="0.12" fill="#fef08a">
+    <polygon points="500,0 350,1800 400,1800"/>
+    <polygon points="500,0 150,1800 220,1800"/>
+    <polygon points="500,0 600,1800 670,1800"/>
+    <polygon points="500,0 800,1800 870,1800"/>
+  </g>
+
+  <!-- Tropical Leaves Background Layer -->
+  <g opacity="0.2" fill="#22c55e">
+    <!-- Monstera Leaves & Palm Leaves -->
+    <path d="M-50,200 Q150,150 250,350 Q100,500 -50,450 Z" />
+    <path d="M1050,300 Q850,250 750,450 Q900,600 1050,550 Z" />
+    <path d="M-80,1100 Q180,1000 280,1250 Q120,1400 -80,1300 Z" />
+    <path d="M1080,1200 Q820,1100 720,1350 Q880,1500 1080,1400 Z" />
+  </g>
+
+  <!-- Detailed Fruit Illustrations floating in background -->
+  <!-- Watermelon Slice Top Right -->
+  <g transform="translate(780, 180) rotate(-15) scale(1.4)" opacity="0.35">
+    <path d="M 0 0 A 120 120 0 0 1 200 0 Z" fill="#ef4444"/>
+    <path d="M -10 0 A 130 130 0 0 1 210 0" fill="none" stroke="#22c55e" stroke-width="16"/>
+    <path d="M -5 0 A 124 124 0 0 1 205 0" fill="none" stroke="#fef08a" stroke-width="6"/>
+    <circle cx="50" cy="30" r="4" fill="#0f172a"/>
+    <circle cx="100" cy="50" r="4" fill="#0f172a"/>
+    <circle cx="150" cy="30" r="4" fill="#0f172a"/>
+  </g>
+
+  <!-- Pineapple Left -->
+  <g transform="translate(60, 650) rotate(20) scale(1.3)" opacity="0.3">
+    <!-- Body -->
+    <ellipse cx="60" cy="90" rx="55" ry="75" fill="#f59e0b"/>
+    <!-- Crown leaves -->
+    <path d="M 60 20 Q 30 -30 20 -50 Q 50 -20 60 15 Q 70 -20 100 -50 Q 90 -30 60 20" fill="#10b981"/>
+    <path d="M 60 20 Q 45 -40 40 -70 Q 60 -30 60 15 Q 60 -30 80 -70 Q 75 -40 60 20" fill="#059669"/>
+    <!-- Crosshatch lines -->
+    <path d="M 20 50 L 100 130 M 10 90 L 90 160 M 20 130 L 100 50 M 10 160 L 90 90" stroke="#b45309" stroke-width="4" opacity="0.6"/>
+  </g>
+
+  <!-- Strawberry Bottom Right -->
+  <g transform="translate(720, 1380) rotate(-25) scale(1.5)" opacity="0.35">
+    <path d="M 60 20 C 120 20 130 90 60 150 C -10 90 0 20 60 20 Z" fill="#dc2626"/>
+    <!-- Leaf top -->
+    <path d="M 60 20 C 40 0 20 10 10 20 C 30 25 50 25 60 20 C 70 25 90 25 110 20 C 100 10 80 0 60 20" fill="#16a34a"/>
+    <!-- Seeds -->
+    <circle cx="40" cy="50" r="3" fill="#fef08a"/>
+    <circle cx="80" cy="50" r="3" fill="#fef08a"/>
+    <circle cx="60" cy="80" r="3" fill="#fef08a"/>
+    <circle cx="35" cy="100" r="3" fill="#fef08a"/>
+    <circle cx="85" cy="100" r="3" fill="#fef08a"/>
+    <circle cx="60" cy="120" r="3" fill="#fef08a"/>
+  </g>
+
+  <!-- Apple Left Top -->
+  <g transform="translate(120, 160) scale(1.2)" opacity="0.3">
+    <path d="M 60 30 C 20 0 0 50 0 80 C 0 130 40 150 60 140 C 80 150 120 130 120 80 C 120 50 100 0 60 30 Z" fill="#ea580c"/>
+    <path d="M 60 30 C 65 15 75 5 80 0 C 75 15 65 25 60 30 Z" fill="#15803d"/>
+  </g>
+
+  <!-- Banana Center Bottom -->
+  <g transform="translate(180, 1480) rotate(35) scale(1.3)" opacity="0.3">
+    <path d="M 20 40 C 80 20 160 60 180 140 C 140 100 80 80 20 40 Z" fill="#eab308"/>
+    <path d="M 180 140 C 185 145 190 145 192 140 C 188 135 183 135 180 140" fill="#854d0e"/>
+  </g>
+
+  <!-- Grapes Right Center -->
+  <g transform="translate(760, 780) scale(1.2)" opacity="0.3">
+    <circle cx="50" cy="40" r="20" fill="#9333ea"/>
+    <circle cx="80" cy="40" r="20" fill="#7e22ce"/>
+    <circle cx="35" cy="70" r="20" fill="#7e22ce"/>
+    <circle cx="65" cy="70" r="20" fill="#9333ea"/>
+    <circle cx="95" cy="70" r="20" fill="#6b21a8"/>
+    <circle cx="50" cy="100" r="20" fill="#6b21a8"/>
+    <circle cx="80" cy="100" r="20" fill="#7e22ce"/>
+    <circle cx="65" cy="130" r="20" fill="#581c87"/>
+    <!-- Stem -->
+    <path d="M 65 25 Q 70 5 85 0" stroke="#15803d" stroke-width="6" fill="none"/>
+  </g>
+
+  <!-- Floating Sparkles & Light Orbs -->
+  <g opacity="0.4" fill="#86efac">
+    <circle cx="200" cy="400" r="8" filter="url(#glow)"/>
+    <circle cx="850" cy="500" r="12" filter="url(#glow)"/>
+    <circle cx="150" cy="950" r="10" filter="url(#glow)"/>
+    <circle cx="880" cy="1100" r="7" filter="url(#glow)"/>
+    <circle cx="500" cy="1600" r="14" filter="url(#glow)"/>
+    <circle cx="300" cy="1200" r="6" filter="url(#glow)"/>
+  </g>
+</svg>

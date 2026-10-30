@@ -1,0 +1,546 @@
+/* ===== THEME SYSTEM - REAL ILLUSTRATED IMAGE BACKGROUNDS & GAMEPLAY ENGINE ===== */
+
+/* Base container setup for theme overlays */
+#app {
+    position: relative;
+    overflow: hidden;
+    transition: background 0.5s ease-in-out;
+}
+
+body {
+    transition: background-color 0.5s ease-in-out;
+}
+
+.screen {
+    background: transparent !important;
+    position: relative;
+    z-index: 2;
+}
+
+/* Glassmorphism UI surfaces - Crisp surfaces without GPU backdrop shift */
+.game-info-card,
+.world-card,
+.popup,
+.modal,
+.login-card,
+.theme-option {
+    background: rgba(15, 23, 42, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    isolation: isolate !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+}
+
+/* Store & Settings Content Containers & List Items */
+#store-content,
+#settings-content {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    padding: 8px 12px 32px 12px !important;
+    box-sizing: border-box !important;
+}
+
+.store-item,
+.theme-option {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 16px !important;
+    margin-bottom: 8px !important;
+    gap: 12px !important;
+    background: rgba(30, 41, 59, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 16px !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    contain: none !important;
+    isolation: isolate !important;
+}
+
+
+/* Clear transparent headers - Perfectly aligned top bar across all screens */
+.game-header,
+.game-top-bar {
+    background: transparent !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 4px !important;
+    margin-bottom: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.game-header > span,
+.game-header > h2,
+.game-top-bar .game-title {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+    text-align: center !important;
+    flex: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.coins-display {
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    background: rgba(30, 41, 59, 0.75) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 20px !important;
+    padding: 0 12px !important;
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    color: var(--gold) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    flex-shrink: 0 !important;
+}
+
+#player-info-display,
+.player-info {
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(30, 41, 59, 0.75) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: 20px !important;
+    padding: 0 12px !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+    flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   1. CLASSIC NUMBERS THEME (theme-numbers)
+   ========================================================================== */
+.theme-numbers,
+#app.theme-numbers,
+body.theme-numbers #app,
+body.theme-numbers {
+    --bg: #0f172a;
+    --grid-bg: #1e293b;
+    background-color: #0f172a !important;
+    background-image: url('../images/bg_numbers.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* ==========================================================================
+   2. FRUIT THEME (theme-fruit) - Lush Orchard & Tropical Fruits
+   ========================================================================== */
+.theme-fruit,
+#app.theme-fruit,
+body.theme-fruit #app,
+body.theme-fruit {
+    --bg: #052e16;
+    --grid-bg: #082112;
+    background-color: #052e16 !important;
+    background-image: url('../images/bg_fruit.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-fruit .board-wrapper {
+    background: rgba(8, 33, 18, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2.5px solid rgba(34, 197, 94, 0.5) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 25px rgba(34, 197, 94, 0.35) !important;
+}
+
+.theme-fruit .grid-cell {
+    background: rgba(34, 197, 94, 0.12) !important;
+    border: 1px solid rgba(34, 197, 94, 0.22) !important;
+}
+
+.theme-fruit .tile[data-value="2"] { background: #388e3c !important; }
+.theme-fruit .tile[data-value="4"] { background: #4caf50 !important; }
+.theme-fruit .tile[data-value="8"] { background: #81c784 !important; }
+.theme-fruit .tile[data-value="16"] { background: #fbc02d !important; }
+.theme-fruit .tile[data-value="32"] { background: #f57c00 !important; }
+.theme-fruit .tile[data-value="64"] { background: #e64a19 !important; }
+.theme-fruit .tile[data-value="128"] { background: #d81b60 !important; }
+.theme-fruit .tile[data-value="256"] { background: #8e24aa !important; }
+
+/* ==========================================================================
+   3. ANIMALS THEME (theme-animals) - Savannah Twilight Sunset
+   ========================================================================== */
+.theme-animals,
+#app.theme-animals,
+body.theme-animals #app,
+body.theme-animals {
+    --bg: #2e1005;
+    --grid-bg: #180803;
+    background-color: #2e1005 !important;
+    background-image: url('../images/bg_animals.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-animals .board-wrapper {
+    background: rgba(24, 8, 3, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2.5px solid rgba(249, 115, 22, 0.55) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(249, 115, 22, 0.35) !important;
+}
+
+.theme-animals .grid-cell {
+    background: rgba(249, 115, 22, 0.12) !important;
+    border: 1px solid rgba(249, 115, 22, 0.22) !important;
+}
+
+.theme-animals .tile[data-value="2"] { background: #795548 !important; }
+.theme-animals .tile[data-value="4"] { background: #8d6e63 !important; }
+.theme-animals .tile[data-value="8"] { background: #a1887f !important; }
+.theme-animals .tile[data-value="16"] { background: #d81b60 !important; }
+.theme-animals .tile[data-value="32"] { background: #f57c00 !important; }
+.theme-animals .tile[data-value="64"] { background: #fbc02d !important; }
+
+/* ==========================================================================
+   4. SPACE THEME (theme-space) - Cosmic Galaxy & Starfield
+   ========================================================================== */
+.theme-space,
+#app.theme-space,
+body.theme-space #app,
+body.theme-space {
+    --bg: #030712;
+    --grid-bg: #080a1d;
+    background-color: #030712 !important;
+    background-image: url('../images/bg_space.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-space .board-wrapper {
+    background: rgba(8, 10, 29, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2.5px solid rgba(168, 85, 247, 0.55) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75), 0 0 30px rgba(168, 85, 247, 0.4) !important;
+}
+
+.theme-space .grid-cell {
+    background: rgba(168, 85, 247, 0.12) !important;
+    border: 1px solid rgba(168, 85, 247, 0.24) !important;
+}
+
+.theme-space .tile[data-value="2"] { background: #3f51b5 !important; }
+.theme-space .tile[data-value="4"] { background: #5c6bc0 !important; }
+.theme-space .tile[data-value="8"] { background: #7e57c2 !important; }
+.theme-space .tile[data-value="16"] { background: #ab47bc !important; }
+.theme-space .tile[data-value="32"] { background: #ec407a !important; }
+
+/* ==========================================================================
+   5. SOUTH AFRICA / COUNTRY THEME (theme-southafrica) - Table Mountain
+   ========================================================================== */
+.theme-southafrica,
+#app.theme-southafrica,
+body.theme-southafrica #app,
+body.theme-southafrica {
+    --bg: #062c19;
+    --grid-bg: #081e12;
+    background-color: #062c19 !important;
+    background-image: url('../images/bg_southafrica.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-southafrica .board-wrapper {
+    background: rgba(8, 30, 18, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2.5px solid rgba(234, 179, 8, 0.6) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(34, 197, 94, 0.4) !important;
+}
+
+.theme-southafrica .grid-cell {
+    background: rgba(234, 179, 8, 0.12) !important;
+    border: 1px solid rgba(234, 179, 8, 0.24) !important;
+}
+
+.theme-southafrica .tile[data-value="2"] { background: #2e7d32 !important; }
+.theme-southafrica .tile[data-value="4"] { background: #1b5e20 !important; }
+.theme-southafrica .tile[data-value="8"] { background: #f9a825 !important; }
+.theme-southafrica .tile[data-value="16"] { background: #c62828 !important; }
+.theme-southafrica .tile[data-value="32"] { background: #1565c0 !important; }
+
+/* ==========================================================================
+   6. NEON THEME (theme_neon / theme-neon) - Synthwave Grid
+   ========================================================================== */
+.theme-theme_neon,
+.theme-neon,
+#app.theme-theme_neon,
+#app.theme-neon,
+body.theme-theme_neon #app,
+body.theme-neon #app,
+body.theme-theme_neon,
+body.theme-neon {
+    --bg: #0d001a;
+    --grid-bg: #0f001f;
+    background-color: #0d001a !important;
+    background-image: url('../images/bg_neon.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-theme_neon .board-wrapper,
+.theme-neon .board-wrapper {
+    background: rgba(15, 0, 31, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 2.5px solid rgba(236, 72, 153, 0.75) !important;
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.55), 0 0 60px rgba(6, 182, 212, 0.3) !important;
+}
+
+.theme-theme_neon .grid-cell,
+.theme-neon .grid-cell {
+    background: rgba(236, 72, 153, 0.14) !important;
+    border: 1px solid rgba(6, 182, 212, 0.3) !important;
+}
+
+.theme-theme_neon .tile[data-value="2"],
+.theme-neon .tile[data-value="2"] { background: #d81b60 !important; box-shadow: 0 0 10px #d81b60 !important; }
+.theme-theme_neon .tile[data-value="4"],
+.theme-neon .tile[data-value="4"] { background: #00acc1 !important; box-shadow: 0 0 10px #00acc1 !important; }
+.theme-theme_neon .tile[data-value="8"],
+.theme-neon .tile[data-value="8"] { background: #8e24aa !important; box-shadow: 0 0 10px #8e24aa !important; }
+
+/* ==========================================================================
+   7. WOOD THEME (theme_wood / theme-wood) - Timber Grain
+   ========================================================================== */
+.theme-theme_wood,
+.theme-wood,
+#app.theme-theme_wood,
+#app.theme-wood,
+body.theme-theme_wood #app,
+body.theme-wood #app,
+body.theme-theme_wood,
+body.theme-wood {
+    --bg: #1c0d02;
+    --grid-bg: #120701;
+    background-color: #1c0d02 !important;
+    background-image: url('../images/bg_wood.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.theme-theme_wood .board-wrapper,
+.theme-wood .board-wrapper {
+    background: rgba(18, 7, 1, 0.88) !important;
+    backdrop-filter: blur(8px) !important;
+    border: 3px solid rgba(217, 119, 6, 0.6) !important;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(180, 83, 9, 0.3) !important;
+}
+
+.theme-theme_wood .grid-cell,
+.theme-wood .grid-cell {
+    background: rgba(217, 119, 6, 0.12) !important;
+    border: 1px solid rgba(217, 119, 6, 0.24) !important;
+}
+
+.theme-theme_wood .tile[data-value="2"],
+.theme-wood .tile[data-value="2"] { background: #5d4037 !important; }
+.theme-theme_wood .tile[data-value="4"],
+.theme-wood .tile[data-value="4"] { background: #6d4c41 !important; }
+.theme-theme_wood .tile[data-value="8"],
+.theme-wood .tile[data-value="8"] { background: #8d6e63 !important; }
+
+/* ==========================================================================
+   WORLD GAMEPLAY THEMES (Forest, Desert, Snow, Volcano, Galaxy, Sky, Ocean, Mythic)
+   ========================================================================== */
+
+/* 0. FOREST WORLD (world-forest) */
+body.world-forest,
+body.world-forest #app,
+body #app.world-forest,
+#app.world-forest,
+#screen-game.world-forest {
+    background-color: #052e16 !important;
+    background-image: url('../images/bg_fruit.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-forest .board-wrapper {
+    background: rgba(8, 33, 18, 0.92) !important;
+    border: 3px solid rgba(34, 197, 94, 0.6) !important;
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4) !important;
+}
+.world-forest .grid-cell {
+    background: rgba(34, 197, 94, 0.12) !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+
+/* 1. DESERT WORLD (world-desert) */
+body.world-desert,
+body.world-desert #app,
+body #app.world-desert,
+#app.world-desert,
+#screen-game.world-desert {
+    background-color: #451a03 !important;
+    background-image: url('../images/bg_desert.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-desert .board-wrapper {
+    background: rgba(41, 15, 2, 0.92) !important;
+    border: 3px solid rgba(245, 158, 11, 0.65) !important;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.45) !important;
+}
+.world-desert .grid-cell {
+    background: rgba(245, 158, 11, 0.12) !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+
+/* 2. SNOW WORLD (world-snow) */
+body.world-snow,
+body.world-snow #app,
+body #app.world-snow,
+#app.world-snow,
+#screen-game.world-snow {
+    background-color: #0c4a6e !important;
+    background-image: url('../images/bg_snow.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-snow .board-wrapper {
+    background: rgba(7, 43, 66, 0.92) !important;
+    border: 3px solid rgba(56, 189, 248, 0.65) !important;
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.45) !important;
+}
+.world-snow .grid-cell {
+    background: rgba(56, 189, 248, 0.12) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+/* 3. VOLCANO WORLD (world-volcano) */
+body.world-volcano,
+body.world-volcano #app,
+body #app.world-volcano,
+#app.world-volcano,
+#screen-game.world-volcano {
+    background-color: #180202 !important;
+    background-image: url('../images/bg_volcano.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-volcano .board-wrapper {
+    background: rgba(28, 3, 3, 0.92) !important;
+    border: 3px solid rgba(239, 68, 68, 0.75) !important;
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.55), inset 0 0 20px rgba(249, 115, 22, 0.3) !important;
+}
+.world-volcano .grid-cell {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(249, 115, 22, 0.3) !important;
+}
+
+/* 4. GALAXY WORLD (world-galaxy) */
+body.world-galaxy,
+body.world-galaxy #app,
+body #app.world-galaxy,
+#app.world-galaxy,
+#screen-game.world-galaxy {
+    background-color: #030712 !important;
+    background-image: url('../images/bg_space.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-galaxy .board-wrapper {
+    background: rgba(8, 10, 29, 0.92) !important;
+    border: 3px solid rgba(168, 85, 247, 0.65) !important;
+    box-shadow: 0 0 35px rgba(168, 85, 247, 0.45) !important;
+}
+.world-galaxy .grid-cell {
+    background: rgba(168, 85, 247, 0.12) !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+}
+
+/* 5. SKY WORLD (world-sky) */
+body.world-sky,
+body.world-sky #app,
+body #app.world-sky,
+#app.world-sky,
+#screen-game.world-sky {
+    background-color: #0284c7 !important;
+    background-image: url('../images/bg_sky.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-sky .board-wrapper {
+    background: rgba(12, 74, 110, 0.92) !important;
+    border: 3px solid rgba(125, 211, 252, 0.65) !important;
+    box-shadow: 0 0 30px rgba(125, 211, 252, 0.45) !important;
+}
+.world-sky .grid-cell {
+    background: rgba(125, 211, 252, 0.12) !important;
+    border: 1px solid rgba(125, 211, 252, 0.25) !important;
+}
+
+/* 6. OCEAN WORLD (world-ocean) */
+body.world-ocean,
+body.world-ocean #app,
+body #app.world-ocean,
+#app.world-ocean,
+#screen-game.world-ocean {
+    background-color: #0f766e !important;
+    background-image: url('../images/bg_ocean.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-ocean .board-wrapper {
+    background: rgba(2, 31, 24, 0.92) !important;
+    border: 3px solid rgba(45, 212, 191, 0.65) !important;
+    box-shadow: 0 0 30px rgba(45, 212, 191, 0.45) !important;
+}
+.world-ocean .grid-cell {
+    background: rgba(45, 212, 191, 0.12) !important;
+    border: 1px solid rgba(45, 212, 191, 0.25) !important;
+}
+
+/* 7. MYTHIC WORLD (world-mythic) */
+body.world-mythic,
+body.world-mythic #app,
+body #app.world-mythic,
+#app.world-mythic,
+#screen-game.world-mythic {
+    background-color: #18002e !important;
+    background-image: url('../images/bg_mythic.svg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+.world-mythic .board-wrapper {
+    background: rgba(10, 0, 20, 0.92) !important;
+    border: 3px solid rgba(245, 158, 11, 0.7) !important;
+    box-shadow: 0 0 35px rgba(192, 132, 252, 0.5), 0 0 15px rgba(245, 158, 11, 0.4) !important;
+}
+.world-mythic .grid-cell {
+    background: rgba(192, 132, 252, 0.14) !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}

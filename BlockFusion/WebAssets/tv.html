@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Link Smart TV - Block Rush 2K</title>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1d;
+            --bg-surface: #131b2e;
+            --bg-card: rgba(26, 36, 56, 0.88);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --accent-gold: #f59e0b;
+            --accent-green: #22c55e;
+            --accent-red: #e94560;
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.16) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.14) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(168, 85, 247, 0.08) 0px, transparent 60%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 30px 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            text-align: center;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-logo {
+            max-width: 200px;
+            width: 65%;
+            height: auto;
+            max-height: 75px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 14px auto;
+            filter: drop-shadow(0 6px 20px rgba(245, 158, 11, 0.35));
+        }
+
+        /* Mode Switcher Tabs */
+        .mode-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 30px;
+            padding: 4px;
+            margin-bottom: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 4px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 8px 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mode-tab.active {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0f172a;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35);
+        }
+
+        .title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        /* Pairing Code Box */
+        .code-box {
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px dashed rgba(245, 158, 11, 0.5);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .code-box:focus-within {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+        }
+
+        .code-label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+        }
+
+        .code-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            text-align: center;
+            font-family: 'Outfit', monospace;
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        /* Big TV Screen Code Display */
+        .tv-big-code {
+            font-family: 'Outfit', monospace;
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 10px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+            margin: 8px 0;
+            user-select: all;
+        }
+
+        .tv-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            height: 50px;
+            border-radius: var(--radius-md);
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            outline: none;
+        }
+
+        .btn:hover, .btn:focus-visible {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-google {
+            background: #ffffff;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .btn-google svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0f172a;
+            margin-top: 12px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        /* User Profile Pill */
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-gold);
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 800;
+            color: #fff;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* States */
+        .state-panel {
+            display: none;
+        }
+
+        .state-panel.active {
+            display: block;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.15);
+            border: 3px solid var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 10px auto 16px;
+            color: var(--accent-green);
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .email-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .email-form input {
+            height: 46px;
+            border-radius: var(--radius-md);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 0 14px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .email-form input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .msg-box {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .msg-error {
+            background: rgba(233, 69, 96, 0.15);
+            border: 1px solid var(--accent-red);
+            color: #ff8b94;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .footer-note a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-note a:hover {
+            color: var(--accent-gold);
+        }
+
+        /* Large TV and Desktop Styling */
+        @media (min-width: 900px) {
+            .container {
+                max-width: 540px;
+                padding: 36px 32px;
+            }
+
+            .title {
+                font-size: 28px;
+            }
+
+            .tv-big-code {
+                font-size: 56px;
+                letter-spacing: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img src="images/logo.png" alt="Block Rush 2K" class="header-logo" onerror="this.src='images/icon.svg'">
+
+        <!-- Mode Switcher -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-phone" onclick="switchMode('phone')">
+                📱 Link from Phone
+            </button>
+            <button class="mode-tab" id="tab-tv" onclick="switchMode('tv')">
+                📺 Show TV Code
+            </button>
+        </div>
+        
+        <!-- ============================================== -->
+        <!-- VIEW A: PHONE MODE (Authorizes code from TV)    -->
+        <!-- ============================================== -->
+        <div id="view-phone">
+            <!-- STATE 1: PAIRING CODE INPUT & AUTH -->
+            <div id="state-prompt" class="state-panel active">
+                <h1 class="title">Link to Smart TV</h1>
+                <p class="subtitle">Enter the 6-digit code shown on your Smart TV to sync your stars, coins, and levels!</p>
+
+                <div class="code-box">
+                    <div class="code-label">TV Pairing Code</div>
+                    <input type="text" id="tv-code" class="code-input" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="off" spellcheck="false">
+                </div>
+
+                <!-- Logged in state -->
+                <div id="logged-in-profile" style="display:none;">
+                    <div class="user-pill">
+                        <div id="user-avatar" class="user-avatar">👤</div>
+                        <div class="user-details">
+                            <div id="user-name" class="user-name">Player</div>
+                            <div id="user-email" class="user-email">email@example.com</div>
+                        </div>
+                    </div>
+                    <button id="btn-approve" class="btn btn-connect" onclick="authorizeTvSession()">
+                        📺 Link TV as <span id="btn-user-name" style="margin-left:4px;">Player</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="signOutCurrentUser()">Switch Account</button>
+                </div>
+
+                <!-- Logged out options -->
+                <div id="logged-out-actions">
+                    <button class="btn btn-google" onclick="signInWithGoogle()">
+                        <svg viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        Sign in with Google to Link TV
+                    </button>
+
+                    <div class="divider">or use email</div>
+
+                    <div class="email-form">
+                        <input type="email" id="email-input" placeholder="Email address">
+                        <input type="password" id="password-input" placeholder="Password">
+                        <button class="btn btn-connect" onclick="signInWithEmail()">Sign In & Link TV</button>
+                    </div>
+                </div>
+
+                <div id="status-error" class="msg-box msg-error"></div>
+            </div>
+
+            <!-- STATE 2: SUCCESS -->
+            <div id="state-success" class="state-panel">
+                <div class="success-icon">✓</div>
+                <h2 class="title">Connected!</h2>
+                <p class="subtitle" id="success-msg">Your Smart TV is now linked. Your progress, stars, and coins are now synced.</p>
+                <div style="font-size:13px;color:var(--text-muted);margin:20px 0;">
+                    Look back at your TV screen to start playing! 🎮
+                </div>
+                <a href="/" class="btn btn-secondary">← Back to Web Game</a>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIEW B: TV DISPLAY MODE (Shows Code on TV)    -->
+        <!-- ============================================== -->
+        <div id="view-tv" style="display:none;">
+            <div id="tv-state-waiting">
+                <h1 class="title">Smart TV Link</h1>
+                <p class="subtitle">On your phone or computer, open <strong>blockrush2k.web.app/tv</strong> and enter this code:</p>
+
+                <div class="code-box">
+                    <div class="code-label">Your TV Pairing Code</div>
+                    <div class="tv-big-code" id="tv-generated-code">------</div>
+                </div>
+
+                <div class="tv-status-badge">
+                    <span style="font-size:10px;">●</span> Waiting for mobile link...
+                </div>
+
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+                    Once you confirm on your phone, your TV will automatically sync and start!
+                </p>
+
+                <button class="btn btn-secondary" onclick="generateNewTvCode()">
+                    🔄 Generate New Code
+                </button>
+            </div>
+
+            <!-- TV Linked Success State -->
+            <div id="tv-state-linked" style="display:none;">
+                <div class="success-icon">✓</div>
+                <h2 class="title">TV Linked!</h2>
+                <p class="subtitle" id="tv-linked-user">Connected successfully!</p>
+                <button class="btn btn-connect" onclick="startTvGame()" style="font-size:17px;height:54px;">
+                    🎮 Start Playing on TV
+                </button>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            <a href="/">Play Game</a> • <a href="/download">Download App</a> • Block Rush 2K
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        let currentUser = null;
+        let tvCodeListenerRef = null;
+        let currentTvGeneratedCode = null;
+
+        // Initialize Firebase
+        try {
+            const config = (typeof ACTIVE_FIREBASE_CONFIG !== 'undefined') ? ACTIVE_FIREBASE_CONFIG : FIREBASE_CONFIG;
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+        } catch (e) {
+            showError('Firebase initialization failed: ' + e.message);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Switch Mode: Phone (Authorize) vs TV (Show Code)
+        function switchMode(mode) {
+            const viewPhone = document.getElementById('view-phone');
+            const viewTv = document.getElementById('view-tv');
+            const tabPhone = document.getElementById('tab-phone');
+            const tabTv = document.getElementById('tab-tv');
+
+            if (mode === 'tv') {
+                viewPhone.style.display = 'none';
+                viewTv.style.display = 'block';
+                tabPhone.classList.remove('active');
+                tabTv.classList.add('active');
+                if (!currentTvGeneratedCode) {
+                    generateNewTvCode();
+                }
+            } else {
+                viewPhone.style.display = 'block';
+                viewTv.style.display = 'none';
+                tabPhone.classList.add('active');
+                tabTv.classList.remove('active');
+            }
+        }
+
+        // Auto-detect TV vs Phone
+        (function autoDetectPlatform() {
+            const isTV = /TV|SmartTV|GoogleTV|HbbTV|BRAVIA|NetCast|Tizen/i.test(navigator.userAgent) || window.location.search.includes('mode=tv');
+            const codeParam = new URLSearchParams(window.location.search).get('code');
+            
+            if (codeParam) {
+                document.getElementById('tv-code').value = codeParam.trim().toUpperCase();
+                switchMode('phone');
+            } else if (isTV) {
+                switchMode('tv');
+            } else {
+                switchMode('phone');
+            }
+        })();
+
+        // Listen for Auth changes
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('logged-in-profile').style.display = 'block';
+                document.getElementById('logged-out-actions').style.display = 'none';
+
+                const name = user.displayName || (user.email ? user.email.split('@')[0] : 'Player');
+                document.getElementById('user-name').textContent = name;
+                document.getElementById('btn-user-name').textContent = name;
+                document.getElementById('user-email').textContent = user.email || 'Google Account';
+
+                const avatarEl = document.getElementById('user-avatar');
+                if (user.photoURL) {
+                    avatarEl.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                } else {
+                    avatarEl.textContent = '👤';
+                }
+
+                // If code is already present, automatically authorize!
+                const code = getPairingCode();
+                if (code && code.length >= 4) {
+                    authorizeTvSession();
+                }
+            } else {
+                document.getElementById('logged-in-profile').style.display = 'none';
+                document.getElementById('logged-out-actions').style.display = 'block';
+            }
+        });
+
+        function getPairingCode() {
+            return (document.getElementById('tv-code').value || '').trim().toUpperCase();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('status-error');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function clearError() {
+            const el = document.getElementById('status-error');
+            el.style.display = 'none';
+            el.textContent = '';
+        }
+
+        // Google Sign In
+        async function signInWithGoogle() {
+            clearError();
+            const code = getPairingCode();
+            if (!code) {
+                showError('Please enter the 6-digit TV Pairing Code shown on your TV.');
+                return;
+            }
+
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('profile');
+                provider.addScope('email');
+                await auth.signInWithPopup(provider);
+            } catch (err) {
+                if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    auth.signInWithRedirect(provider);
+                } else {
+                    showError('Google sign in error: ' + (err.message || err.code));
+                }
+            }
+        }
+
+        // Email Sign In
+        async function signInWithEmail() {
+            clearError();
+            const code = getPairingCode();
+            if (!code) {
+                showError('Please enter the 6-digit TV Pairing Code shown on your TV.');
+                return;
+            }
+
+            const email = (document.getElementById('email-input').value || '').trim();
+            const password = (document.getElementById('password-input').value || '');
+
+            if (!email || !password) {
+                showError('Please enter your email and password.');
+                return;
+            }
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (err) {
+                showError('Login error: ' + (err.message || err.code));
+            }
+        }
+
+        // Authorize TV Session in Firebase Realtime Database
+        async function authorizeTvSession() {
+            clearError();
+            const code = getPairingCode();
+            if (!code || code.length < 4) {
+                showError('Please enter the valid TV Pairing Code displayed on your TV.');
+                return;
+            }
+
+            if (!currentUser) {
+                showError('Please sign in first to link your TV.');
+                return;
+            }
+
+            const approveBtn = document.getElementById('btn-approve');
+            if (approveBtn) {
+                approveBtn.disabled = true;
+                approveBtn.textContent = '⏳ Linking TV...';
+            }
+
+            try {
+                const name = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : 'Player');
+                const sessionRef = db.ref('device_logins/' + code);
+
+                // Fetch user's cloud game data so TV receives stars, coins, and levels immediately
+                let cloudGameData = null;
+                try {
+                    const snap = await db.ref('users/' + currentUser.uid).once('value');
+                    if (snap.exists()) {
+                        cloudGameData = snap.val();
+                    }
+                } catch (dataErr) {
+                    console.warn('Could not read user game data:', dataErr);
+                }
+
+                await sessionRef.set({
+                    status: 'authorized',
+                    uid: currentUser.uid,
+                    displayName: name,
+                    email: currentUser.email || '',
+                    photoURL: currentUser.photoURL || '',
+                    gameData: cloudGameData,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Show Success Panel
+                document.getElementById('state-prompt').classList.remove('active');
+                document.getElementById('state-success').classList.add('active');
+                document.getElementById('success-msg').textContent = `Your Smart TV is linked to ${name}! Look back at your TV screen.`;
+            } catch (err) {
+                showError('Failed to link TV: ' + (err.message || err.code));
+                if (approveBtn) {
+                    approveBtn.disabled = false;
+                    approveBtn.textContent = '📺 Try Again';
+                }
+            }
+        }
+
+        // Generate TV Code for TV Screen
+        function generateNewTvCode() {
+            if (tvCodeListenerRef) {
+                tvCodeListenerRef.off();
+            }
+
+            // Generate random 6-digit numeric code
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            currentTvGeneratedCode = code;
+            document.getElementById('tv-generated-code').textContent = code;
+
+            if (db) {
+                const sessionRef = db.ref('device_logins/' + code);
+                sessionRef.set({
+                    status: 'waiting',
+                    device: 'SmartTV',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Listen for authorization from mobile
+                tvCodeListenerRef = sessionRef;
+                sessionRef.on('value', snapshot => {
+                    const data = snapshot.val();
+                    if (data && data.status === 'authorized') {
+                        onTvSessionApproved(data);
+                    }
+                });
+            }
+        }
+
+        function onTvSessionApproved(sessionData) {
+            document.getElementById('tv-state-waiting').style.display = 'none';
+            document.getElementById('tv-state-linked').style.display = 'block';
+            document.getElementById('tv-linked-user').textContent = `Synced with ${sessionData.displayName || 'Player'} (${sessionData.email || 'Cloud Account'})!`;
+
+            // Store game state into localStorage for the TV
+            try {
+                if (sessionData.gameData) {
+                    localStorage.setItem('blockRush2KSave', JSON.stringify(sessionData.gameData));
+                }
+                localStorage.setItem('br2k_tv_linked_user', JSON.stringify({
+                    uid: sessionData.uid,
+                    displayName: sessionData.displayName,
+                    email: sessionData.email,
+                    photoURL: sessionData.photoURL
+                }));
+            } catch (e) {
+                console.warn('Storage sync error:', e);
+            }
+        }
+
+        function startTvGame() {
+            window.location.href = '/?tv=1';
+        }
+
+        async function signOutCurrentUser() {
+            await auth.signOut();
+            clearError();
+        }
+    </script>
+</body>
+
+</html>

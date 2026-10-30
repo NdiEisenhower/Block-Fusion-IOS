@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Privacy Policy for Block Rush 2K - Learn how we collect, use, and protect your information.">
+    <title>Privacy Policy - Block Rush 2K</title>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-surface: #1E293B;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(247, 201, 72, 0.25);
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --accent-yellow: #F7C948;
+            --accent-coral: #E9543A;
+            --accent-green: #22C55E;
+            --accent-blue: #38BDF8;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(233, 84, 58, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(247, 201, 72, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 24px 16px 60px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        /* Top Navigation */
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-yellow);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 8px 16px;
+            background: rgba(247, 201, 72, 0.1);
+            border: 1px solid rgba(247, 201, 72, 0.2);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(247, 201, 72, 0.2);
+            transform: translateX(-2px);
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-badge span.logo-highlight {
+            color: var(--accent-yellow);
+        }
+
+        .brand-badge span.logo-accent {
+            color: var(--accent-coral);
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            padding: 20px 0 40px;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(32px, 5vw, 44px);
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .hero .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .effective-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 14px;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            color: var(--accent-yellow);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .summary-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .summary-item .title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .summary-item .desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Policy Sections */
+        .policy-content {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .policy-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .policy-section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .policy-section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 20px 0 10px;
+        }
+
+        .policy-section p {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            font-size: 15px;
+        }
+
+        .policy-section ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 16px;
+        }
+
+        .policy-section ul li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+        }
+
+        .policy-section ul li::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--accent-yellow);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Links */
+        a.external-link {
+            color: var(--accent-blue);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        a.external-link:hover {
+            color: #BAE6FD;
+        }
+
+        /* Callout Box */
+        .callout {
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-left: 4px solid var(--accent-green);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin: 18px 0;
+            font-size: 14px;
+            color: #DCFCE7;
+        }
+
+        .callout.danger {
+            background: rgba(233, 69, 96, 0.08);
+            border: 1px solid rgba(233, 69, 96, 0.25);
+            border-left: 4px solid #e94560;
+            color: #FFE4E6;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        footer a:hover {
+            color: var(--accent-yellow);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation Header -->
+        <header class="header-nav">
+            <a href="index.html" class="back-link">
+                <span>←</span> Back to Game
+            </a>
+            <div class="brand-badge">
+                <img src="images/icon.svg" alt="Block Rush 2K" style="width: 28px; height: 28px; border-radius: 6px; vertical-align: middle;">
+                <span>
+                    <span class="logo-highlight">BLOCK</span>
+                    <span class="logo-accent">RUSH 2K</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Privacy Policy</h1>
+            <p class="subtitle">Transparency on how Block Rush 2K collects, uses, and safeguards your data.</p>
+            <div class="effective-badge">Effective Date: September 21, 2026</div>
+        </section>
+
+        <!-- Quick Summary Card -->
+        <div class="summary-card">
+            <h2>Quick Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="title">Guest Play First</div>
+                    <div class="desc">You can play the entire game offline or as a guest without creating an account or providing personal details.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">No Selling of Data</div>
+                    <div class="desc">We do not sell, rent, or monetize your personal information to any third parties. Ever.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">Secure Analytics</div>
+                    <div class="desc">Anonymous performance and crash metrics help us fix bugs and improve smooth 60fps puzzle gameplay.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">Complete Data Control</div>
+                    <div class="desc">You can export all your game save data or delete your account at any time with a single tap in Settings.</div>
+                </div>
+            </div>
+        </div>
+
+        <main class="policy-content">
+            <!-- 1. Introduction -->
+            <section class="policy-section">
+                <h2>1. Introduction</h2>
+                <p>Welcome to <strong>Block Rush 2K</strong> ("we", "our", or "us"). This Privacy Policy applies to our mobile application on Google Play, our web-based game application, and any related services (collectively referred to as the "Service").</p>
+                <p>We believe in privacy by design. By playing or using Block Rush 2K, you acknowledge the terms outlined in this policy. If you have any questions or concerns, please contact us at the email provided at the bottom of this page.</p>
+            </section>
+
+            <!-- 2. Information We Collect -->
+            <section class="policy-section">
+                <h2>2. Information We Collect</h2>
+                <p>We only collect information necessary to deliver, maintain, and enhance your gaming experience:</p>
+
+                <h3>A. No Account Creation Required</h3>
+                <p><strong>Block Rush 2K does not require or allow users to create an account.</strong> All players enjoy the game as guests without creating a profile, logging in, or providing personal identifiers such as your name, email address, or password.</p>
+
+                <h3>B. Information Collected Automatically</h3>
+                <ul>
+                    <li><strong>Game Progress & Local Storage:</strong> High scores, coins, unlocked worlds, challenge streaks, and game settings are saved locally on your device (via browser <code>localStorage</code> or Android <code>SharedPreferences</code>).</li>
+                    <li><strong>Device & Usage Data:</strong> Operating system version, device model, language preference, and anonymous in-game interactions (e.g. levels played, puzzle merges completed) via Google Firebase Analytics.</li>
+                    <li><strong>Diagnostic & Crash Logs:</strong> Stack traces, operating system state, and crash occurrences via Firebase Crashlytics to resolve bugs and performance bottlenecks.</li>
+                    <li><strong>Advertising Identifiers:</strong> Google Mobile Ads (AdMob) may use standard device advertising identifiers (such as Android Advertising ID / AD_ID) to deliver ads and measure ad performance in accordance with Google's policies.</li>
+                </ul>
+
+                <h3>C. In-App Purchases</h3>
+                <p>All in-app purchases (such as coin packs or ad removal) are processed directly and securely by <strong>Google Play Billing</strong>. We never receive or store your credit card numbers or financial account information.</p>
+            </section>
+
+            <!-- 3. How We Use Information -->
+            <section class="policy-section">
+                <h2>3. How We Use Your Information</h2>
+                <p>We use the collected information for the following specific purposes:</p>
+                <ul>
+                    <li>To save and synchronize your puzzle progress, trophies, and coin balances across sessions.</li>
+                    <li>To provide competitive features such as global and daily challenge leaderboards.</li>
+                    <li>To monitor, debug, and optimize application performance, responsiveness, and frame rates.</li>
+                    <li>To deliver non-intrusive advertisements that support the free version of the game.</li>
+                    <li>To fulfill customer support requests and address technical issues.</li>
+                </ul>
+            </section>
+
+            <!-- 4. Third-Party Service Providers -->
+            <section class="policy-section">
+                <h2>4. Third-Party Service Providers</h2>
+                <p>We work with trusted third-party service providers that adhere to strict data protection standards. Below are the third-party services utilized in Block Rush 2K:</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Service Provider</th>
+                                <th>Purpose</th>
+                                <th>Privacy Link</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Google Play Services</strong></td>
+                                <td>Platform integration, in-app billing, updates</td>
+                                <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="external-link">Google Privacy Policy</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Google AdMob</strong></td>
+                                <td>Banner, interstitial, and rewarded video ads</td>
+                                <td><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" class="external-link">AdMob Privacy & Terms</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Firebase Analytics</strong></td>
+                                <td>Anonymous gameplay analytics and event metrics</td>
+                                <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" class="external-link">Firebase Privacy Policy</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Firebase Crashlytics</strong></td>
+                                <td>Real-time crash reporting and diagnostic logs</td>
+                                <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" class="external-link">Firebase Crashlytics Privacy</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Firebase Authentication & Database</strong></td>
+                                <td>Optional cloud save and leaderboard synchronization</td>
+                                <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" class="external-link">Firebase Security Rules</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. Data Safety & Security -->
+            <section class="policy-section">
+                <h2>5. Data Security & Encryption</h2>
+                <p>We take the security of your data seriously and enforce modern security protocols:</p>
+                <ul>
+                    <li>All network communication between your device, Firebase services, and game APIs is encrypted in transit using industry-standard <strong>HTTPS / TLS 1.3 encryption</strong>.</li>
+                    <li>Local game saves are stored within secure application-private sandboxes on Android.</li>
+                    <li>Access to cloud databases is protected by strict Firebase Security Rules that prevent unauthorized data access.</li>
+                </ul>
+                <div class="callout">
+                    <strong>Safety Reminder:</strong> While we implement rigorous technical safeguards, please protect your device and Google credentials to prevent unauthorized access.
+                </div>
+            </section>
+
+            <!-- 6. Your Rights & Data Deletion -->
+            <section class="policy-section">
+                <h2>6. Your Rights and Data Deletion (GDPR & CCPA)</h2>
+                <p>Regardless of your geographic location, we respect your rights to control your personal and device data:</p>
+                <ul>
+                    <li><strong>No Account Deletion Needed:</strong> Because Block Rush 2K does not allow or support user accounts, there is no online profile or password-protected account maintained on our servers.</li>
+                    <li><strong>Reset Local Gameplay Data:</strong> You can wipe all local progress, coins, and high scores at any time by clearing your device's app storage (Android: <em>Settings ➔ Apps ➔ Block Rush 2K ➔ Storage ➔ Clear Storage</em>) or clearing your browser cookies/cache.</li>
+                    <li><strong>Request Associated Data Deletion:</strong> If you wish to request the deletion of any associated telemetry, crash logs, or advertising identifiers, you can submit a formal request via our dedicated deletion page:</li>
+                </ul>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="delete-data.html" class="back-link" style="font-size: 15px; padding: 12px 24px; background: rgba(233, 69, 96, 0.15); border: 1px solid rgba(233, 69, 96, 0.35); color: #FF8BA7; text-decoration: none;">
+                        Request Associated Data Deletion Page
+                    </a>
+                </div>
+            </section>
+
+            <!-- 7. Children's Privacy -->
+            <section class="policy-section">
+                <h2>7. Children's Privacy (COPPA Compliance)</h2>
+                <p>Block Rush 2K is designed as a family-friendly casual puzzle game. We do not knowingly collect personal identifiable information from children under the age of 13 (or under the applicable age of digital consent in your jurisdiction).</p>
+                <p>If you are a parent or legal guardian and believe that your child has provided us with personal information without your consent, please contact us immediately, and we will promptly delete such information from our records.</p>
+            </section>
+
+            <!-- 8. Policy Updates -->
+            <section class="policy-section">
+                <h2>8. Changes to This Privacy Policy</h2>
+                <p>We may update this Privacy Policy from time to time to reflect game updates, new features, or legal requirements. Any modifications will be posted directly on this page with an updated "Effective Date". We encourage you to review this policy periodically.</p>
+            </section>
+
+            <!-- 9. Contact Us -->
+            <section class="policy-section">
+                <h2>9. Contact Us</h2>
+                <p>If you have any questions, inquiries, or requests regarding this Privacy Policy or the handling of your data, please contact our support team at:</p>
+                <p>
+                    <strong>Email:</strong> <a href="mailto:tambanizwavhudimitambo@gmail.com" class="external-link">tambanizwavhudimitambo@gmail.com</a><br>
+                    <strong>Developer:</strong> Eisenhower Games
+                </p>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Eisenhower Games • Block Rush 2K. All rights reserved.</p>
+            <p style="margin-top: 8px;">
+                <a href="index.html">Play Game</a> • 
+                <a href="privacy.html">Privacy Policy</a> • 
+                <a href="delete-data.html">Data Deletion</a>
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>

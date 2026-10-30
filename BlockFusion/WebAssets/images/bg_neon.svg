@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="neonSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0d001a"/>
+      <stop offset="40%" stop-color="#1a0033"/>
+      <stop offset="70%" stop-color="#2d004d"/>
+      <stop offset="100%" stop-color="#050010"/>
+    </linearGradient>
+
+    <radialGradient id="neonSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="50%" stop-color="#e11d48"/>
+      <stop offset="85%" stop-color="#9f1239"/>
+      <stop offset="100%" stop-color="#0d001a" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="neonGlow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Background Base -->
+  <rect width="1000" height="1800" fill="url(#neonSky)"/>
+
+  <!-- Glowing Synthwave Neon Sun Horizon -->
+  <g transform="translate(500, 750)">
+    <circle cx="0" cy="0" r="220" fill="url(#neonSun)" filter="url(#neonGlow)"/>
+    <!-- Sun Horizontal Cut Lines -->
+    <rect x="-240" y="20" width="480" height="8" fill="#0d001a"/>
+    <rect x="-240" y="45" width="480" height="12" fill="#0d001a"/>
+    <rect x="-240" y="75" width="480" height="16" fill="#0d001a"/>
+    <rect x="-240" y="110" width="480" height="22" fill="#0d001a"/>
+    <rect x="-240" y="150" width="480" height="30" fill="#0d001a"/>
+  </g>
+
+  <!-- Electric Lasers / Light Rays -->
+  <g stroke="#06b6d4" stroke-width="2" opacity="0.4" filter="url(#neonGlow)">
+    <line x1="500" y1="750" x2="-200" y2="0"/>
+    <line x1="500" y1="750" x2="1200" y2="0"/>
+    <line x1="500" y1="750" x2="-200" y2="300"/>
+    <line x1="500" y1="750" x2="1200" y2="300"/>
+  </g>
+
+  <!-- Perspective Cyber Grid Floor Bottom -->
+  <g stroke="#ec4899" stroke-width="2.5" opacity="0.65" filter="url(#neonGlow)">
+    <!-- Horizon Line -->
+    <line x1="0" y1="950" x2="1000" y2="950" stroke="#06b6d4" stroke-width="4"/>
+
+    <!-- Perspective Rays emanating from vanishing point -->
+    <line x1="500" y1="950" x2="-500" y2="1800"/>
+    <line x1="500" y1="950" x2="-200" y2="1800"/>
+    <line x1="500" y1="950" x2="100" y2="1800"/>
+    <line x1="500" y1="950" x2="300" y2="1800"/>
+    <line x1="500" y1="950" x2="500" y2="1800"/>
+    <line x1="500" y1="950" x2="700" y2="1800"/>
+    <line x1="500" y1="950" x2="900" y2="1800"/>
+    <line x1="500" y1="950" x2="1200" y2="1800"/>
+    <line x1="500" y1="950" x2="1500" y2="1800"/>
+
+    <!-- Horizontal Grid Lines spreading outwards -->
+    <line x1="0" y1="970" x2="1000" y2="970"/>
+    <line x1="0" y1="1000" x2="1000" y2="1000"/>
+    <line x1="0" y1="1040" x2="1000" y2="1040"/>
+    <line x1="0" y1="1090" x2="1000" y2="1090"/>
+    <line x1="0" y1="1150" x2="1000" y2="1150"/>
+    <line x1="0" y1="1220" x2="1000" y2="1220"/>
+    <line x1="0" y1="1310" x2="1000" y2="1310"/>
+    <line x1="0" y1="1420" x2="1000" y2="1420"/>
+    <line x1="0" y1="1560" x2="1000" y2="1560"/>
+    <line x1="0" y1="1730" x2="1000" y2="1730"/>
+  </g>
+
+  <!-- Cyberpunk Neon Palm Tree Silhouettes Left & Right -->
+  <g fill="#050010" stroke="#ec4899" stroke-width="2" opacity="0.9" filter="url(#neonGlow)">
+    <!-- Left Palm -->
+    <path d="M 80 950 Q 120 750 200 600" fill="none" stroke-width="12"/>
+    <path d="M 200 600 Q 100 550 20 580" fill="none" stroke-width="6"/>
+    <path d="M 200 600 Q 120 480 50 480" fill="none" stroke-width="6"/>
+    <path d="M 200 600 Q 220 450 200 380" fill="none" stroke-width="6"/>
+    <path d="M 200 600 Q 280 480 320 500" fill="none" stroke-width="6"/>
+
+    <!-- Right Palm -->
+    <path d="M 920 950 Q 880 750 800 600" fill="none" stroke-width="12"/>
+    <path d="M 800 600 Q 900 550 980 580" fill="none" stroke-width="6"/>
+    <path d="M 800 600 Q 880 480 950 480" fill="none" stroke-width="6"/>
+    <path d="M 800 600 Q 780 450 800 380" fill="none" stroke-width="6"/>
+    <path d="M 800 600 Q 720 480 680 500" fill="none" stroke-width="6"/>
+  </g>
+
+  <!-- Floating Glowing Triangle Vector Shapes Top -->
+  <g opacity="0.35" fill="none" stroke="#06b6d4" stroke-width="3" filter="url(#neonGlow)">
+    <polygon points="500,200 420,340 580,340" />
+    <polygon points="200,300 150,380 250,380" stroke="#ec4899" />
+    <polygon points="800,250 740,350 860,350" stroke="#a855f7" />
+  </g>
+</svg>

@@ -1,0 +1,251 @@
+/* dark-mode-fix.css - Force light mode for game */
+:root {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+}
+
+html {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+}
+
+body {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+    background-color: #0F172A !important;
+}
+
+#app,
+.screen,
+.board-wrapper,
+.tile,
+.modal-overlay,
+.popup-overlay,
+.popup,
+.modal,
+.game-info-card,
+.store-item,
+.world-card,
+.level-btn,
+.powerup-btn,
+.btn,
+.coins-display,
+.game-stat,
+.goal-badge,
+.offline-box,
+.login-card,
+.theme-option,
+.player-info {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+}
+
+/* ===== TUTORIAL BOARD FIXES ===== */
+/* Ensure tutorial board uses same styling as main board */
+#tutorial-board-wrapper {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+    background: var(--grid-bg) !important;
+}
+
+#tutorial-board-wrapper .grid-cell {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+}
+
+/* ===== TILE FIXES - Apply to both game and tutorial ===== */
+/* Prevent color inversion on tiles */
+.tile {
+    filter: none !important;
+    -webkit-filter: none !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure all tile colors are preserved - applies to game AND tutorial */
+.tile[data-value="2"] {
+    background: #2D5A27 !important;
+}
+
+.tile[data-value="4"] {
+    background: #3A7D32 !important;
+}
+
+.tile[data-value="8"] {
+    background: #C47C2C !important;
+}
+
+.tile[data-value="16"] {
+    background: #D4862A !important;
+}
+
+.tile[data-value="32"] {
+    background: #E05A2B !important;
+}
+
+.tile[data-value="64"] {
+    background: #D42F1A !important;
+}
+
+.tile[data-value="128"] {
+    background: #E8B830 !important;
+}
+
+.tile[data-value="256"] {
+    background: #E5C43A !important;
+}
+
+.tile[data-value="512"] {
+    background: #E5A020 !important;
+}
+
+.tile[data-value="1024"] {
+    background: #E07B20 !important;
+}
+
+.tile[data-value="2048"] {
+    background: #E04060 !important;
+}
+
+.tile[data-value="4096"] {
+    background: #9030D0 !important;
+}
+
+.tile[data-value="8192"] {
+    background: #5090F0 !important;
+}
+
+.tile[data-value="16384"] {
+    background: #20C0A0 !important;
+}
+
+.tile[data-value="32768"] {
+    background: #F0A030 !important;
+}
+
+.tile[data-value="65536"] {
+    background: #F06060 !important;
+}
+
+/* ===== TUTORIAL TILE OVERRIDES ===== */
+/* Explicitly override any tutorial-specific styles that might conflict */
+#tutorial-board-wrapper .tile {
+    color: #fff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    forced-color-adjust: none !important;
+    -webkit-forced-color-adjust: none !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="2"] {
+    background: #2D5A27 !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="4"] {
+    background: #3A7D32 !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="8"] {
+    background: #C47C2C !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="16"] {
+    background: #D4862A !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="32"] {
+    background: #E05A2B !important;
+}
+
+#tutorial-board-wrapper .tile[data-value="64"] {
+    background: #D42F1A !important;
+}
+
+/* Theme tile overrides in dark mode */
+.theme-fruit .tile[data-value="2"],
+#tutorial-board-wrapper.theme-fruit .tile[data-value="2"] {
+    background: #4a7c2e !important;
+}
+
+.theme-fruit .tile[data-value="4"],
+#tutorial-board-wrapper.theme-fruit .tile[data-value="4"] {
+    background: #5c8a3a !important;
+}
+
+.theme-fruit .tile[data-value="8"],
+#tutorial-board-wrapper.theme-fruit .tile[data-value="8"] {
+    background: #d4782a !important;
+}
+
+.theme-animals .tile[data-value="2"],
+#tutorial-board-wrapper.theme-animals .tile[data-value="2"] {
+    background: #5c3a2e !important;
+}
+
+.theme-animals .tile[data-value="4"],
+#tutorial-board-wrapper.theme-animals .tile[data-value="4"] {
+    background: #7a4a3a !important;
+}
+
+.theme-animals .tile[data-value="8"],
+#tutorial-board-wrapper.theme-animals .tile[data-value="8"] {
+    background: #c47c2c !important;
+}
+
+.theme-space .tile[data-value="2"],
+#tutorial-board-wrapper.theme-space .tile[data-value="2"] {
+    background: #1a2a5c !important;
+}
+
+.theme-space .tile[data-value="4"],
+#tutorial-board-wrapper.theme-space .tile[data-value="4"] {
+    background: #2a3a7a !important;
+}
+
+.theme-space .tile[data-value="8"],
+#tutorial-board-wrapper.theme-space .tile[data-value="8"] {
+    background: #3a4a9a !important;
+}
+
+.theme-southafrica .tile[data-value="2"],
+#tutorial-board-wrapper.theme-southafrica .tile[data-value="2"] {
+    background: #2e5c1a !important;
+}
+
+.theme-southafrica .tile[data-value="4"],
+#tutorial-board-wrapper.theme-southafrica .tile[data-value="4"] {
+    background: #3a7a2a !important;
+}
+
+.theme-southafrica .tile[data-value="8"],
+#tutorial-board-wrapper.theme-southafrica .tile[data-value="8"] {
+    background: #c47c2c !important;
+}
+
+/* Fix grid cells in dark mode */
+.grid-cell {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Fix board background */
+.board-wrapper {
+    background: var(--grid-bg, #1a2538);
+}
+
+/* Fix app background - Fallback when no theme class is set */
+#app:not([class*="theme-"]) {
+    background: #0F172A !important;
+    background: linear-gradient(180deg, #0F172A 0%, #16213e 100%) !important;
+}

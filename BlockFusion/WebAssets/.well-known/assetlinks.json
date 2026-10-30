@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.eisen.blockrush2k",
+      "sha256_cert_fingerprints": [
+        "62:83:46:D0:77:5D:41:C0:A7:E8:4C:96:B1:D4:C9:6E:91:E3:7C:56:6B:F9:35:56:81:FD:C0:00:CD:5D:DE:85"
+      ]
+    }
+  }
+]

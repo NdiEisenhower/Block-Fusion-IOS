@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="desertSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="35%" stop-color="#78350f"/>
+      <stop offset="70%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#290f02"/>
+    </linearGradient>
+
+    <radialGradient id="desertSun" cx="50%" cy="30%" r="45%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#f59e0b" stop-opacity="0.6"/>
+      <stop offset="80%" stop-color="#b45309" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#451a03" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1000" height="1800" fill="url(#desertSky)"/>
+
+  <!-- Golden Sun -->
+  <circle cx="500" cy="450" r="180" fill="url(#desertSun)"/>
+
+  <!-- Pyramid Silhouettes Horizon -->
+  <g fill="#290f02" opacity="0.85">
+    <!-- Main Pyramid -->
+    <polygon points="500,680 280,950 720,950"/>
+    <!-- Second Pyramid Right -->
+    <polygon points="720,750 580,950 860,950"/>
+    <!-- Small Pyramid Left -->
+    <polygon points="280,800 180,950 380,950"/>
+  </g>
+
+  <!-- Rolling Sand Dunes Layers -->
+  <path d="M -100 950 Q 200 880 500 960 Q 800 1020 1100 930 L 1100 1800 L -100 1800 Z" fill="#b45309" opacity="0.6"/>
+  <path d="M -100 1100 Q 300 1020 600 1120 Q 850 1080 1100 1140 L 1100 1800 L -100 1800 Z" fill="#78350f" opacity="0.8"/>
+  <path d="M -100 1300 Q 250 1220 550 1320 Q 800 1260 1100 1340 L 1100 1800 L -100 1800 Z" fill="#451a03"/>
+
+  <!-- Cactus Silhouettes Foreground -->
+  <g fill="#1a0a01" opacity="0.9">
+    <!-- Cactus Left -->
+    <path d="M 120 1350 L 120 1200 C 120 1180 140 1180 140 1200 L 140 1350 Z"/>
+    <path d="M 90 1260 C 90 1240 120 1240 120 1260 L 120 1280 L 90 1280 Z"/>
+    <path d="M 140 1240 L 170 1240 L 170 1220 C 170 1200 140 1200 140 1220 Z"/>
+
+    <!-- Cactus Right -->
+    <path d="M 850 1400 L 850 1220 C 850 1200 870 1200 870 1220 L 870 1400 Z"/>
+  </g>
+</svg>

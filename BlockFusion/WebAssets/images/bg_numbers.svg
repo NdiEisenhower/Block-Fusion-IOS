@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="numGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+
+    <radialGradient id="numGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+      <stop offset="70%" stop-color="#3b82f6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="numBlur">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Base -->
+  <rect width="1000" height="1800" fill="url(#numGrad)"/>
+  <rect width="1000" height="1800" fill="url(#numGlow)"/>
+
+  <!-- Geometric Hexagon Grid Pattern -->
+  <g fill="none" stroke="#6366f1" stroke-width="1.5" opacity="0.15">
+    <polygon points="100,100 150,70 200,100 200,160 150,190 100,160" />
+    <polygon points="250,100 300,70 350,100 350,160 300,190 250,160" />
+    <polygon points="400,100 450,70 500,100 500,160 450,190 400,160" />
+    <polygon points="550,100 600,70 650,100 650,160 600,190 550,160" />
+    <polygon points="700,100 750,70 800,100 800,160 750,190 700,160" />
+
+    <polygon points="175,220 225,190 275,220 275,280 225,310 175,280" />
+    <polygon points="325,220 375,190 425,220 425,280 375,310 325,280" />
+    <polygon points="475,220 525,190 575,220 575,280 525,310 475,280" />
+    <polygon points="625,220 675,190 725,220 725,280 675,310 625,280" />
+    <polygon points="775,220 825,190 875,220 875,280 825,310 775,280" />
+  </g>
+
+  <!-- Number Matrix Watermark Symbols floating in background -->
+  <g fill="#818cf8" opacity="0.1" font-family="-apple-system, sans-serif" font-weight="900" font-size="120">
+    <text x="120" y="450">2048</text>
+    <text x="650" y="380">1024</text>
+    <text x="180" y="880">512</text>
+    <text x="700" y="950">256</text>
+    <text x="100" y="1320">128</text>
+    <text x="620" y="1450">4096</text>
+    <text x="400" y="1680">8192</text>
+  </g>
+
+  <!-- Floating Indigo Light Orbs -->
+  <g fill="#818cf8" opacity="0.3">
+    <circle cx="500" cy="300" r="14" filter="url(#numBlur)"/>
+    <circle cx="200" cy="750" r="10" filter="url(#numBlur)"/>
+    <circle cx="820" cy="1150" r="12" filter="url(#numBlur)"/>
+  </g>
+</svg>

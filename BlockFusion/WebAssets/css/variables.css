@@ -1,0 +1,335 @@
+/* ===== CSS VARIABLES ===== */
+:root {
+    /* Colors - Primary */
+    --bg-primary: #0F172A;
+    --bg-surface: #1E293B;
+    --bg-elevated: #334155;
+    --bg-card: #2D3A4F;
+    --bg-grid: #1A2538;
+
+    /* Colors - Text */
+    --text-primary: #F1F5F9;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+
+    /* Colors - Accent */
+    --accent-primary: #E9543A;
+    --accent-primary-dark: #C73A22;
+    --accent-secondary: #22C55E;
+    --accent-warning: #F7C948;
+    --accent-danger: #E94560;
+
+    /* Tile Colors */
+    --tile-2: #2D5A27;
+    --tile-4: #3A7D32;
+    --tile-8: #C47C2C;
+    --tile-16: #D4862A;
+    --tile-32: #E05A2B;
+    --tile-64: #D42F1A;
+    --tile-128: #E8B830;
+    --tile-256: #E5C43A;
+    --tile-512: #E5A020;
+    --tile-1024: #E07B20;
+    --tile-2048: #E04060;
+    --tile-4096: #9030D0;
+    --tile-8192: #5090F0;
+    --tile-16384: #20C0A0;
+    --tile-32768: #F0A030;
+    --tile-65536: #F06060;
+
+    /* Shadows */
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 30px rgba(233, 68, 96, 0.3);
+    --shadow-gold: 0 0 30px rgba(247, 201, 72, 0.3);
+    --shadow-danger: 0 0 30px rgba(233, 69, 96, 0.4);
+
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-title: clamp(24px, 6vw, 36px);
+    --font-body: clamp(14px, 2.5vw, 16px);
+    --font-caption: clamp(11px, 2vw, 13px);
+    --font-small: clamp(9px, 1.5vw, 11px);
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+
+    /* Board Sizes - Responsive */
+    --cell-size: 70px;
+    --gap: 8px;
+    --board-pad: 10px;
+    --tile-size: 70px;
+    --gap-size: 8px;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 20px;
+
+    /* Background */
+    --bg: var(--bg-primary);
+    --grid-bg: var(--bg-primary);
+    --surface: var(--bg-surface);
+    --surface2: var(--bg-elevated);
+    --text: var(--text-primary);
+    --gold: var(--accent-warning);
+    --accent: var(--accent-primary);
+}
+
+/* ===== FALLBACKS FOR OLDER BROWSERS ===== */
+.logo-area h1 {
+    color: var(--accent-warning) !important;
+    background: linear-gradient(135deg, var(--accent-warning), var(--accent-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@supports not (background-clip: text) {
+    .logo-area h1 {
+        background: none !important;
+        -webkit-text-fill-color: var(--accent-warning) !important;
+        color: var(--accent-warning) !important;
+    }
+}
+
+#app {
+    background: var(--bg-primary) !important;
+    background: linear-gradient(180deg, var(--bg) 0%, #16213e 100%);
+}
+
+/* Theme Backgrounds */
+#app.theme-fruit {
+    background: #1a3a1a !important;
+    background: linear-gradient(180deg, #1a3a1a 0%, #2a5a2a 100%);
+}
+
+#app.theme-animals {
+    background: #2e1a1a !important;
+    background: linear-gradient(180deg, #2e1a1a 0%, #4a2a2a 100%);
+}
+
+#app.theme-space {
+    background: #0a0a2e !important;
+    background: linear-gradient(180deg, #0a0a2e 0%, #1a1a4a 100%);
+}
+
+#app.theme-southafrica {
+    background: #1a2e1a !important;
+    background: linear-gradient(180deg, #1a2e1a 0%, #2a4a2a 100%);
+}
+
+#app.theme-numbers {
+    background: #0F172A !important;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, #0a0f1a 100%);
+}
+
+/* Button Gradients Fallback */
+.btn-gold {
+    background: #d4a020 !important;
+    background: linear-gradient(135deg, var(--accent-warning), #e0a820);
+}
+
+.btn-primary {
+    background: #e55a2e !important;
+    background: var(--accent-primary);
+}
+
+.popup {
+    background: var(--bg-primary) !important;
+    background: linear-gradient(145deg, var(--bg-surface), var(--bg-primary));
+}
+
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.85) !important;
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.popup-overlay {
+    background: rgba(15, 23, 42, 0.85) !important;
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* ===== DARK MODE OVERRIDES - Force light mode for game ===== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Override any dark mode defaults */
+        color-scheme: light !important;
+        -webkit-color-scheme: light !important;
+    }
+
+    /* Force app to ignore dark mode */
+    #app,
+    .screen,
+    .board-wrapper,
+    .tile,
+    .modal-overlay,
+    .popup-overlay,
+    .popup,
+    .modal,
+    .game-info-card,
+    .store-item,
+    .world-card,
+    .level-btn,
+    .powerup-btn,
+    .btn,
+    .coins-display,
+    .game-stat,
+    .goal-badge,
+    .offline-box,
+    .login-card,
+    .theme-option,
+    .player-info {
+        color-scheme: light !important;
+        -webkit-color-scheme: light !important;
+        forced-color-adjust: none !important;
+        -webkit-forced-color-adjust: none !important;
+    }
+
+    /* Ensure tile colors are not inverted */
+    .tile {
+        filter: none !important;
+        -webkit-filter: none !important;
+        forced-color-adjust: none !important;
+        -webkit-forced-color-adjust: none !important;
+    }
+
+    .tile[data-value="2"] {
+        background: #2D5A27 !important;
+    }
+
+    .tile[data-value="4"] {
+        background: #3A7D32 !important;
+    }
+
+    .tile[data-value="8"] {
+        background: #C47C2C !important;
+    }
+
+    .tile[data-value="16"] {
+        background: #D4862A !important;
+    }
+
+    .tile[data-value="32"] {
+        background: #E05A2B !important;
+    }
+
+    .tile[data-value="64"] {
+        background: #D42F1A !important;
+    }
+
+    .tile[data-value="128"] {
+        background: #E8B830 !important;
+    }
+
+    .tile[data-value="256"] {
+        background: #E5C43A !important;
+    }
+
+    .tile[data-value="512"] {
+        background: #E5A020 !important;
+    }
+
+    .tile[data-value="1024"] {
+        background: #E07B20 !important;
+    }
+
+    .tile[data-value="2048"] {
+        background: #E04060 !important;
+    }
+
+    .tile[data-value="4096"] {
+        background: #9030D0 !important;
+    }
+
+    .tile[data-value="8192"] {
+        background: #5090F0 !important;
+    }
+
+    .tile[data-value="16384"] {
+        background: #20C0A0 !important;
+    }
+
+    .tile[data-value="32768"] {
+        background: #F0A030 !important;
+    }
+
+    .tile[data-value="65536"] {
+        background: #F06060 !important;
+    }
+
+    /* Theme tile overrides in dark mode */
+    .theme-fruit .tile[data-value="2"] {
+        background: #4a7c2e !important;
+    }
+
+    .theme-fruit .tile[data-value="4"] {
+        background: #5c8a3a !important;
+    }
+
+    .theme-fruit .tile[data-value="8"] {
+        background: #d4782a !important;
+    }
+
+    .theme-animals .tile[data-value="2"] {
+        background: #5c3a2e !important;
+    }
+
+    .theme-animals .tile[data-value="4"] {
+        background: #7a4a3a !important;
+    }
+
+    .theme-animals .tile[data-value="8"] {
+        background: #c47c2c !important;
+    }
+
+    .theme-space .tile[data-value="2"] {
+        background: #1a2a5c !important;
+    }
+
+    .theme-space .tile[data-value="4"] {
+        background: #2a3a7a !important;
+    }
+
+    .theme-space .tile[data-value="8"] {
+        background: #3a4a9a !important;
+    }
+
+    .theme-southafrica .tile[data-value="2"] {
+        background: #2e5c1a !important;
+    }
+
+    .theme-southafrica .tile[data-value="4"] {
+        background: #3a7a2a !important;
+    }
+
+    .theme-southafrica .tile[data-value="8"] {
+        background: #c47c2c !important;
+    }
+
+    /* Fix text colors in dark mode */
+    .tile {
+        color: #fff !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Fix background colors */
+    #app {
+        background: #0F172A !important;
+        background: linear-gradient(180deg, #0F172A 0%, #16213e 100%) !important;
+    }
+
+    .board-wrapper {
+        background: var(--grid-bg) !important;
+    }
+
+    .grid-cell {
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+}

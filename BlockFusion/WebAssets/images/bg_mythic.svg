@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mythicGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#18002e"/>
+      <stop offset="35%" stop-color="#31005c"/>
+      <stop offset="70%" stop-color="#581c87"/>
+      <stop offset="100%" stop-color="#0a0014"/>
+    </linearGradient>
+
+    <radialGradient id="dragonGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#c084fc" stop-opacity="0.5"/>
+      <stop offset="80%" stop-color="#581c87" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0a0014" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1000" height="1800" fill="url(#mythicGrad)"/>
+  <rect width="1000" height="1800" fill="url(#dragonGlow)"/>
+
+  <!-- Arcane Magic Rune Ring Center -->
+  <g fill="none" stroke="#f59e0b" stroke-width="3" opacity="0.4" stroke-dasharray="10 15">
+    <circle cx="500" cy="550" r="280"/>
+    <circle cx="500" cy="550" r="220" stroke="#c084fc"/>
+    <polygon points="500,270 250,700 750,700" stroke="#eab308"/>
+    <polygon points="500,830 250,400 750,400" stroke="#eab308"/>
+  </g>
+
+  <!-- Dragon Silhouette Upper Center -->
+  <g fill="#0a0014" opacity="0.9">
+    <!-- Dragon Head & Wings -->
+    <path d="M 500 350 C 450 300 400 320 350 280 C 320 380 250 400 150 350 C 250 480 380 500 420 580 C 450 620 480 650 500 750 C 520 650 550 620 580 580 C 620 500 750 480 850 350 C 750 400 680 380 650 280 C 600 320 550 300 500 350 Z"/>
+  </g>
+
+  <!-- Floating Arcane Magic Particles -->
+  <g fill="#fef08a" opacity="0.8">
+    <circle cx="500" cy="450" r="6"/><circle cx="420" cy="520" r="8"/>
+    <circle cx="580" cy="520" r="8"/><circle cx="320" cy="650" r="5"/>
+    <circle cx="680" cy="650" r="5"/><circle cx="220" cy="800" r="7"/>
+    <circle cx="780" cy="800" r="7"/><circle cx="500" cy="950" r="9"/>
+  </g>
+</svg>

@@ -1,0 +1,1184 @@
+/* ===== GLOBAL MOBILE FOCUS & SELECTION SUPPRESSION ===== */
+body:not(.tv-mode) *,
+body:not(.tv-mode) *:focus,
+body:not(.tv-mode) *:focus-visible,
+body:not(.tv-mode) button:focus,
+body:not(.tv-mode) .btn:focus,
+body:not(.tv-mode) .store-item:focus,
+body:not(.tv-mode) .card:focus,
+body:not(.tv-mode) .level-btn:focus,
+body:not(.tv-mode) .circle-btn:focus,
+body:not(.tv-mode) [tabindex]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Small phones (<= 400px) */
+@media (max-width: 400px) {
+    :root {
+        --cell-size: 62px;
+        --gap: 6px;
+        --board-pad: 7px;
+        --tile-size: 62px;
+        --gap-size: 6px;
+    }
+
+    .tile {
+        font-size: 17px;
+        border-radius: 8px;
+    }
+
+    .grid-cell {
+        border-radius: 8px;
+    }
+
+    .board-wrapper {
+        border-radius: 12px;
+    }
+
+    .tile[data-value="1024"] {
+        font-size: 13px;
+    }
+
+    .tile[data-value="2048"] {
+        font-size: 13px;
+    }
+
+    .tile[data-value="4096"] {
+        font-size: 12px;
+    }
+
+    .tile[data-value="8192"] {
+        font-size: 11px;
+    }
+
+    .tile[data-value="16384"] {
+        font-size: 10px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+
+    .game-stat {
+        padding: 5px 6px;
+    }
+
+    .game-stat .stat-val {
+        font-size: 15px;
+    }
+
+    .goal-badge {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
+
+    .powerup-btn {
+        padding: 7px 9px;
+        font-size: 10px;
+    }
+
+    .coins-display {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+
+    .btn-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+}
+
+/* Extra small phones (<= 420px) */
+@media (max-width: 420px) {
+    .game-top-bar {
+        gap: 3px;
+        padding: 3px 0;
+        min-height: 38px;
+    }
+
+    .game-stat {
+        padding: 3px 4px;
+        border-radius: 8px;
+    }
+
+    .game-stat .stat-val {
+        font-size: 12px;
+    }
+
+    .game-stat .stat-label {
+        font-size: 6px;
+    }
+
+    .game-stat-level {
+        max-width: 60px;
+    }
+
+    .game-stat-level .stat-level {
+        font-size: 8px !important;
+    }
+
+    .game-stat-best {
+        min-width: 22px;
+        padding: 3px 4px;
+    }
+
+    .goal-badge {
+        font-size: 9px;
+        padding: 3px 6px;
+        max-width: 70px;
+        height: 26px;
+        border-radius: 12px;
+    }
+
+    .coins-display {
+        font-size: 10px;
+        padding: 3px 6px;
+        height: 26px;
+        border-radius: 14px;
+    }
+
+    .coin-icon-fallback {
+        width: 10px;
+        height: 10px;
+        border-width: 1.5px;
+    }
+
+    .btn-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+}
+
+/* Tiny phones (<= 380px) */
+@media (max-width: 380px) {
+    .game-top-bar {
+        gap: 2px;
+        padding: 2px 0;
+        min-height: 34px;
+    }
+
+    .game-stat .stat-val {
+        font-size: 11px;
+    }
+
+    .game-stat-level {
+        max-width: 50px;
+    }
+
+    .game-stat-level .stat-level {
+        font-size: 7px !important;
+    }
+
+    .goal-badge {
+        font-size: 8px;
+        padding: 2px 5px;
+        max-width: 60px;
+        height: 22px;
+        border-radius: 10px;
+    }
+
+    .coins-display {
+        font-size: 9px;
+        padding: 2px 5px;
+        height: 22px;
+        border-radius: 12px;
+    }
+
+    .coin-icon-fallback {
+        width: 8px;
+        height: 8px;
+        border-width: 1px;
+    }
+
+    .btn-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 10px;
+    }
+
+    .game-stat {
+        padding: 2px 3px;
+        border-radius: 6px;
+    }
+
+    .game-stat .stat-label {
+        font-size: 5px;
+    }
+
+    .game-stat-best {
+        min-width: 18px;
+        padding: 2px 3px;
+    }
+}
+
+/* Tablets and larger (>= 500px) */
+@media (min-width: 500px) {
+    .game-top-bar {
+        gap: 8px;
+        padding: 6px 0;
+    }
+
+    .game-stat .stat-val {
+        font-size: 16px;
+    }
+
+    .game-stat .stat-label {
+        font-size: 8px;
+    }
+
+    .game-stat-level {
+        max-width: 100px;
+    }
+
+    .goal-badge {
+        font-size: 12px;
+        padding: 6px 12px;
+        max-width: 120px;
+        height: 34px;
+    }
+
+    .coins-display {
+        font-size: 13px;
+        padding: 6px 12px;
+        height: 34px;
+    }
+
+    .btn-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+    }
+}
+
+/* Desktop / large tablets (>= 768px) Portrait */
+@media (min-width: 768px) and (orientation: portrait) {
+    :root {
+        --cell-size: 90px;
+        --gap: 10px;
+        --board-pad: 14px;
+        --tile-size: 90px;
+        --gap-size: 10px;
+    }
+
+    #app {
+        max-width: 520px;
+        border-radius: 24px;
+        box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+        margin: 20px auto;
+        min-height: auto;
+        height: 95vh;
+    }
+
+    .tile { font-size: 26px; }
+    .tile[data-value="1024"] { font-size: 18px; }
+    .tile[data-value="2048"] { font-size: 17px; }
+    .tile[data-value="4096"] { font-size: 16px; }
+}
+
+/* ============================================================
+   LARGE SCREEN DISPLAY & TV MODE (>= 768px landscape / >= 992px)
+   ============================================================ */
+@media (min-width: 768px) and (orientation: landscape), (min-width: 992px) {
+    :root {
+        --cell-size: clamp(66px, 8.2vh, 88px);
+        --gap: 10px;
+        --board-pad: 14px;
+        --tile-size: clamp(66px, 8.2vh, 88px);
+        --gap-size: 10px;
+    }
+
+    body {
+        overflow: hidden;
+        background-color: #080d1a;
+    }
+
+    #app {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+
+    /* Strict Screen Isolation on Large Screens */
+    .screen:not(.active),
+    div[id^="screen-"]:not(.active) {
+        display: none !important;
+    }
+
+    .screen.active {
+        max-width: 1140px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        padding: 16px 24px 20px 24px !important;
+        box-sizing: border-box !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        position: relative !important;
+    }
+
+    .tile { font-size: 26px; }
+    .tile[data-value="1024"] { font-size: 18px; }
+    .tile[data-value="2048"] { font-size: 17px; }
+    .tile[data-value="4096"] { font-size: 16px; }
+
+    .banner-ad-container:not(.has-ad) {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+    }
+
+    .banner-ad-container.has-ad {
+        max-width: 960px !important;
+        margin: 0 auto !important;
+        max-height: 60px !important;
+    }
+
+    /* ===== 1. GAME PLAY SCREEN (#screen-game) ON LARGE SCREENS ===== */
+    #screen-game.active {
+        max-width: 960px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        height: 100% !important;
+        flex: 1 !important;
+        padding: 16px 20px !important;
+        display: grid !important;
+        grid-template-columns: 320px 460px !important;
+        grid-template-rows: auto auto auto !important;
+        column-gap: 32px !important;
+        row-gap: 14px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        align-content: center !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        background: transparent !important;
+    }
+
+    #screen-game > .game-top-bar {
+        grid-column: 1 / -1 !important;
+        grid-row: 1 !important;
+        width: 100% !important;
+        max-width: 812px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 8px 16px !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        position: relative !important;
+    }
+
+    #screen-game > .game-top-bar .game-title {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    #screen-game > .game-top-bar .world-name {
+        font-size: 14px !important;
+        color: #94a3b8 !important;
+    }
+
+    #screen-game > .game-top-bar .level-name {
+        font-size: 17px !important;
+        font-weight: 800 !important;
+        color: #fff !important;
+    }
+
+    /* Left Side Console: Info Card */
+    #screen-game > .game-info-card {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        width: 100% !important;
+        align-self: center !important;
+        background: rgba(15, 23, 42, 0.7) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 18px !important;
+        padding: 16px 18px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Left Side Console: Powerups Bar */
+    #screen-game > .powerups-bar {
+        grid-column: 1 !important;
+        grid-row: 3 !important;
+        width: 100% !important;
+        align-self: center !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #screen-game .powerup-btn {
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background: rgba(30, 41, 59, 0.75) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    #screen-game .powerup-btn:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(247, 201, 72, 0.45) !important;
+        box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25) !important;
+    }
+
+    /* Right Side Board Stage */
+    #screen-game > .board-container {
+        grid-column: 2 !important;
+        grid-row: 2 / span 2 !important;
+        justify-self: center !important;
+        align-self: center !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .board-wrapper {
+        border-radius: 20px !important;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    }
+
+    /* ===== 2. HOME SCREEN (#screen-home) ON LARGE SCREENS ===== */
+    #screen-home.active {
+        max-width: 1040px !important;
+        margin: 0 auto !important;
+        padding: 16px 24px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #screen-home > .game-header {
+        max-width: 980px !important;
+        width: 100% !important;
+        margin: 0 auto 12px auto !important;
+        padding: 8px 12px !important;
+    }
+
+    #screen-home .screen-body {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 40px !important;
+        flex: 1 !important;
+        max-width: 980px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        overflow-y: auto !important;
+        padding: 10px 0 !important;
+    }
+
+    #screen-home .logo-area {
+        flex: 1 !important;
+        max-width: 380px !important;
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    #screen-home .game-logo {
+        width: 100% !important;
+        max-width: 250px !important;
+        max-height: 120px !important;
+        height: auto !important;
+        filter: drop-shadow(0 8px 24px rgba(245, 158, 11, 0.35)) !important;
+        animation: floatLogo 4s ease-in-out infinite !important;
+    }
+
+    @keyframes floatLogo {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    #screen-home .home-menu-container {
+        flex: 1.2 !important;
+        max-width: 440px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+        gap: 10px !important;
+    }
+
+    #screen-home .home-menu {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+
+    #screen-home .home-menu .btn-block:first-child {
+        grid-column: 1 / -1 !important;
+        min-height: 48px !important;
+        font-size: 15px !important;
+        font-weight: 800 !important;
+    }
+
+    #screen-home .home-menu .btn {
+        font-size: 13px !important;
+        padding: 10px 12px !important;
+        min-height: 44px !important;
+        margin-bottom: 0 !important;
+        white-space: normal !important;
+        border-radius: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s ease !important;
+    }
+
+    #screen-home .home-menu .btn:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    /* ===== 3. WORLDS SELECT SCREEN (#screen-world-select) ===== */
+    #screen-world-select.active {
+        max-width: 1060px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #screen-world-select .game-header {
+        max-width: 1020px !important;
+        margin: 0 auto 12px auto !important;
+    }
+
+    #world-list {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)) !important;
+        gap: 16px !important;
+        max-width: 1020px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 4px 4px 40px 4px !important;
+        align-content: start !important;
+    }
+
+    .world-card {
+        min-height: 94px !important;
+        border-radius: 16px !important;
+        padding: 14px 16px !important;
+        transition: all 0.2s ease !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .world-card:not(.locked):hover {
+        transform: translateY(-3px) !important;
+        border-color: rgba(247, 201, 72, 0.45) !important;
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25) !important;
+    }
+
+    /* ===== 4. LEVEL SELECT SCREEN (#screen-level-select) ===== */
+    #screen-level-select.active {
+        max-width: 960px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #screen-level-select .game-header {
+        max-width: 920px !important;
+        margin: 0 auto 12px auto !important;
+    }
+
+    #level-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, minmax(76px, 92px)) !important;
+        justify-content: center !important;
+        gap: 14px !important;
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 14px 4px 40px 4px !important;
+        align-content: start !important;
+    }
+
+    .level-btn {
+        height: 84px !important;
+        font-size: 22px !important;
+        font-weight: 800 !important;
+        border-radius: 16px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .level-btn:not(.locked):hover {
+        transform: scale(1.06) !important;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    /* ===== 5. STORE SCREEN (#screen-store) ===== */
+    #screen-store.active {
+        max-width: 1040px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #screen-store .game-header {
+        max-width: 1000px !important;
+        margin: 0 auto 12px auto !important;
+    }
+
+    #store-content {
+        max-width: 1000px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 8px 12px 40px 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    .store-section {
+        margin-bottom: 22px !important;
+        width: 100% !important;
+    }
+
+    .store-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)) !important;
+        gap: 14px 16px !important;
+        padding-top: 10px !important;
+        margin-bottom: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .store-grid .store-item {
+        border-radius: 16px !important;
+        padding: 14px 16px !important;
+        margin: 0 !important;
+        height: 100% !important;
+        min-height: 64px !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(12px) !important;
+        box-sizing: border-box !important;
+    }
+
+    .store-grid .store-item:hover {
+        border-color: rgba(247, 201, 72, 0.45) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(247, 201, 72, 0.15) !important;
+    }
+
+    .store-grid .store-item.store-item-best-value {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* ===== 6. LEADERBOARD SCREEN (#screen-leaderboard) ===== */
+    #screen-leaderboard.active {
+        max-width: 960px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #screen-leaderboard .game-header {
+        max-width: 920px !important;
+        margin: 0 auto 12px auto !important;
+    }
+
+    #leaderboard-content {
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 0 8px 40px 8px !important;
+    }
+
+    #leaderboard-list {
+        max-width: 900px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+    }
+
+    #leaderboard-list .store-item {
+        padding: 12px 18px !important;
+        margin: 6px 0 !important;
+        border-radius: 14px !important;
+        background: rgba(30, 41, 59, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(10px) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    #leaderboard-list .store-item:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(247, 201, 72, 0.35) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    /* ===== 7. DAILY, ACHIEVEMENTS, SETTINGS, REFERRAL ===== */
+    #screen-daily.active,
+    #screen-achievements.active,
+    #screen-settings.active,
+    #screen-referral.active,
+    #screen-feedback.active,
+    #screen-login-prompt.active {
+        max-width: 920px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #daily-list,
+    #achievements-list {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important;
+        gap: 14px !important;
+        max-width: 880px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 10px 4px 40px 4px !important;
+        align-content: start !important;
+    }
+
+    #settings-content {
+        max-width: 720px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 16px 24px 40px 24px !important;
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 20px !important;
+        backdrop-filter: blur(14px) !important;
+    }
+
+    #referral-content {
+        max-width: 720px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 16px 24px 40px 24px !important;
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 20px !important;
+        backdrop-filter: blur(14px) !important;
+    }
+
+    /* Modals & Popups on Large Screens */
+    .popup, .modal {
+        max-width: 520px !important;
+        border-radius: 24px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.75) !important;
+    }
+
+    /* Custom Sleek Scrollbars on Large Screens */
+    ::-webkit-scrollbar {
+        width: 6px !important;
+        height: 6px !important;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-radius: 10px !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(247, 201, 72, 0.5) !important;
+    }
+    * {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent !important;
+    }
+}
+
+/* Smart View & Store Formatting */
+.store-item {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.store-item .item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: block !important;
+    align-self: center !important;
+    height: auto !important;
+}
+
+.store-item .item-name {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.25 !important;
+}
+
+.store-item .item-desc {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.25 !important;
+}
+
+.coin-label {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-weight: 700 !important;
+    color: var(--gold) !important;
+}
+
+.home-menu .btn {
+    font-size: clamp(12px, 3.8vw, 15px) !important;
+    padding: 10px 14px !important;
+    line-height: 1.3 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    min-height: 46px !important;
+}
+
+.badge-new {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+    margin-left: 4px !important;
+    vertical-align: middle !important;
+}
+
+@media (max-width: 420px) {
+    #store-content .store-item,
+    #settings-content .store-item,
+    .store-item {
+        padding: 12px 14px !important;
+        margin: 0 0 6px 0 !important;
+        gap: 10px !important;
+        min-height: 58px !important;
+        height: auto !important;
+    }
+
+    #store-content .store-item .btn,
+    #settings-content .store-item .btn,
+    .store-item .btn {
+        padding: 6px 12px !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
+        font-size: 11px !important;
+    }
+
+    .store-item .item-name {
+        font-size: 13px !important;
+        line-height: 1.25 !important;
+    }
+
+    .store-item .item-desc {
+        font-size: 11px !important;
+        line-height: 1.25 !important;
+    }
+
+    .store-item span:first-child {
+        font-size: 16px !important;
+        width: 24px !important;
+    }
+
+    .store-item .item-icon {
+        font-size: 20px !important;
+    }
+
+    /* Avatar size on mobile (settings) */
+    .store-item > .profile-picture-container {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .store-item > .profile-picture-container img,
+    .store-item > .profile-picture-container span {
+        font-size: 14px !important;
+    }
+
+    /* Store Best Value responsive sizing */
+    .store-item.store-item-best-value {
+        margin-top: 14px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .store-badge-best-value {
+        top: -10px !important;
+        left: 12px !important;
+        font-size: 9px !important;
+        padding: 2.5px 10px !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: none !important;
+    }
+
+    /* Divider text */
+    .divider-dots span {
+        font-size: 10px !important;
+    }
+
+    /* Climb indicator */
+    .climb-indicator {
+        font-size: 10px !important;
+        padding: 4px 8px !important;
+    }
+
+    /* User row highlight */
+    .user-row {
+        padding: 10px 12px !important;
+        margin: 4px 0 !important;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 360px) {
+    .store-item {
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        min-height: 40px !important;
+    }
+
+    .store-item .item-name {
+        font-size: 12px !important;
+    }
+
+    .store-item .item-desc {
+        font-size: 10px !important;
+    }
+
+    .store-item.store-item-best-value {
+        margin-top: 12px !important;
+    }
+}
+/* ===== Store & Settings list item polish ===== */
+#store-content .store-item,
+#settings-content .store-item,
+.store-item {
+    padding: 12px 14px !important;
+    margin: 0 0 6px 0 !important;
+    gap: 12px !important;
+    min-height: 56px !important;
+    height: auto !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background-color: rgba(30, 41, 59, 0.82) !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    contain: none !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+#store-content .store-item .item-info,
+#settings-content .store-item .item-info,
+.store-item .item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: block !important;
+    align-self: center !important;
+    height: auto !important;
+}
+
+#store-content .store-item > div:first-child,
+#settings-content .store-item > div:first-child,
+#settings-content .store-item > .item-icon {
+    margin-left: 2px !important;
+}
+
+#store-content .store-item .item-icon,
+#settings-content .store-item .item-icon {
+    width: 40px !important;
+    height: 40px !important;
+    margin-right: 2px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+}
+
+#store-content .store-item .btn,
+#settings-content .store-item .btn,
+.store-item .btn,
+.store-item button,
+.store-item a.btn {
+    padding: 6px 14px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    align-self: center !important;
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+}
+
+#store-content .store-item.store-item-best-value {
+    margin-top: 18px !important;
+    margin-bottom: 6px !important;
+    overflow: visible !important;
+    border: 1px solid rgba(247, 201, 72, 0.35) !important;
+}
+
+.store-grid .store-item.store-item-best-value {
+    margin-top: 6px !important;
+    margin-bottom: 0 !important;
+}
+
+@media (min-width: 600px) {
+    .store-grid .store-item.store-item-best-value {
+        margin-top: 0 !important;
+    }
+}
+
+#store-content .store-item .store-badge-best-value {
+    top: -11px !important;
+    left: 16px !important;
+    z-index: 20 !important;
+    padding: 3px 10px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+}
+
+/* Keep content away from card borders and screen edges */
+#store-content,
+#settings-content {
+    padding: 14px 16px 32px 16px !important;
+}
+
+#store-content .store-item,
+#settings-content .store-item {
+    padding: 12px 16px !important;
+    gap: 14px !important;
+}
+
+#store-content .store-item > div:first-child,
+#settings-content .store-item > div:first-child {
+    margin-left: 0 !important;
+}
+
+#store-content .store-item .btn,
+#settings-content .store-item .btn,
+.store-item button {
+    margin-right: 0 !important;
+    min-width: 76px !important;
+    padding: 6px 14px !important;
+}
+
+#store-content > h3,
+#settings-content > h3 {
+    margin-top: 10px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Offline Subscription card polish - Prevent text cutoff and harmonize blue theme */
+#store-content .store-item.store-item-offline,
+.store-item.store-item-offline {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+    border: 1px solid rgba(96, 165, 250, 0.3) !important;
+    min-height: 60px !important;
+    height: auto !important;
+    padding: 11px 14px !important;
+    gap: 10px !important;
+    overflow: visible !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+#store-content .store-item.store-item-offline .item-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    overflow: visible !important;
+}
+
+#store-content .store-item.store-item-offline .item-name {
+    font-size: 13px !important;
+    color: #60A5FA !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#store-content .store-item.store-item-offline .item-desc {
+    font-size: 11px !important;
+    color: #e2e8f0 !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#store-content .store-item.store-item-offline .btn:not(.btn-outline) {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4) !important;
+    min-width: 76px !important;
+    height: 34px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    border-radius: 10px !important;
+    padding: 0 10px !important;
+}

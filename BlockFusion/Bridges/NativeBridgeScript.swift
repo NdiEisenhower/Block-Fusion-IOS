@@ -1,0 +1,171 @@
+import Foundation
+
+/// JavaScript injection script that establishes complete compatibility with the Android bridge
+enum NativeBridgeScript {
+    static let scriptContent: String = """
+    (function() {
+        console.log('⚡ Initializing iOS Native Bridges (Android, Billing, Social, iOS)...');
+        
+        window._cachedPrices = {};
+        window._purchasedProducts = [];
+        window._activeTheme = 'numbers';
+        window._isAdsRemoved = false;
+        window._isThemePackOwned = false;
+
+        // Post message wrapper to native WKScriptMessageHandler
+        function postToNative(handler, action, payload) {
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers[handler]) {
+                    window.webkit.messageHandlers[handler].postMessage(Object.assign({ action: action }, payload || {}));
+                } else {
+                    console.warn('Native handler [' + handler + '] not registered yet');
+                }
+            } catch (err) {
+                console.error('Bridge post error:', err);
+            }
+        }
+
+        // ==========================================
+        // 1. Android Bridge (AdMob + Billing fallback)
+        // ==========================================
+        window.Android = {
+            initAds: function(bannerId, interId, rewardedId) {
+                postToNative('adBridge', 'initAds', { bannerId: bannerId, interId: interId, rewardedId: rewardedId });
+            },
+            showBannerAd: function(adUnitId) {
+                postToNative('adBridge', 'showBannerAd', { adUnitId: adUnitId });
+            },
+            hideBannerAd: function() {
+                postToNative('adBridge', 'hideBannerAd');
+            },
+            showInterstitialAd: function(adUnitId) {
+                postToNative('adBridge', 'showInterstitialAd', { adUnitId: adUnitId });
+            },
+            showRewardedAd: function(adUnitId) {
+                postToNative('adBridge', 'showRewardedAd', { adUnitId: adUnitId });
+            },
+            launchPurchase: function(productId) {
+                postToNative('billingBridge', 'launchPurchase', { productId: productId });
+            },
+            restorePurchases: function() {
+                postToNative('billingBridge', 'restorePurchases');
+            },
+            getProductPrices: function() {
+                return JSON.stringify(window._cachedPrices || {});
+            },
+            isBillingAvailable: function() {
+                return true;
+            },
+            isThemePackOwned: function() {
+                return !!window._isThemePackOwned;
+            },
+            isAdsRemoved: function() {
+                return !!window._isAdsRemoved;
+            },
+            isAdEnabled: function() {
+                return !window._isAdsRemoved;
+            },
+            vibrate: function() {
+                postToNative('hapticBridge', 'vibrate');
+            },
+            exitApp: function() {
+                postToNative('appBridge', 'exitApp');
+            },
+            openStoreReview: function() {
+                postToNative('appBridge', 'openStoreReview');
+            },
+            getDeviceInfo: function() {
+                return JSON.stringify({
+                    platform: 'ios',
+                    model: 'iPhone',
+                    osVersion: '18.0',
+                    isTv: false,
+                    isAdsRemoved: window._isAdsRemoved,
+                    isThemePackOwned: window._isThemePackOwned
+                });
+            },
+            getPlatform: function() {
+                return 'google'; // Tells ads.js to activate AdMob unit IDs
+            },
+            getFlavor: function() {
+                return 'appstore';
+            },
+            isDebug: function() {
+                return false;
+            },
+            getEnvironment: function() {
+                return 'ios';
+            },
+            ping: function() {
+                return 'pong';
+            }
+        };
+
+        // ==========================================
+        // 2. Billing Bridge (StoreKit 2)
+        // ==========================================
+        window.Billing = {
+            launchPurchase: function(productId) {
+                postToNative('billingBridge', 'launchPurchase', { productId: productId });
+            },
+            restorePurchases: function() {
+                postToNative('billingBridge', 'restorePurchases');
+            },
+            isPaymentSupported: function() {
+                return true;
+            },
+            getProductPrices: function() {
+                return JSON.stringify(window._cachedPrices || {});
+            },
+            isBillingAvailable: function() {
+                return true;
+            },
+            isThemePackOwned: function() {
+                return !!window._isThemePackOwned;
+            },
+            isAdsRemoved: function() {
+                return !!window._isAdsRemoved;
+            },
+            getPurchasedProducts: function() {
+                return JSON.stringify(window._purchasedProducts || []);
+            },
+            setActiveTheme: function(themeId) {
+                window._activeTheme = themeId;
+                postToNative('billingBridge', 'setActiveTheme', { themeId: themeId });
+            },
+            getActiveTheme: function() {
+                return window._activeTheme || 'numbers';
+            },
+            isTvDevice: function() {
+                return false;
+            }
+        };
+
+        // ==========================================
+        // 3. Social Bridge (Native Share Sheet)
+        // ==========================================
+        window.Social = {
+            shareReferralCode: function(code, shareUrl) {
+                postToNative('socialBridge', 'shareReferralCode', { code: code, shareUrl: shareUrl });
+            },
+            sendFriendRequest: function(uid) {
+                console.log('Social friend request:', uid);
+            },
+            acceptFriendRequest: function(uid) {
+                console.log('Social accept request:', uid);
+            },
+            getFriendsList: function() {
+                if (window.onFriendsListLoaded) window.onFriendsListLoaded([]);
+            }
+        };
+
+        // Direct iOS namespace
+        window.iOS = {
+            vibrate: function() { postToNative('hapticBridge', 'vibrate'); },
+            share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); }
+        };
+
+        console.log('✅ iOS Native Bridges loaded and active');
+    })();
+    """
+}

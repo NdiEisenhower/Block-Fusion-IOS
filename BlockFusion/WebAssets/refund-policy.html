@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Refund Policy for Block Rush 2K - Clear guidelines on in-app purchases, Google Play, Huawei AppGallery, and refund requests.">
+    <title>Refund Policy - Block Rush 2K</title>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-surface: #1E293B;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(247, 201, 72, 0.25);
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --accent-yellow: #F7C948;
+            --accent-coral: #E9543A;
+            --accent-green: #22C55E;
+            --accent-blue: #38BDF8;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(233, 84, 58, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(247, 201, 72, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 24px 16px 60px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        /* Top Navigation */
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-yellow);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 8px 16px;
+            background: rgba(247, 201, 72, 0.1);
+            border: 1px solid rgba(247, 201, 72, 0.2);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(247, 201, 72, 0.2);
+            transform: translateX(-2px);
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-badge span.logo-highlight {
+            color: var(--accent-yellow);
+        }
+
+        .brand-badge span.logo-accent {
+            color: var(--accent-coral);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 20px 0 40px;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(32px, 5vw, 44px);
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .hero .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        .effective-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 14px;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            color: var(--accent-yellow);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .summary-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .summary-item .title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .summary-item .desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Policy Sections */
+        .policy-content {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .policy-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .policy-section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .policy-section h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 20px 0 10px;
+        }
+
+        .policy-section p {
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            font-size: 15px;
+        }
+
+        .policy-section ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 16px;
+        }
+
+        .policy-section ul li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+        }
+
+        .policy-section ul li::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            font-size: 18px;
+            line-height: 1.4;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--accent-yellow);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Callout */
+        .callout {
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin: 18px 0;
+            font-size: 14px;
+            color: #E0F2FE;
+        }
+
+        .callout.warning {
+            background: rgba(247, 201, 72, 0.08);
+            border-color: rgba(247, 201, 72, 0.25);
+            border-left-color: var(--accent-yellow);
+            color: #FEF3C7;
+        }
+
+        a.external-link {
+            color: var(--accent-blue);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        a.external-link:hover {
+            color: #BAE6FD;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-coral);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            background: #D4432A;
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        footer a:hover {
+            color: var(--accent-yellow);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation Header -->
+        <header class="header-nav">
+            <a href="index.html" class="back-link">
+                <span>←</span> Back to Game
+            </a>
+            <div class="brand-badge">
+                <img src="images/icon.svg" alt="Block Rush 2K" style="width: 28px; height: 28px; border-radius: 6px; vertical-align: middle;">
+                <span>
+                    <span class="logo-highlight">BLOCK</span>
+                    <span class="logo-accent">RUSH 2K</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Refund Policy</h1>
+            <p class="subtitle">Clear, transparent information regarding in-app purchases, billing, and refunds for Block Rush 2K.</p>
+            <div class="effective-badge">Effective Date: October 21, 2026</div>
+        </section>
+
+        <!-- Summary Highlights -->
+        <div class="summary-card">
+            <h2>Key Refund Guidelines</h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="title">Google Play: 48h Self-Service</div>
+                    <div class="desc">Request instant automated refunds within 48 hours directly via your Google Play account order history.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">Huawei AppGallery Support</div>
+                    <div class="desc">Refunds on Huawei devices are requested through your Huawei Account or by emailing us with your order number.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">Non-Consumable Restores</div>
+                    <div class="desc">Permanent items like "Remove Ads" can be restored anytime for free using the 🔄 Restore button in the store.</div>
+                </div>
+                <div class="summary-item">
+                    <div class="title">24–48h Developer Support</div>
+                    <div class="desc">If you experience accidental charges or delivery errors, our team reviews requests within 1 to 2 business days.</div>
+                </div>
+            </div>
+        </div>
+
+        <main class="policy-content">
+            <!-- 1. Overview -->
+            <section class="policy-section">
+                <h2>1. Overview & In-App Purchases</h2>
+                <p>Block Rush 2K is a free-to-play puzzle game developed by Eisenhower Games. To support continuous updates and development, we offer optional digital items inside the game store:</p>
+                <ul>
+                    <li><strong>Coin Bundles:</strong> Consumable virtual currency used to unlock puzzle themes and in-game powerups (Starter Pack, 5,000 Coins, 15,000 Coins).</li>
+                    <li><strong>Remove Ads:</strong> A permanent, non-consumable unlock that disables all interstitial and banner advertisements across the entire game.</li>
+                    <li><strong>Offline Subscriptions:</strong> Optional recurring subscription providing unlimited offline play and ad-free offline access.</li>
+                    <li><strong>Buy Me a Coffee:</strong> Voluntary one-time tip to support the independent developer with bonus coins.</li>
+                </ul>
+                <div class="callout">
+                    <strong>Payment Processing Notice:</strong> All purchases in Block Rush 2K are billed, processed, and fulfilled through <strong>Google Play Billing (Google LLC)</strong> or <strong>Huawei In-App Purchases / HMS Core IAP (Huawei Device Co., Ltd.)</strong>. We do not store or process credit cards or bank accounts directly.
+                </div>
+            </section>
+
+            <!-- 2. Google Play Store Refunds -->
+            <section class="policy-section">
+                <h2>2. Google Play Store Purchases</h2>
+                <p>If you downloaded Block Rush 2K from the Google Play Store, your purchases are governed by Google Play's standard refund terms:</p>
+
+                <h3>A. Within 48 Hours of Purchase (Instant Automated Refund)</h3>
+                <p>For purchases made less than 48 hours ago, you can request an automated refund directly through Google without waiting for developer review:</p>
+                <ol style="padding-left: 20px; color: var(--text-secondary); margin-bottom: 14px; font-size: 14.5px;">
+                    <li style="margin-bottom: 8px;">Visit <a href="https://play.google.com/store/account/orderhistory" target="_blank" rel="noopener noreferrer" class="external-link">Google Play Order History</a> on your browser or Android device.</li>
+                    <li style="margin-bottom: 8px;">Find the Block Rush 2K order you wish to refund.</li>
+                    <li style="margin-bottom: 8px;">Select <strong>"Request a refund"</strong> or <strong>"Report a problem"</strong> and choose the reason that describes your situation.</li>
+                    <li>Submit the form. Google usually responds within 15 minutes to a few business days.</li>
+                </ol>
+
+                <h3>B. After 48 Hours (Developer Review)</h3>
+                <p>If more than 48 hours have elapsed, Google delegates refund decisions to Eisenhower Games. We review requests on a case-by-case basis. To request a refund after 48 hours, please email us with:</p>
+                <ul>
+                    <li>Your <strong>Google Play Order Number</strong> (format: <code>GPA.1234-5678-9012-34567</code>, found on your Google Play receipt email).</li>
+                    <li>Your registered player email address or user ID.</li>
+                    <li>A clear explanation of why you are requesting a refund.</li>
+                </ul>
+            </section>
+
+            <!-- 3. Huawei AppGallery Purchases -->
+            <section class="policy-section">
+                <h2>3. Huawei AppGallery Purchases</h2>
+                <p>If you downloaded Block Rush 2K from Huawei AppGallery or on a Huawei HMS device:</p>
+                <ul>
+                    <li><strong>Self-Service Refund via Huawei Account:</strong> Open your phone's <em>Settings ➔ Huawei ID ➔ Payment and Purchases ➔ Purchase History</em>. Select the order and follow Huawei's refund instructions.</li>
+                    <li><strong>Developer Support:</strong> If you encounter issues with a Huawei IAP purchase, email our support at <a href="mailto:tambanizwavhudimitambo@gmail.com" class="external-link">tambanizwavhudimitambo@gmail.com</a> with your Huawei transaction receipt, order number, and description of the issue.</li>
+                </ul>
+            </section>
+
+            <!-- 4. Consumable vs Non-Consumable Goods -->
+            <section class="policy-section">
+                <h2>4. Refund Eligibility by Item Type</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Type</th>
+                                <th>Examples</th>
+                                <th>Eligibility & Policy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Consumable Virtual Goods</strong></td>
+                                <td>Coin Bundles (3,000, 5,000, 15,000 Coins)</td>
+                                <td>
+                                    <strong>Unused:</strong> Refundable within standard store window.<br>
+                                    <strong>Consumed:</strong> Non-refundable once coins have been spent on powerups or theme unlocks, unless a technical delivery failure occurred.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Non-Consumable Items</strong></td>
+                                <td>"Remove Ads" Lifetime Unlock</td>
+                                <td>
+                                    <strong>Eligible:</strong> If ads still display after purchase or the feature failed to unlock. Players can also tap <strong>🔄 Restore</strong> in the store anytime to restore this item across devices.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Subscriptions</strong></td>
+                                <td>Offline Subscription</td>
+                                <td>
+                                    <strong>Cancel Anytime:</strong> You can cancel auto-renewal anytime in Google Play Subscriptions or Huawei IAP. Access remains active until the end of the paid billing period.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Donations / Tips</strong></td>
+                                <td>"Buy Me a Coffee" (+500 Coins)</td>
+                                <td>
+                                    Voluntary supporter contributions. Refundable within 48 hours via Google Play/Huawei if triggered accidentally.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. Technical Issues & Restoring Purchases -->
+            <section class="policy-section">
+                <h2>5. Missing Purchases & How to Restore</h2>
+                <p>If your account was debited but your purchased item did not appear in Block Rush 2K:</p>
+                <ul>
+                    <li><strong>Tap "🔄 Restore":</strong> Open the in-game Store and tap the <strong>🔄 Restore</strong> button at the top right. This queries Google Play and Huawei IAP for active purchases and automatically re-applies your entitlements.</li>
+                    <li><strong>Restart the App:</strong> Close Block Rush 2K completely, check your internet connection, and reopen the app.</li>
+                    <li><strong>Contact Support:</strong> If your coins or Remove Ads pass still do not show up, email us immediately with your receipt. We will manually credit your items or issue a refund prompt.</li>
+                </ul>
+            </section>
+
+            <!-- 6. Accidental Purchases & Child Protection -->
+            <section class="policy-section">
+                <h2>6. Accidental Charges and Parental Controls</h2>
+                <p>To prevent accidental purchases or unauthorized transactions by minors:</p>
+                <ul>
+                    <li>We strongly advise enabling <strong>Purchase Authentication</strong> (fingerprint, face unlock, or PIN requirement for every purchase) in the Google Play Store or Huawei AppGallery settings.</li>
+                    <li>If a minor made an unauthorized purchase without parental consent, please contact Google Play or Huawei immediately via their family payment refund channels, or email us with proof of transaction.</li>
+                </ul>
+            </section>
+
+            <!-- 7. How to Contact Support for a Refund -->
+            <section class="policy-section">
+                <h2>7. Contact Us for Refund Support</h2>
+                <p>Our support team is dedicated to fair resolutions. If you have questions about a charge or need assistance with a refund, reach out to us:</p>
+                <p>
+                    <strong>Support Email:</strong> <a href="mailto:tambanizwavhudimitambo@gmail.com" class="external-link">tambanizwavhudimitambo@gmail.com</a><br>
+                    <strong>Developer:</strong> Eisenhower Games<br>
+                    <strong>Response Time:</strong> Typically within 24 to 48 hours (excluding public holidays)
+                </p>
+                <div style="margin-top: 20px;">
+                    <a href="mailto:tambanizwavhudimitambo@gmail.com?subject=Refund%20Request%20-%20Block%20Rush%202K&body=Hello%20Eisenhower%20Games%20Support%2C%0A%0AI%20am%20requesting%20a%20refund%20for%20a%20purchase%20in%20Block%20Rush%202K.%0A%0APlatform%20(Google%20Play%20or%20Huawei)%3A%20%0AOrder%20ID%20%2F%20Transaction%20Number%3A%20%0AItem%20Purchased%3A%20%0ADate%20of%20Purchase%3A%20%0AReason%20for%20Refund%3A%20%0A%0AThank%20you." class="btn-action">
+                        ✉️ Email Support for Refund Assistance
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Eisenhower Games • Block Rush 2K. All rights reserved.</p>
+            <p style="margin-top: 8px;">
+                <a href="index.html">Play Game</a> • 
+                <a href="privacy.html">Privacy Policy</a> • 
+                <a href="refund-policy.html">Refund Policy</a> • 
+                <a href="delete-data.html">Data Deletion</a>
+            </p>
+        </footer>
+    </div>
+</body>
+
+</html>

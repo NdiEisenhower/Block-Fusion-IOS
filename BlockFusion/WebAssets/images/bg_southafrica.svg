@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="saSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#062c19"/>
+      <stop offset="35%" stop-color="#143e26"/>
+      <stop offset="70%" stop-color="#1e3a1e"/>
+      <stop offset="100%" stop-color="#2a1f0a"/>
+    </linearGradient>
+
+    <radialGradient id="saSunGlow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#facc15" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#22c55e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#062c19" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="saBlur">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <!-- Sky Base -->
+  <rect width="1000" height="1800" fill="url(#saSky)"/>
+  <rect width="1000" height="1800" fill="url(#saSunGlow)"/>
+
+  <!-- SA Flag Inspired Flowing Ribbon Waves Subtle Overlay -->
+  <g opacity="0.18" fill="none" stroke-width="40">
+    <!-- Red Wave -->
+    <path d="M -100 200 C 300 100 600 400 1100 250" stroke="#dc2626"/>
+    <!-- Blue Wave -->
+    <path d="M -100 350 C 300 250 600 550 1100 400" stroke="#2563eb"/>
+    <!-- Green Wave -->
+    <path d="M -100 275 C 300 175 600 475 1100 325" stroke="#16a34a" stroke-width="50"/>
+    <!-- Gold Wave -->
+    <path d="M -100 250 C 300 150 600 450 1100 300" stroke="#eab308" stroke-width="12"/>
+    <!-- Black Wave -->
+    <path d="M -100 275 C 300 175 600 475 1100 325" stroke="#0f172a" stroke-width="20"/>
+  </g>
+
+  <!-- Table Mountain Famous Silhouette Horizon -->
+  <g fill="#071d12" opacity="0.85">
+    <!-- Table Mountain Flat Top Contour -->
+    <path d="M 0 1050 L 120 1000 L 220 820 L 280 810 L 720 810 L 780 830 L 880 1000 L 1000 1050 L 1000 1800 L 0 1800 Z" />
+    <!-- Lion's Head & Signal Hill Peaks -->
+    <path d="M 120 1000 L 180 880 L 210 880 L 250 980 Z" opacity="0.9"/>
+  </g>
+
+  <!-- Protea Flower Illustration Bottom Left -->
+  <g transform="translate(140, 1380) scale(1.4)" opacity="0.35">
+    <!-- Outer Petals Pink/Red -->
+    <path d="M 50 100 Q 10 40 50 0 Q 90 40 50 100 Z" fill="#ec4899"/>
+    <path d="M 50 100 Q -10 60 20 10 Q 70 50 50 100 Z" fill="#db2777"/>
+    <path d="M 50 100 Q 110 60 80 10 Q 30 50 50 100 Z" fill="#db2777"/>
+    <path d="M 50 100 Q -30 80 0 30 Q 50 70 50 100 Z" fill="#be185d"/>
+    <path d="M 50 100 Q 130 80 100 30 Q 50 70 50 100 Z" fill="#be185d"/>
+    <!-- Inner Cone Yellow/Gold -->
+    <ellipse cx="50" cy="40" rx="20" ry="30" fill="#facc15"/>
+    <!-- Stem & Leaves -->
+    <path d="M 50 100 L 50 180" stroke="#15803d" stroke-width="8"/>
+    <path d="M 50 130 Q 10 110 0 130 Q 30 150 50 140" fill="#16a34a"/>
+    <path d="M 50 150 Q 90 130 100 150 Q 70 170 50 160" fill="#16a34a"/>
+  </g>
+
+  <!-- Acacia Tree Right Silhouette -->
+  <g fill="#04120a" opacity="0.9" transform="translate(700, 920) scale(0.9)">
+    <path d="M 100 350 C 120 250 90 180 60 120 C 100 100 150 90 180 40 C 140 80 100 120 80 140 C 90 90 110 40 140 -20 C 100 20 70 80 60 120 Z" />
+    <ellipse cx="140" cy="-20" rx="100" ry="18" />
+    <ellipse cx="180" cy="40" rx="80" ry="15" />
+    <ellipse cx="50" cy="110" rx="90" ry="16" />
+  </g>
+
+  <!-- Springbok Silhouette Right Foreground -->
+  <g fill="#020a05" opacity="0.92" transform="translate(680, 1150) scale(0.8)">
+    <path d="M 100 200 L 110 100 L 100 100 L 90 200 Z"/>
+    <path d="M 130 200 L 120 100 L 110 100 L 120 200 Z"/>
+    <path d="M 90 110 C 70 90 80 60 110 50 L 130 -60 L 120 -90 L 135 -100 L 140 -60 L 130 50 C 150 70 140 110 120 110 Z"/>
+  </g>
+
+  <!-- Sun Rays & Gold Sparkles -->
+  <g opacity="0.35" fill="#fef08a">
+    <circle cx="500" cy="300" r="12" filter="url(#saBlur)"/>
+    <circle cx="200" cy="600" r="8" filter="url(#saBlur)"/>
+    <circle cx="820" cy="500" r="10" filter="url(#saBlur)"/>
+    <circle cx="450" cy="1100" r="14" filter="url(#saBlur)"/>
+  </g>
+</svg>

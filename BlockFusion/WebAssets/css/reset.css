@@ -1,0 +1,107 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    /* Prevent dark mode from affecting game */
+    color-scheme: light dark;
+}
+
+/* Force light color scheme for game content to prevent dark mode issues */
+#app,
+.screen,
+.board-wrapper,
+.tile,
+.modal-overlay,
+.popup-overlay {
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+}
+
+/* Prevent any automatic dark mode adjustments */
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    overscroll-behavior: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    /* Force light mode styling */
+    color-scheme: light !important;
+    -webkit-color-scheme: light !important;
+    background-color: #0F172A !important;
+}
+
+/* Samsung / Safari viewport fix */
+@supports (-webkit-touch-callout: none) {
+
+    html,
+    body {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* Additional dark mode prevention for Samsung Internet */
+@media (prefers-color-scheme: dark) {
+    html {
+        color-scheme: light !important;
+    }
+
+    body {
+        color-scheme: light !important;
+        -webkit-color-scheme: light !important;
+        background-color: #0F172A !important;
+    }
+
+    #app {
+        color-scheme: light !important;
+        -webkit-color-scheme: light !important;
+        background: #0F172A !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        /* ... existing overrides ... */
+
+        /* Fix text colors in dark mode */
+        .tile {
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Fix background colors */
+        #app {
+            background: #0F172A !important;
+            background: linear-gradient(180deg, #0F172A 0%, #16213e 100%) !important;
+        }
+
+        .board-wrapper {
+            background: var(--grid-bg) !important;
+        }
+
+        /* CRITICAL FIX: Combined selector for main board and tutorial board grid lines */
+        .grid-cell,
+        #tutorial-board-wrapper .grid-cell {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        }
+    }
+
+}

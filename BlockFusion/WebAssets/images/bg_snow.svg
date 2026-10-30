@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="snowSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="35%" stop-color="#0369a1"/>
+      <stop offset="70%" stop-color="#0c4a6e"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <radialGradient id="auroraGlow" cx="50%" cy="25%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#34d399" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1000" height="1800" fill="url(#snowSky)"/>
+  <rect width="1000" height="1800" fill="url(#auroraGlow)"/>
+
+  <!-- Aurora Borealis Ribbon Waves Upper Sky -->
+  <g fill="none" stroke-width="60" opacity="0.3">
+    <path d="M -100 200 Q 300 100 600 300 Q 850 200 1100 350" stroke="#34d399"/>
+    <path d="M -100 300 Q 250 180 550 380 Q 800 280 1100 400" stroke="#38bdf8"/>
+  </g>
+
+  <!-- Ice Mountain Peaks Horizon -->
+  <g fill="#072032" opacity="0.85">
+    <polygon points="150,750 0,950 300,950"/>
+    <polygon points="400,650 200,950 600,950"/>
+    <polygon points="750,700 500,950 1000,950"/>
+  </g>
+
+  <!-- Snow Hills Layers -->
+  <path d="M -100 950 Q 250 880 550 960 Q 800 900 1100 980 L 1100 1800 L -100 1800 Z" fill="#0c4a6e" opacity="0.7"/>
+  <path d="M -100 1150 Q 350 1080 650 1180 Q 850 1120 1100 1200 L 1100 1800 L -100 1800 Z" fill="#072b42"/>
+
+  <!-- Falling Snowflakes -->
+  <g fill="#e0f2fe" opacity="0.75">
+    <circle cx="150" cy="150" r="3"/><circle cx="350" cy="220" r="5"/><circle cx="650" cy="180" r="4"/>
+    <circle cx="850" cy="120" r="3"/><circle cx="200" cy="450" r="6"/><circle cx="500" cy="380" r="4"/>
+    <circle cx="750" cy="480" r="5"/><circle cx="100" cy="720" r="4"/><circle cx="420" cy="650" r="6"/>
+    <circle cx="880" cy="780" r="3"/><circle cx="250" cy="1050" r="5"/><circle cx="600" cy="1180" r="4"/>
+    <circle cx="800" cy="1350" r="6"/><circle cx="180" cy="1500" r="4"/><circle cx="520" cy="1620" r="5"/>
+  </g>
+</svg>

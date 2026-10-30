@@ -1,0 +1,591 @@
+/* ==========================================================================
+   Block Rush 2K - iKhokha Checkout Modal Styling
+   ========================================================================== */
+
+.ikhokha-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 15, 29, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    box-sizing: border-box;
+}
+
+.ikhokha-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ikhokha-modal-card {
+    background: linear-gradient(145deg, rgba(26, 36, 56, 0.96) 0%, rgba(15, 23, 42, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 25px rgba(245, 158, 11, 0.12);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    padding: 24px;
+    position: relative;
+    color: #f8fafc;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.ikhokha-modal-overlay.active .ikhokha-modal-card {
+    transform: scale(1) translateY(0);
+}
+
+.ikhokha-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+
+.ikhokha-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+    transform: scale(1.05);
+}
+
+.ikhokha-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-right: 32px;
+}
+
+.ikhokha-brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+}
+
+.ikhokha-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00d2ff;
+    box-shadow: 0 0 8px #00d2ff;
+}
+
+.ikhokha-mode-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.ikhokha-mode-badge:hover {
+    transform: scale(1.04);
+}
+
+.ikhokha-mode-badge.sandbox {
+    background: rgba(245, 158, 11, 0.18);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fde68a;
+}
+
+.ikhokha-mode-badge.live {
+    background: rgba(34, 197, 94, 0.18);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+
+/* Product Box */
+.ikhokha-product-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.ikhokha-product-icon {
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ikhokha-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ikhokha-product-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ikhokha-product-desc {
+    font-size: 12px;
+    color: var(--accent-gold, #f59e0b);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ikhokha-product-price {
+    font-size: 17px;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+}
+
+/* Payment Methods Row */
+.ikhokha-methods-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.ikhokha-method-tag {
+    font-size: 11px;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Actions */
+.ikhokha-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.ikhokha-pay-btn {
+    width: 100% !important;
+    height: 46px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    border-radius: 12px !important;
+    letter-spacing: 0.3px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35) !important;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.ikhokha-pay-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5) !important;
+}
+
+.ikhokha-pay-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.ikhokha-sandbox-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 4px 0;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.ikhokha-sandbox-divider::before,
+.ikhokha-sandbox-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ikhokha-sandbox-divider span {
+    padding: 0 8px;
+}
+
+.ikhokha-test-btn {
+    width: 100% !important;
+    height: 40px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    border: 1px dashed rgba(245, 158, 11, 0.45) !important;
+    color: #fde68a !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ikhokha-test-btn:hover {
+    background: rgba(245, 158, 11, 0.16) !important;
+    border-color: rgba(245, 158, 11, 0.7) !important;
+    color: #fff !important;
+}
+
+/* Status message */
+.ikhokha-status-msg {
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.ikhokha-status-msg.info {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #7dd3fc;
+}
+
+.ikhokha-status-msg.success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #86efac;
+}
+
+.ikhokha-status-msg.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+}
+
+/* Spinner */
+.ikhokha-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(15, 23, 42, 0.25);
+    border-top-color: #0f172a;
+    border-radius: 50%;
+    animation: ikhokhaSpin 0.75s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes ikhokhaSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Progress bar for sandbox simulation */
+.ikhokha-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.ikhokha-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #22c55e);
+    border-radius: 10px;
+    transition: width 0.8s ease-in-out;
+}
+
+/* Security Guarantee Footer */
+.ikhokha-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #64748b;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ==========================================================================
+   Customer Information Input Box
+   ========================================================================== */
+.ikhokha-customer-box {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+
+.ikhokha-customer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.ikhokha-customer-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ikhokha-customer-sub {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.ikhokha-input-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.ikhokha-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ikhokha-field-label {
+    font-size: 11px;
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.ikhokha-field-input {
+    background: rgba(10, 15, 29, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #fff;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.ikhokha-field-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    background: rgba(15, 23, 42, 0.95);
+}
+
+.ikhokha-field-input::placeholder {
+    color: #64748b;
+}
+
+/* ==========================================================================
+   Payment History Modal & Receipts
+   ========================================================================== */
+.ikhokha-history-card {
+    max-width: 520px !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.ikhokha-history-list {
+    overflow-y: auto;
+    max-height: 52vh;
+    padding-right: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.ikhokha-history-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ikhokha-history-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+.ikhokha-tx-row {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.ikhokha-tx-row:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(30, 41, 59, 0.7);
+    transform: translateY(-1px);
+}
+
+.ikhokha-tx-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.ikhokha-tx-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ikhokha-tx-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.ikhokha-tx-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ikhokha-tx-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ikhokha-tx-ref {
+    font-family: monospace;
+    color: #38bdf8;
+    font-size: 10px;
+}
+
+.ikhokha-tx-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.ikhokha-tx-price {
+    font-size: 14px;
+    font-weight: 900;
+    color: #4ade80;
+}
+
+.ikhokha-tx-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: rgba(34, 197, 94, 0.18);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #4ade80;
+}
+
+.ikhokha-history-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: #94a3b8;
+}
+
+.ikhokha-empty-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+/* Digital Receipt Card */
+.ikhokha-receipt-sheet {
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #e2e8f0;
+}
+
+.ikhokha-receipt-header {
+    text-align: center;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.ikhokha-receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 12px 0;
+}
+
+.ikhokha-receipt-table td {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ikhokha-receipt-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+    color: #fff;
+}

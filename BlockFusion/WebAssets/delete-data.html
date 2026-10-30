@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Request deletion of your account and associated data for Block Rush 2K.">
+    <title>Request Data Deletion - Block Rush 2K</title>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-surface: #1E293B;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(233, 69, 96, 0.3);
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --accent-yellow: #F7C948;
+            --accent-coral: #E9543A;
+            --accent-danger: #E94560;
+            --accent-green: #22C55E;
+            --accent-blue: #38BDF8;
+            --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(233, 69, 96, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(247, 201, 72, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            line-height: 1.7;
+            padding: 24px 16px 60px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Header */
+        .header-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-yellow);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 8px 16px;
+            background: rgba(247, 201, 72, 0.1);
+            border: 1px solid rgba(247, 201, 72, 0.2);
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(247, 201, 72, 0.2);
+            transform: translateX(-2px);
+        }
+
+        .brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-badge span.logo-highlight {
+            color: var(--accent-yellow);
+        }
+
+        .brand-badge span.logo-accent {
+            color: var(--accent-coral);
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 20px 0 36px;
+        }
+
+        .hero-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(28px, 5vw, 40px);
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .hero .subtitle {
+            font-size: 16px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Notice Banner */
+        .notice-banner {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .notice-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .notice-content h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 4px;
+        }
+
+        .notice-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 14px;
+        }
+
+        .card ol, .card ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+        }
+
+        .card li {
+            margin-bottom: 10px;
+        }
+
+        /* Step Box */
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            background: var(--accent-coral);
+            color: white;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-text h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .step-text p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14.5px;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-coral);
+            box-shadow: 0 0 0 3px rgba(233, 84, 58, 0.15);
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--accent-coral);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 14px 28px;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s ease, transform 0.1s ease;
+            text-decoration: none;
+        }
+
+        .btn-submit:hover {
+            background: #D4432A;
+            transform: translateY(-1px);
+        }
+
+        .mailto-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(233, 69, 96, 0.15);
+            color: #FF8BA7;
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14.5px;
+            margin-top: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .mailto-link:hover {
+            background: rgba(233, 69, 96, 0.25);
+            color: #FFFFFF;
+        }
+
+        /* Deletion details table */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--accent-yellow);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        footer a:hover {
+            color: var(--accent-yellow);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <header class="header-nav">
+            <a href="index.html" class="back-link">
+                <span>←</span> Back to Game
+            </a>
+            <div class="brand-badge">
+                <img src="images/icon.svg" alt="Block Rush 2K" style="width: 28px; height: 28px; border-radius: 6px; vertical-align: middle;">
+                <span>
+                    <span class="logo-highlight">BLOCK</span>
+                    <span class="logo-accent">RUSH 2K</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Request Data Deletion</h1>
+            <p class="subtitle">Submit a request to delete any gameplay data, device records, or identifiers associated with Block Rush 2K.</p>
+        </section>
+
+        <!-- No Account Notice -->
+        <div class="notice-banner">
+            <div class="notice-icon" style="font-weight:800;color:var(--accent-blue);font-size:22px;line-height:1;">i</div>
+            <div class="notice-content">
+                <h3>No Account Required in Block Rush 2K</h3>
+                <p>Block Rush 2K <strong>does not require or allow users to create an account</strong>. All gameplay progress (high scores, coin balances, unlocked worlds) is stored locally on your device or linked to anonymous diagnostic identifiers.</p>
+            </div>
+        </div>
+
+        <main>
+            <!-- Method 1: Instant Local Deletion -->
+            <section class="card">
+                <h2>Option 1: Delete Local Data Immediately</h2>
+                <p>Since your game data is stored directly on your phone or browser, you can erase it instantly without waiting for customer support:</p>
+                <div class="step-container">
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <div class="step-text">
+                            <h4>On Android Device:</h4>
+                            <p>Open <strong>Settings</strong> ➔ <strong>Apps</strong> ➔ <strong>Block Rush 2K</strong> ➔ <strong>Storage & Cache</strong> ➔ Tap <strong>"Clear Storage"</strong> and <strong>"Clear Cache"</strong>.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <div class="step-text">
+                            <h4>In Web Browser:</h4>
+                            <p>Click your browser settings ➔ <strong>Clear Browsing Data</strong> ➔ Select <strong>"Cookies and site data"</strong> (or open Settings in the game and use the Reset option).</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <div class="step-text">
+                            <h4>Reset Advertising ID (Optional):</h4>
+                            <p>On your Android device, go to <strong>Settings</strong> ➔ <strong>Google</strong> ➔ <strong>All Services</strong> ➔ <strong>Ads</strong> ➔ Tap <strong>"Delete Advertising ID"</strong> to sever any advertising profile.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Method 2: Online Request Submission -->
+            <section class="card">
+                <h2>Option 2: Request Cloud & Telemetry Deletion</h2>
+                <p>If you would like us to purge any associated diagnostic telemetry, Firebase analytics instances, or communication logs associated with your device or IP address, please submit a deletion request below:</p>
+
+                <form id="deletion-form" onsubmit="handleFormSubmit(event)">
+                    <div class="form-group">
+                        <label for="contact-email">Your Email Address (for confirmation):</label>
+                        <input type="email" id="contact-email" placeholder="e.g. yourname@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="device-model">Device Model / OS (Optional):</label>
+                        <input type="text" id="device-model" placeholder="e.g. Samsung Galaxy S23 / Android 14">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="advertising-id">Google Advertising ID or notes (Optional):</label>
+                        <input type="text" id="advertising-id" placeholder="Optional identifier to locate ad/analytics records">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additional-notes">Additional Details (Optional):</label>
+                        <textarea id="additional-notes" rows="3" placeholder="Any additional information regarding your deletion request..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        Submit Deletion Request via Email
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 18px;">
+                    <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 6px;">Or send an email directly to:</p>
+                    <a href="mailto:tambanizwavhudimitambo@gmail.com?subject=Data%20Deletion%20Request%20-%20Block%20Rush%202K&body=Hello%2C%0A%0APlease%20delete%20all%20associated%20data%20and%20identifiers%20related%20to%20my%20use%20of%20Block%20Rush%202K.%0A%0AMy%20Device%20Model%3A%20%0ADate%20of%20last%20play%3A%20%0A%0AThank%20you." class="mailto-link">
+                        tambanizwavhudimitambo@gmail.com
+                    </a>
+                </div>
+            </section>
+
+            <!-- Data Retention Specification -->
+            <section class="card">
+                <h2>Data Scope & Retention Policy</h2>
+                <p>In accordance with Google Play Developer Policies, GDPR, and CCPA requirements, here is what happens when you request data deletion:</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data Category</th>
+                                <th>Action Taken</th>
+                                <th>Retention Timeline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Local Game Save</strong></td>
+                                <td>Deleted locally via app/browser storage clear</td>
+                                <td>Immediate</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Firebase Analytics ID</strong></td>
+                                <td>Anonymized and purged from Firebase project telemetry</td>
+                                <td>Within 30 days</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Crashlytics Logs</strong></td>
+                                <td>Associated device crash stack traces purged</td>
+                                <td>Within 30 days</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Support Inquiries</strong></td>
+                                <td>Customer support correspondence deleted</td>
+                                <td>Within 30 days</td>
+                            </tr>
+                            <tr>
+                                <td><strong>In-App Purchase Records</strong></td>
+                                <td>Financial records retained only as required by tax and Google Play legal obligations</td>
+                                <td>As mandated by law (Google Play)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Eisenhower Games • Block Rush 2K. All rights reserved.</p>
+            <p style="margin-top: 8px;">
+                <a href="index.html">Play Game</a> • 
+                <a href="privacy.html">Privacy Policy</a> • 
+                <a href="delete-data.html">Data Deletion</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('contact-email').value.trim();
+            const device = document.getElementById('device-model').value.trim();
+            const adId = document.getElementById('advertising-id').value.trim();
+            const notes = document.getElementById('additional-notes').value.trim();
+
+            const subject = encodeURIComponent("Data Deletion Request - Block Rush 2K");
+            const body = encodeURIComponent(
+                `Hello Eisenhower Games Support,\n\n` +
+                `I am requesting the deletion of all data and identifiers associated with my usage of Block Rush 2K.\n\n` +
+                `Contact Email: ${email}\n` +
+                `Device Model / OS: ${device || 'Not specified'}\n` +
+                `Advertising ID / Identifier: ${adId || 'Not specified'}\n` +
+                `Additional Details: ${notes || 'None'}\n\n` +
+                `Thank you.`
+            );
+
+            window.location.href = `mailto:tambanizwavhudimitambo@gmail.com?subject=${subject}&body=${body}`;
+        }
+    </script>
+</body>
+
+</html>
