@@ -24,6 +24,7 @@ enum NativeBridgeScript {
                     }
                     /* Remove all download UI on iOS app side */
                     a[href*="download"],
+                    a[href*="/tv"],
                     button[onclick*="download"],
                     .web-only-download,
                     .store-web-notice,
