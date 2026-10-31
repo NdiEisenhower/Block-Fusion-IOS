@@ -9,6 +9,7 @@ final class MainViewController: UIViewController {
     private let preferences = PreferencesManager.shared
     
     private static let remoteGameUrl = "https://blockrush2k.kharitambe.co.za"
+    private var currentBannerHeight: CGFloat = 0
     
     // MARK: - Safe Area Handling
     override func viewSafeAreaInsetsDidChange() {
@@ -18,7 +19,8 @@ final class MainViewController: UIViewController {
     
     private func updateSafeAreaInsets() {
         let top = max(view.safeAreaInsets.top, 50.0)
-        let bottom = max(view.safeAreaInsets.bottom, 24.0)
+        let bottomWithBanner = view.safeAreaInsets.bottom + currentBannerHeight + (currentBannerHeight > 0 ? 8.0 : 0.0)
+        let bottom = max(bottomWithBanner, 24.0)
         let js = """
         (function() {
             var el = document.getElementById('ios-safe-area-rules');
@@ -89,6 +91,7 @@ final class MainViewController: UIViewController {
         contentController.add(scriptBridge, name: "hapticBridge")
         contentController.add(scriptBridge, name: "socialBridge")
         contentController.add(scriptBridge, name: "appBridge")
+        contentController.add(scriptBridge, name: "gameCenterBridge")
         
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
@@ -124,6 +127,9 @@ final class MainViewController: UIViewController {
     private func setupManagers() {
         AdMobManager.shared.presentingViewController = self
         AdMobManager.shared.delegate = self
+        
+        GameKitManager.shared.presentingViewController = self
+        GameKitManager.shared.authenticateLocalPlayer()
         
         if #available(iOS 15.0, *) {
             StoreKitManager.shared.delegate = self
@@ -201,17 +207,30 @@ extension MainViewController: WKNavigationDelegate, WKUIDelegate {
             return
         }
         
-        // Local files, scheme handlers, or internal domain
+        // Local files, scheme handlers, internal domain, or blank pages
         if url.isFileURL ||
            url.host == "blockrush2k.kharitambe.co.za" ||
            url.scheme == "local" ||
-           url.absoluteString.hasPrefix("https://games-7b902") {
+           url.absoluteString.hasPrefix("https://games-7b902") ||
+           url.absoluteString == "about:blank" {
             decisionHandler(.allow)
             return
         }
         
-        // External links open in default mobile Safari
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        // Allow subframe requests (e.g., ad iframes or embedded media) inside the web view
+        if let targetFrame = navigationAction.targetFrame, !targetFrame.isMainFrame {
+            decisionHandler(.allow)
+            return
+        }
+        
+        // External links in main frame: ONLY open Safari if user explicitly tapped a link
+        if navigationAction.navigationType == .linkActivated {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // Cancel automatic external redirects/navigation in main frame without opening Safari
         decisionHandler(.cancel)
     }
 }
@@ -254,7 +273,11 @@ extension MainViewController: AdMobEventListener {
     }
     
     func onBannerVisibilityChanged(visible: Bool, height: CGFloat) {
-        // Adjust safe area or padding if necessary
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.currentBannerHeight = visible ? height : 0
+            self.updateSafeAreaInsets()
+        }
     }
 }
 

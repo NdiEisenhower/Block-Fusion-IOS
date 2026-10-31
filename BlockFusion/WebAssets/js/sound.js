@@ -26,9 +26,22 @@ class SoundManager {
 
     static vibrate(ms = 40) {
         try {
-            if (typeof Android !== 'undefined' && typeof Android.vibrate === 'function') {
-                Android.vibrate();
+            if (!this.enabled) return;
+            let type = 'light';
+            if (ms > 30 && ms <= 50) type = 'medium';
+            else if (ms > 50) type = 'heavy';
+            this.haptic(type);
+        } catch (e) { /* ignore */ }
+    }
+
+    static haptic(type = 'medium') {
+        try {
+            if (typeof iOS !== 'undefined' && typeof iOS.vibrate === 'function') {
+                iOS.vibrate(type);
+            } else if (typeof Android !== 'undefined' && typeof Android.vibrate === 'function') {
+                Android.vibrate(type);
             } else if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                const ms = type === 'light' ? 20 : (type === 'heavy' || type === 'success' || type === 'error' ? 60 : 40);
                 navigator.vibrate(ms);
             }
         } catch (e) { /* ignore */ }
@@ -103,7 +116,10 @@ class SoundManager {
         this.vibrate(60);
     }
 
-    static click() { this.play(300, 0.06, 'square', 0.04); }
+    static click() { 
+        this.play(300, 0.06, 'square', 0.04); 
+        this.haptic('selection');
+    }
 
     static win() {
         this.play(660, 0.2, 'sine', 0.1);

@@ -94,8 +94,8 @@ enum NativeBridgeScript {
             isAdEnabled: function() {
                 return !window._isAdsRemoved;
             },
-            vibrate: function() {
-                postToNative('hapticBridge', 'vibrate');
+            vibrate: function(type) {
+                postToNative('hapticBridge', 'vibrate', { type: type || 'medium' });
             },
             exitApp: function() {
                 postToNative('appBridge', 'exitApp');
@@ -190,8 +190,22 @@ enum NativeBridgeScript {
 
         // Direct iOS namespace
         window.iOS = {
-            vibrate: function() { postToNative('hapticBridge', 'vibrate'); },
-            share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); }
+            vibrate: function(type) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium' }); },
+            share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
+            showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); }
+        };
+
+        // Game Center Bridge
+        window.GameCenter = {
+            submitScore: function(score, leaderboardId) {
+                postToNative('gameCenterBridge', 'submitScore', { score: score, leaderboardId: leaderboardId || 'main_leaderboard' });
+            },
+            reportAchievement: function(id, percent) {
+                postToNative('gameCenterBridge', 'reportAchievement', { id: id, percent: percent || 100.0 });
+            },
+            showDashboard: function() {
+                postToNative('gameCenterBridge', 'showDashboard');
+            }
         };
 
         console.log('✅ iOS Native Bridges loaded and active');
