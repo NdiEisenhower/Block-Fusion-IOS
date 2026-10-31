@@ -1,10 +1,10 @@
 // Main Application Controller
 class App {
 
-    // Dismiss Splash Screen smoothly
+    // Dismiss Splash Screen smoothly and rapidly
     static hideSplashScreen() {
         const splash = document.getElementById('app-splash-screen');
-        if (!splash) return;
+        if (!splash || splash.classList.contains('fade-out')) return;
         const fill = document.getElementById('splash-loader-fill');
         const status = document.getElementById('splash-status-text');
         if (fill) {
@@ -16,8 +16,8 @@ class App {
             splash.classList.add('fade-out');
             setTimeout(() => {
                 if (splash.parentNode) splash.parentNode.removeChild(splash);
-            }, 600);
-        }, 500);
+            }, 350);
+        }, 150);
     }
 
     static state = {
@@ -205,6 +205,11 @@ class App {
                 if (continueBtn) continueBtn.focus();
             }
         }, 250);
+
+        // Fast & smooth splash screen dismissal
+        setTimeout(() => {
+            App.hideSplashScreen();
+        }, 300);
     }
 
 
@@ -2828,6 +2833,7 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
     App.setupGameSwipe();
+    setTimeout(() => { App.hideSplashScreen(); }, 400);
 
     // Initialization completed
 

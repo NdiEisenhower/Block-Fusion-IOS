@@ -408,6 +408,29 @@
     <script src="js/daily-challenge.js"></script>
     <script src="js/leaderboard.js"></script>
     <script src="js/popup-manager.js"></script>
+    <script>
+        // Failsafe: Ensure splash screen never hangs or takes time
+        (function() {
+            function dismissSplash() {
+                var s = document.getElementById('app-splash-screen');
+                if (s && !s.classList.contains('fade-out')) {
+                    if (window.App && typeof window.App.hideSplashScreen === 'function') {
+                        window.App.hideSplashScreen();
+                    } else {
+                        s.classList.add('fade-out');
+                        setTimeout(function() { if (s.parentNode) s.parentNode.removeChild(s); }, 350);
+                    }
+                }
+            }
+            if (document.readyState === 'complete') {
+                setTimeout(dismissSplash, 400);
+            } else {
+                window.addEventListener('load', function() { setTimeout(dismissSplash, 350); });
+            }
+            // Absolute maximum safety timeout (600ms)
+            setTimeout(dismissSplash, 600);
+        })();
+    </script>
 </body>
 
 </html>
