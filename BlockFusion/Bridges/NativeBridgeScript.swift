@@ -114,7 +114,7 @@ enum NativeBridgeScript {
                 });
             },
             getPlatform: function() {
-                return 'google'; // Tells ads.js to activate AdMob unit IDs
+                return 'ios'; // Direct iOS platform identity
             },
             getFlavor: function() {
                 return 'appstore';

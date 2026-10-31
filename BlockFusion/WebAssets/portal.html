@@ -1875,6 +1875,17 @@
 
                             <div class="toggle-row">
                                 <div class="toggle-info">
+                                    <h4>Apple iOS App Store Ads</h4>
+                                    <p>Enable AdMob banners, interstitials & rewarded ads on iOS</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="cfg-ios-ads" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-row">
+                                <div class="toggle-info">
                                     <h4>In-Game Top Banner Ad</h4>
                                     <p>Show sticky banner at the top of game canvas</p>
                                 </div>
@@ -2040,7 +2051,7 @@
                             </div>
                         </div>
 
-                        <div class="config-grid-2">
+                        <div class="config-grid-3">
                             <!-- GOOGLE PLAY CONFIG -->
                             <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
                                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
@@ -2154,6 +2165,64 @@
                                 <div class="input-group">
                                     <label class="input-label">AppGallery Store URL</label>
                                     <input type="text" id="rc-huawei-store-url" class="input-field" value="https://appgallery.huawei.com/app/com.eisen.blockrush2k">
+                                </div>
+                            </div>
+
+                            <!-- APPLE APP STORE (iOS) CONFIG -->
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                    <span style="font-size: 24px;">🍎</span>
+                                    <div>
+                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Apple App Store (iOS)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted);">Bundle ID: com.eisen.blockrush2k</p>
+                                    </div>
+                                </div>
+
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">AdMob iOS App ID</label>
+                                    <input type="text" id="rc-ios-app-id" class="input-field mono" value="ca-app-pub-4255859216659691~4111326402">
+                                </div>
+
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Banner Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-banner-id" class="input-field mono" value="ca-app-pub-4255859216659691/6387045959">
+                                </div>
+
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Interstitial Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-interstitial-id" class="input-field mono" value="ca-app-pub-4255859216659691/7221704767">
+                                </div>
+
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Rewarded Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-rewarded-id" class="input-field mono" value="ca-app-pub-4255859216659691/3713704595">
+                                </div>
+
+                                <div class="config-grid-2" style="margin-bottom: 12px;">
+                                    <div class="input-group">
+                                        <label class="input-label">Latest Version</label>
+                                        <input type="text" id="rc-ios-version-name" class="input-field mono" value="1.0.0">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Build / Version Code</label>
+                                        <input type="number" id="rc-ios-version-code" class="input-field mono" value="1">
+                                    </div>
+                                </div>
+
+                                <div class="toggle-row" style="margin-bottom: 12px;">
+                                    <div class="toggle-info">
+                                        <h4 style="font-size: 13px;">Force Update Required</h4>
+                                        <p style="font-size: 11px;">Lock outdated app versions</p>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="rc-ios-force-update">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="input-group">
+                                    <label class="input-label">App Store URL</label>
+                                    <input type="text" id="rc-ios-store-url" class="input-field" value="https://apps.apple.com/app/id6470000000">
                                 </div>
                             </div>
 
@@ -3768,6 +3837,7 @@
                     document.getElementById('cfg-google-ads').checked = ads.googleAdsEnabled !== undefined ? !!ads.googleAdsEnabled : true;
                     document.getElementById('cfg-huawei-ads').checked = ads.huaweiAdsEnabled !== undefined ? !!ads.huaweiAdsEnabled : true;
                     document.getElementById('cfg-tv-ads').checked = ads.enableTvAds !== undefined ? !!ads.enableTvAds : true;
+                    document.getElementById('cfg-ios-ads').checked = ads.iosAdsEnabled !== undefined ? !!ads.iosAdsEnabled : true;
                     document.getElementById('cfg-banner-in-game').checked = ads.showBannerInGame !== undefined ? !!ads.showBannerInGame : false;
                     document.getElementById('cfg-interstitial-freq').value = ads.interstitialFrequency || 3;
                     document.getElementById('cfg-rewarded-coins').value = ads.rewardedAdCoins || 50;
@@ -3801,6 +3871,7 @@
                         'remote_config/ads/googleAdsEnabled': document.getElementById('cfg-google-ads').checked,
                         'remote_config/ads/huaweiAdsEnabled': document.getElementById('cfg-huawei-ads').checked,
                         'remote_config/ads/enableTvAds': document.getElementById('cfg-tv-ads').checked,
+                        'remote_config/ads/iosAdsEnabled': document.getElementById('cfg-ios-ads').checked,
                         'remote_config/ads/showBannerInGame': document.getElementById('cfg-banner-in-game').checked,
                         'remote_config/ads/interstitialFrequency': parseInt(document.getElementById('cfg-interstitial-freq').value) || 3,
                         'remote_config/ads/rewardedAdCoins': parseInt(document.getElementById('cfg-rewarded-coins').value) || 50,
@@ -3867,6 +3938,16 @@
                     document.getElementById('rc-huawei-force-update').checked = !!huawei.forceUpdate;
                     document.getElementById('rc-huawei-store-url').value = huawei.storeUrl || 'https://appgallery.huawei.com/app/com.eisen.blockrush2k';
 
+                    const ios = rc.ios || {};
+                    document.getElementById('rc-ios-app-id').value = ios.appId || 'ca-app-pub-4255859216659691~4111326402';
+                    document.getElementById('rc-ios-banner-id').value = ios.bannerAdUnitId || 'ca-app-pub-4255859216659691/6387045959';
+                    document.getElementById('rc-ios-interstitial-id').value = ios.interstitialAdUnitId || 'ca-app-pub-4255859216659691/7221704767';
+                    document.getElementById('rc-ios-rewarded-id').value = ios.rewardedAdUnitId || 'ca-app-pub-4255859216659691/3713704595';
+                    document.getElementById('rc-ios-version-name').value = ios.versionName || '1.0.0';
+                    document.getElementById('rc-ios-version-code').value = ios.versionCode || 1;
+                    document.getElementById('rc-ios-force-update').checked = !!ios.forceUpdate;
+                    document.getElementById('rc-ios-store-url').value = ios.storeUrl || 'https://apps.apple.com/app/id6470000000';
+
                     document.getElementById('rc-raw-json').value = JSON.stringify(rc, null, 2);
                 } catch (e) {
                     console.warn('Load remote config error:', e);
@@ -3900,11 +3981,23 @@
                         storeUrl: document.getElementById('rc-huawei-store-url').value.trim()
                     };
 
+                    const ios = {
+                        appId: document.getElementById('rc-ios-app-id').value.trim(),
+                        bannerAdUnitId: document.getElementById('rc-ios-banner-id').value.trim(),
+                        interstitialAdUnitId: document.getElementById('rc-ios-interstitial-id').value.trim(),
+                        rewardedAdUnitId: document.getElementById('rc-ios-rewarded-id').value.trim(),
+                        versionName: document.getElementById('rc-ios-version-name').value.trim(),
+                        versionCode: parseInt(document.getElementById('rc-ios-version-code').value) || 1,
+                        forceUpdate: document.getElementById('rc-ios-force-update').checked,
+                        storeUrl: document.getElementById('rc-ios-store-url').value.trim()
+                    };
+
                     await db.ref('remote_config/google').set(google);
                     await db.ref('remote_config/huawei').set(huawei);
+                    await db.ref('remote_config/ios').set(ios);
                     await db.ref('remote_config/updatedAt').set(firebase.database.ServerValue.TIMESTAMP);
 
-                    showToast('🎉 Google Play & Huawei Remote Config deployed!', '✅');
+                    showToast('🎉 Google Play, Huawei & iOS Remote Config deployed!', '✅');
                     this.loadRemoteConfig();
                 } catch (e) {
                     alert('Failed to deploy remote config: ' + e.message);

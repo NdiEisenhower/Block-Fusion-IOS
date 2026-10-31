@@ -557,7 +557,7 @@
                     exitApp: () => log('App', 'bridge', 'Exit app called'),
                     openStoreReview: () => win.webkit.messageHandlers.appBridge.postMessage({ action: 'openStoreReview' }),
                     getDeviceInfo: () => JSON.stringify({ platform: 'ios', model: 'iPhone 16 Pro', osVersion: '18.0' }),
-                    getPlatform: () => 'google',
+                    getPlatform: () => 'ios',
                     getFlavor: () => 'appstore',
                     isDebug: () => false,
                     getEnvironment: () => 'ios'

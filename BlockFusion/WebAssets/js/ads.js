@@ -25,6 +25,20 @@ class AdService {
             interstitial: 'testb4znbuh3n2',
             rewarded: 'testx9dtjwj8hp'
         },
+        // Apple iOS Production Ad Unit IDs
+        ios: {
+            appId: 'ca-app-pub-4255859216659691~4111326402',
+            banner: 'ca-app-pub-4255859216659691/6387045959',
+            interstitial: 'ca-app-pub-4255859216659691/7221704767',
+            rewarded: 'ca-app-pub-4255859216659691/3713704595'
+        },
+        // Apple iOS Test Ad Unit IDs (Debug mode)
+        iosTest: {
+            appId: 'ca-app-pub-3940256099942544~1458002511',
+            banner: 'ca-app-pub-3940256099942544/2934735716',
+            interstitial: 'ca-app-pub-3940256099942544/4411468910',
+            rewarded: 'ca-app-pub-3940256099942544/1712485313'
+        },
         // AdSense IDs (for Web)
         adsense: {
             banner: 'ca-pub-4255859216659691/6387045959',
@@ -39,7 +53,8 @@ class AdService {
         disabledPlatforms: {
             huawei: false,  // Ads enabled on Huawei platform
             google: false,  // Ads enabled on Google platform
-            web: false      // Ads enabled on Web platform
+            web: false,     // Ads enabled on Web platform
+            ios: false      // Ads enabled on Apple iOS platform
         },
         // Configurable interstitial frequency (number of rounds/game plays before showing ad)
         interstitialFrequency: 3
@@ -70,7 +85,7 @@ class AdService {
 
         this.isInitialized = true;
 
-        if (this.env === 'android') {
+        if (this.env === 'android' || this.env === 'ios') {
             this.initAdMob();
             // REMOVE HTML banner when in Android mode
             this.removeHtmlBannerContainer();
@@ -88,6 +103,7 @@ class AdService {
                 const p = platformParam.toLowerCase();
                 if (p === 'huawei' || p === 'hms') return 'huawei';
                 if (p === 'google' || p === 'admob' || p === 'playstore') return 'google';
+                if (p === 'ios' || p === 'apple' || p === 'appstore') return 'ios';
                 if (p === 'web') return 'web';
             }
 
@@ -103,13 +119,26 @@ class AdService {
             const f = window.BUILD_FLAVOR.toLowerCase();
             if (f.includes('huawei')) return 'huawei';
             if (f.includes('google')) return 'google';
+            if (f.includes('ios') || f.includes('apple')) return 'ios';
+        }
+
+        // Direct iOS bridge detection
+        if (typeof window.iOS !== 'undefined' || (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge)) {
+            return 'ios';
         }
 
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
             try {
                 if (typeof window.Android.getPlatform === 'function') {
                     const p = window.Android.getPlatform();
-                    if (p) return p.toLowerCase();
+                    if (p) {
+                        const pl = p.toLowerCase();
+                        if (pl === 'ios' || pl === 'apple') return 'ios';
+                        return pl;
+                    }
+                }
+                if (typeof window.Android.getEnvironment === 'function' && window.Android.getEnvironment() === 'ios') {
+                    return 'ios';
                 }
                 if (typeof window.Android.getFlavor === 'function') {
                     const f = window.Android.getFlavor();
@@ -245,6 +274,14 @@ class AdService {
         const platform = (targetPlatform || this.platform || 'web').toLowerCase();
         const isDebug = this.isDebugMode();
 
+        if (platform === 'ios' || platform === 'apple') {
+            if (isDebug) {
+                console.log('🐞 Debug build active: Using iOS Test Ad Units');
+                return this.config.iosTest;
+            }
+            return this.config.ios;
+        }
+
         if (platform === 'huawei') {
             if (isDebug) {
                 console.log('🐞 Debug build active: Using Huawei Test Ad Units');
@@ -266,11 +303,14 @@ class AdService {
 
     static detectEnvironment() {
         const isNativeBridge = (typeof window.Android !== 'undefined' && window.Android !== null) ||
+                               (typeof window.iOS !== 'undefined') ||
+                               (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) ||
                                (typeof window.AdMob !== 'undefined');
 
         if (isNativeBridge) {
-            this.env = 'android';
-            console.log('📱 Native bridge environment detected - HTML banner will be removed');
+            const p = this.detectPlatform();
+            this.env = (p === 'ios') ? 'ios' : 'android';
+            console.log(`📱 Native bridge environment detected (${this.env}) - HTML banner will be removed`);
         } else {
             this.env = 'web';
             console.log('🌐 Web environment detected');
@@ -578,7 +618,7 @@ class AdService {
     static showBannerAd() {
         if (!this.adsEnabled || !this.isInitialized) return;
 
-        if (this.env === 'android') {
+        if (this.env === 'android' || this.env === 'ios') {
             this.showAndroidBanner();
         } else {
             const container = document.getElementById('banner-ad');

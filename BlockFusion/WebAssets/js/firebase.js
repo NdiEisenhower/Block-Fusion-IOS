@@ -162,6 +162,16 @@ class FirebaseService {
                 CONFIG.DISABLED_ADS.web = !ads.webAdsEnabled;
                 CONFIG.DISABLED_ADS.google = !ads.googleAdsEnabled;
                 CONFIG.DISABLED_ADS.huawei = !ads.huaweiAdsEnabled;
+                CONFIG.DISABLED_ADS.ios = ads.iosAdsEnabled !== undefined ? !ads.iosAdsEnabled : false;
+            }
+            if (typeof AdService !== 'undefined') {
+                if (ads.iosAdsEnabled !== undefined) {
+                    if (ads.iosAdsEnabled) {
+                        AdService.enableAdsForPlatform('ios');
+                    } else {
+                        AdService.disableAdsForPlatform('ios');
+                    }
+                }
             }
             if (CONFIG.ADS) {
                 if (ads.interstitialFrequency) {
@@ -175,6 +185,53 @@ class FirebaseService {
             // Android TV Ads toggle
             if (ads.enableTvAds !== undefined && typeof Android !== 'undefined' && typeof Android.setTvAdsEnabled === 'function') {
                 Android.setTvAdsEnabled(!!ads.enableTvAds);
+            }
+        }
+
+        // 1b. Apple App Store (iOS) Remote Config
+        if (config.ios) {
+            const iosConfig = config.ios;
+            if (typeof AdService !== 'undefined' && AdService.config) {
+                if (!AdService.config.ios) AdService.config.ios = {};
+                if (iosConfig.bannerAdUnitId) AdService.config.ios.banner = iosConfig.bannerAdUnitId;
+                if (iosConfig.interstitialAdUnitId) AdService.config.ios.interstitial = iosConfig.interstitialAdUnitId;
+                if (iosConfig.rewardedAdUnitId) AdService.config.ios.rewarded = iosConfig.rewardedAdUnitId;
+                if (iosConfig.appId) AdService.config.ios.appId = iosConfig.appId;
+            }
+
+            const isIosPlatform = (typeof AdService !== 'undefined' && AdService.platform === 'ios') ||
+                                  (typeof window.Android !== 'undefined' && typeof window.Android.getPlatform === 'function' && window.Android.getPlatform() === 'ios') ||
+                                  (typeof window.iOS !== 'undefined');
+
+            if (isIosPlatform && typeof window.Android !== 'undefined' && typeof window.Android.initAds === 'function') {
+                const bId = iosConfig.bannerAdUnitId || (AdService.config && AdService.config.ios ? AdService.config.ios.banner : "");
+                const iId = iosConfig.interstitialAdUnitId || (AdService.config && AdService.config.ios ? AdService.config.ios.interstitial : "");
+                const rId = iosConfig.rewardedAdUnitId || (AdService.config && AdService.config.ios ? AdService.config.ios.rewarded : "");
+                window.Android.initAds(bId, iId, rId);
+            }
+
+            // Force update modal for iOS
+            if (isIosPlatform && iosConfig.forceUpdate && iosConfig.versionCode) {
+                const currentIosVersionCode = 1;
+                if (currentIosVersionCode < (parseInt(iosConfig.versionCode) || 1)) {
+                    const storeUrl = iosConfig.storeUrl || 'https://apps.apple.com/app/id6470000000';
+                    if (typeof PopupManager !== 'undefined' && PopupManager.show) {
+                        PopupManager.show({
+                            icon: '🍎',
+                            title: 'Update Required',
+                            subtitle: `Version ${iosConfig.versionName || 'New'} Available`,
+                            customContent: `<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                                A new version of Block Rush 2K is available on the App Store with performance updates and new stages. Please update to continue!
+                            </div>`,
+                            confirmText: 'Update on App Store',
+                            showCancel: false,
+                            showClose: false,
+                            onConfirm: () => {
+                                window.location.href = storeUrl;
+                            }
+                        });
+                    }
+                }
             }
         }
 

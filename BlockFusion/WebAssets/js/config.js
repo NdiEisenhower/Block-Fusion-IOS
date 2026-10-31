@@ -5,7 +5,8 @@ const CONFIG = {
     DISABLED_ADS_PLATFORMS: {
         huawei: false,  // Ads enabled on Huawei
         google: false,  // Ads enabled on Google
-        web: false      // Ads enabled on Web
+        web: false,     // Ads enabled on Web
+        ios: false      // Ads enabled on Apple iOS
     },
 
     // Show Ads related UI elements ('auto' evaluates per platform, or explicitly true/false)
