@@ -1,5 +1,25 @@
 // Main Application Controller
 class App {
+
+    // Dismiss Splash Screen smoothly
+    static hideSplashScreen() {
+        const splash = document.getElementById('app-splash-screen');
+        if (!splash) return;
+        const fill = document.getElementById('splash-loader-fill');
+        const status = document.getElementById('splash-status-text');
+        if (fill) {
+            fill.style.animation = 'none';
+            fill.style.width = '100%';
+        }
+        if (status) status.textContent = 'Ready!';
+        setTimeout(() => {
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                if (splash.parentNode) splash.parentNode.removeChild(splash);
+            }, 600);
+        }, 500);
+    }
+
     static state = {
         coins: 100,
         stars: {},

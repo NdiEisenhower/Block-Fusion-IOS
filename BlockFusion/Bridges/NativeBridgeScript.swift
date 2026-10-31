@@ -106,12 +106,19 @@ enum NativeBridgeScript {
             getDeviceInfo: function() {
                 return JSON.stringify({
                     platform: 'ios',
+                    platformName: 'Apple iOS (App Store)',
                     model: 'iPhone',
+                    os: 'iOS',
                     osVersion: '18.0',
+                    isIos: true,
+                    clientType: 'ios_native',
                     isTv: false,
                     isAdsRemoved: window._isAdsRemoved,
                     isThemePackOwned: window._isThemePackOwned
                 });
+            },
+            logEvent: function(eventName, paramsJson) {
+                postToNative('adBridge', 'logEvent', { name: eventName, params: paramsJson });
             },
             getPlatform: function() {
                 return 'ios'; // Direct iOS platform identity
@@ -120,7 +127,7 @@ enum NativeBridgeScript {
                 return 'appstore';
             },
             isDebug: function() {
-                return false;
+                return window.BUILD_VARIANT === 'qa';
             },
             getEnvironment: function() {
                 return 'ios';

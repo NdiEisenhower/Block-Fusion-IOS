@@ -1,5 +1,43 @@
 // Leaderboard System with Smart View
 class Leaderboard {
+    static isUserLoggedIn() {
+        return (typeof FirebaseService !== 'undefined' && !!FirebaseService.currentUser) ||
+               (typeof App !== 'undefined' && App.state && !!App.state.isLoggedIn);
+    }
+
+    static renderLoggedOutState() {
+        const list = document.getElementById('leaderboard-list');
+        const paginationInfo = document.getElementById('pagination-info');
+        const btnFindMe = document.getElementById('btn-find-me');
+        const toggleBtn = document.getElementById('btn-toggle-view');
+
+        // Hide pagination controls
+        document.querySelectorAll('#btn-first-page, #btn-prev-page, #btn-next-page, #btn-last-page, #page-indicator').forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+        if (paginationInfo) paginationInfo.textContent = '';
+        if (btnFindMe) btnFindMe.style.display = 'none';
+        if (toggleBtn) toggleBtn.style.display = 'none';
+
+        if (!list) return;
+
+        list.innerHTML = `
+            <div style="text-align: center; padding: 42px 20px; background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.3); border-radius: 16px; margin: 16px 0; box-shadow: 0 12px 36px rgba(0,0,0,0.4);">
+                <div style="font-size: 54px; margin-bottom: 12px; filter: drop-shadow(0 4px 16px rgba(245, 158, 11, 0.5));">🔐</div>
+                <h3 style="color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px;">Leaderboard Locked</h3>
+                <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 20px auto;">
+                    Sign in to view global player rankings, track your personal standing, and climb the competitive world ladder!
+                </p>
+                <button class="btn btn-gold btn-block" style="max-width: 250px; margin: 0 auto; padding: 13px 20px; font-weight: 800; font-size: 14px; border-radius: 12px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);" onclick="App.showLoginPrompt()">
+                    🔑 Sign In to View Rankings
+                </button>
+                <div style="margin-top: 16px; font-size: 11px; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>✨ Free Account</span> &bull; <span>☁️ Cloud Sync</span>
+                </div>
+            </div>
+        `;
+    }
+
     static currentTimeframe = 'overall';
     static currentCountry = '';
     static currentPage = 1;
@@ -178,6 +216,11 @@ class Leaderboard {
     // Smart render - shows top 10 + user's position with neighbors
     // Smart render - shows top 10 + user's position with neighbors
     static async renderSmart() {
+        if (!this.isUserLoggedIn()) {
+            this.renderLoggedOutState();
+            return;
+        }
+
         if (this.isLoading) return;
         this.isLoading = true;
 
@@ -444,21 +487,23 @@ class Leaderboard {
         const starSize = isUser ? '16px' : '14px';
 
         return `
-    <div class="store-item" style="${isUserStyle}display:flex;align-items:center;gap:10px;padding:${padding};margin:${margin};border-radius:10px;border:2px solid ${isUser ? '#f7c948' : 'var(--bg-card)'};background:${isUser ? 'rgba(247,201,72,0.08)' : 'var(--bg-surface)'};transition:all 0.2s ease;min-height:${isUser ? '56px' : '48px'};">
-        <span style="font-weight:700;font-size:${rankSize};width:28px;flex-shrink:0;color:${isUser ? '#f7c948' : 'var(--text-primary)'};text-align:center;">#${rank}</span>
-        <span style="font-size:20px;flex-shrink:0;">${medal}</span>
+    <div class="store-item" style="${isUserStyle}display:flex;align-items:center;gap:8px;padding:${padding};margin:${margin};border-radius:10px;border:2px solid ${isUser ? '#f7c948' : 'var(--bg-card)'};background:${isUser ? 'rgba(247,201,72,0.08)' : 'var(--bg-surface)'};transition:all 0.2s ease;min-height:${isUser ? '56px' : '48px'};">
+        <span style="font-weight:800;font-size:${rankSize};width:36px;flex-shrink:0;color:${isUser ? '#f7c948' : 'var(--text-primary)'};text-align:center;font-variant-numeric:tabular-nums;font-family:-apple-system,system-ui,sans-serif;">#${rank}</span>
+        <span style="font-size:18px;width:24px;text-align:center;flex-shrink:0;">${medal}</span>
         ${avatarHtml}
-        <div class="item-info" style="flex:1;min-width:0;padding:0 4px;">
-            <div class="item-name" style="font-weight:${isUser ? '800' : '600'};font-size:${fontSize};color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;">
+        <div class="item-info" style="flex:1;min-width:0;padding:0 6px;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+            <div class="item-name" style="font-weight:${isUser ? '800' : '600'};font-size:${fontSize};color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-family:-apple-system,system-ui,sans-serif;letter-spacing:0.3px;">
                 ${displayName}
             </div>
-            <div class="item-desc" style="font-size:10px;color:var(--text-muted);line-height:1.2;">
-                ${e.levels || 0} levels • ${countryFlag}
+            <div class="item-desc" style="font-size:11px;color:var(--text-muted);line-height:1.2;display:flex;align-items:center;gap:5px;">
+                <span>Level ${e.levels || 1}</span>
+                <span>&bull;</span>
+                <span>${countryFlag} ${(e.country || 'Global')}</span>
             </div>
         </div>
-        <span style="font-weight:700;color:#f7c948;flex-shrink:0;font-size:${starSize};text-align:right;">
-            ${e.stars || 0} ⭐
-            ${isUser ? '<span style="display:block;font-size:8px;color:var(--text-muted);font-weight:400;">Your Score</span>' : ''}
+        <span style="font-weight:800;color:#f7c948;flex-shrink:0;font-size:${starSize};text-align:right;font-variant-numeric:tabular-nums;min-width:60px;">
+            ${(e.stars || 0).toLocaleString()} ⭐
+            ${isUser ? '<span style="display:block;font-size:9px;color:var(--text-muted);font-weight:600;">You</span>' : ''}
         </span>
     </div>`;
     }
@@ -528,6 +573,11 @@ class Leaderboard {
 
     // Paginated render (original leaderboard)
     static async renderPaginated() {
+        if (!this.isUserLoggedIn()) {
+            this.renderLoggedOutState();
+            return;
+        }
+
         if (this.isLoading) return;
         this.isLoading = true;
 
@@ -1011,30 +1061,32 @@ class Leaderboard {
         `;
     }
 
-    // Mask surname for privacy
+    // Mask surname for privacy - elegant and strictly aligned
     static maskSurname(name) {
-        if (!name || name === 'Player') return 'Player';
+        if (!name || name === 'Player' || name === 'Guest' || name === 'Guest Player') {
+            return 'Player ••••';
+        }
 
         if (name.includes('@')) {
             const localPart = name.split('@')[0];
-            if (localPart.length <= 2) return localPart[0] + '***';
-            return localPart[0] + '***' + localPart[localPart.length - 1];
+            const p = localPart.slice(0, 2);
+            return `${p}•••• ••••`;
         }
 
         const parts = name.trim().split(/\s+/);
 
         if (parts.length === 1) {
-            if (parts[0].length <= 2) return parts[0];
-            return parts[0].substring(0, 2) + '***';
+            const single = parts[0];
+            if (single.length <= 2) return single + ' ••••';
+            return single.slice(0, 2) + '•••• ••••';
         }
 
-        const firstName = parts[0];
-        const maskedSurnames = parts.slice(1).map(surname => {
-            if (surname.length <= 1) return surname;
-            return surname[0] + '***';
-        });
+        const first = parts[0];
+        const firstMasked = first.length <= 2 ? first : (first.slice(0, 2) + '••');
+        const last = parts[parts.length - 1];
+        const lastMasked = last.slice(0, 1) + '•••';
 
-        return firstName + ' ' + maskedSurnames.join(' ');
+        return `${firstMasked} ${lastMasked}`;
     }
 
     // Set view (global/friends)

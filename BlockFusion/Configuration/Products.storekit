@@ -1,210 +1,203 @@
 {
-  "identifier" : "3E8FA41B-9473-4A59-B812-78809A1C3C30",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "3E8FA41B-9473-4A59-B812-78809A1C3C30",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : false,
-      "internalID" : "10000001",
-      "localizations" : [
+      "displayPrice": "14.99",
+      "familyShareable": false,
+      "internalID": "10000001",
+      "localizations": [
         {
-          "description" : "Starter Pack with 3,000 Coins",
-          "displayName" : "Starter Pack (3,000 Coins)",
-          "locale" : "en_US"
+          "description": "Starter Pack with 3,000 Coins",
+          "displayName": "Starter Pack (3,000 Coins)",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "coins_pack_3000",
-      "referenceName" : "3,000 Coins Pack",
-      "type" : "Consumable"
+      "productID": "coins_pack_3000",
+      "referenceName": "3,000 Coins Pack",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "10000002",
-      "localizations" : [
+      "displayPrice": "22.99",
+      "familyShareable": false,
+      "internalID": "10000002",
+      "localizations": [
         {
-          "description" : "Popular Pack with 5,000 Coins",
-          "displayName" : "Popular Pack (5,000 Coins)",
-          "locale" : "en_US"
+          "description": "Popular Pack with 5,000 Coins",
+          "displayName": "Popular Pack (5,000 Coins)",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "coins_pack_5000",
-      "referenceName" : "5,000 Coins Pack",
-      "type" : "Consumable"
+      "productID": "coins_pack_5000",
+      "referenceName": "5,000 Coins Pack",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "3.99",
-      "familyShareable" : false,
-      "internalID" : "10000003",
-      "localizations" : [
+      "displayPrice": "45.99",
+      "familyShareable": false,
+      "internalID": "10000003",
+      "localizations": [
         {
-          "description" : "Best Value Pack with 15,000 Coins",
-          "displayName" : "Best Value (15,000 Coins)",
-          "locale" : "en_US"
+          "description": "Best Value Pack with 15,000 Coins",
+          "displayName": "Best Value (15,000 Coins)",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "coins_pack_15000",
-      "referenceName" : "15,000 Coins Pack",
-      "type" : "Consumable"
+      "productID": "coins_pack_15000",
+      "referenceName": "15,000 Coins Pack",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "1.99",
-      "familyShareable" : false,
-      "internalID" : "10000004",
-      "localizations" : [
+      "displayPrice": "28.99",
+      "familyShareable": false,
+      "internalID": "10000004",
+      "localizations": [
         {
-          "description" : "Support indie developer with a virtual coffee",
-          "displayName" : "Buy Me a Coffee",
-          "locale" : "en_US"
+          "description": "Support indie developer with a virtual coffee",
+          "displayName": "Buy Me a Coffee",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "buy_me_coffee",
-      "referenceName" : "Buy Me a Coffee",
-      "type" : "Consumable"
+      "productID": "buy_me_coffee",
+      "referenceName": "Buy Me a Coffee",
+      "type": "Consumable"
     },
     {
-      "displayPrice" : "2.99",
-      "familyShareable" : true,
-      "internalID" : "10000005",
-      "localizations" : [
+      "displayPrice": "56.99",
+      "familyShareable": true,
+      "internalID": "10000005",
+      "localizations": [
         {
-          "description" : "Permanently remove all banner and interstitial ads",
-          "displayName" : "Remove Ads",
-          "locale" : "en_US"
+          "description": "Permanently remove all banner and interstitial ads",
+          "displayName": "Remove Ads",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "remove_ads",
-      "referenceName" : "Remove Ads",
-      "type" : "NonConsumable"
+      "productID": "remove_ads",
+      "referenceName": "Remove Ads",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : true,
-      "internalID" : "10000006",
-      "localizations" : [
+      "displayPrice": "14.99",
+      "familyShareable": true,
+      "internalID": "10000006",
+      "localizations": [
         {
-          "description" : "Unlock the cyber neon glowing board theme",
-          "displayName" : "Neon Cyber Theme",
-          "locale" : "en_US"
+          "description": "Unlock the cyber neon glowing board theme",
+          "displayName": "Neon Cyber Theme",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "theme_neon",
-      "referenceName" : "Neon Theme",
-      "type" : "NonConsumable"
+      "productID": "theme_neon",
+      "referenceName": "Neon Theme",
+      "type": "NonConsumable"
     },
     {
-      "displayPrice" : "0.99",
-      "familyShareable" : true,
-      "internalID" : "10000007",
-      "localizations" : [
+      "displayPrice": "14.99",
+      "familyShareable": true,
+      "internalID": "10000007",
+      "localizations": [
         {
-          "description" : "Unlock the organic handcrafted wood board theme",
-          "displayName" : "Classic Wood Theme",
-          "locale" : "en_US"
+          "description": "Unlock the organic handcrafted wood board theme",
+          "displayName": "Classic Wood Theme",
+          "locale": "en_ZA"
         }
       ],
-      "productID" : "theme_wood",
-      "referenceName" : "Wood Theme",
-      "type" : "NonConsumable"
+      "productID": "theme_wood",
+      "referenceName": "Wood Theme",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_ZA",
+    "_storefront": "ZAF",
+    "_storeKitErrors": [
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Load Products"
+        "current": null,
+        "enabled": false,
+        "name": "Load Products"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Purchase"
+        "current": null,
+        "enabled": false,
+        "name": "Purchase"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Verification"
+        "current": null,
+        "enabled": false,
+        "name": "Verification"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "App Store Sync"
+        "current": null,
+        "enabled": false,
+        "name": "App Store Sync"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Subscription Status"
+        "current": null,
+        "enabled": false,
+        "name": "Subscription Status"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "App Transaction"
+        "current": null,
+        "enabled": false,
+        "name": "App Transaction"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Manage Subscriptions Sheet"
+        "current": null,
+        "enabled": false,
+        "name": "Manage Subscriptions Sheet"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Refund Request Sheet"
+        "current": null,
+        "enabled": false,
+        "name": "Refund Request Sheet"
       },
       {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Offer Code Redeem Sheet"
+        "current": null,
+        "enabled": false,
+        "name": "Offer Code Redeem Sheet"
       }
     ]
   },
-  "subscriptionGroups" : [
+  "subscriptionGroups": [
     {
-      "id" : "21400001",
-      "localizations" : [
+      "id": "21400001",
+      "localizations": [
         {
-          "description" : "Offline Pass Subscriptions",
-          "displayName" : "Block Rush Pass",
-          "locale" : "en_US"
+          "description": "Offline Pass Subscriptions",
+          "displayName": "Block Rush Pass",
+          "locale": "en_US"
         }
       ],
-      "name" : "Block Rush Pass",
-      "subscriptions" : [
+      "name": "Block Rush Pass",
+      "subscriptions": [
         {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "1.49",
-          "familyShareable" : true,
-          "groupNumber" : 1,
-          "internalID" : "21400002",
-          "introductoryOffer" : null,
-          "localizations" : [
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.99",
+          "familyShareable": true,
+          "groupNumber": 1,
+          "internalID": "21400002",
+          "introductoryOffer": null,
+          "localizations": [
             {
-              "description" : "Play anytime offline without internet and ad-free",
-              "displayName" : "Offline Mode Subscription",
-              "locale" : "en_US"
+              "description": "Play anytime offline without internet and ad-free",
+              "displayName": "Offline Mode Subscription",
+              "locale": "en_ZA"
             }
           ],
-          "productID" : "sub_offline_mode",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Offline Mode Monthly",
-          "subscriptionGroupID" : "21400001",
-          "type" : "RecurringSubscription"
+          "productID": "sub_offline_mode",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Offline Mode Monthly",
+          "subscriptionGroupID": "21400001",
+          "type": "RecurringSubscription"
         }
       ]
     }
   ],
-  "version" : {
-    "major" : 3,
-    "minor" : 0
+  "version": {
+    "major": 3,
+    "minor": 0
   }
 }
-

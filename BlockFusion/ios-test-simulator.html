@@ -313,7 +313,7 @@
             <div class="storekit-modal" id="storekit-sheet">
                 <div class="storekit-apple-logo"> StoreKit 2</div>
                 <div class="storekit-product-title" id="sk-title">Item Name</div>
-                <div class="storekit-product-price" id="sk-price">$0.99</div>
+                <div class="storekit-product-price" id="sk-price">R 14.99</div>
                 <div style="font-size: 12px; color: #94a3b8;" id="sk-desc">Double click side button to confirm In-App Purchase</div>
                 <div class="storekit-actions">
                     <button class="btn-sk btn-sk-cancel" onclick="cancelStoreKitPurchase()">Cancel</button>
@@ -399,14 +399,14 @@
 
     <script>
         const PRICES = {
-            'coins_pack_3000': '$0.99',
-            'coins_pack_5000': '$1.99',
-            'coins_pack_15000': '$3.99',
-            'remove_ads': '$2.99',
-            'theme_neon': '$0.99',
-            'theme_wood': '$0.99',
-            'buy_me_coffee': '$1.99',
-            'sub_offline_mode': '$1.49'
+            'coins_pack_3000': 'R 14.99',
+            'coins_pack_5000': 'R 22.99',
+            'coins_pack_15000': 'R 45.99',
+            'remove_ads': 'R 56.99',
+            'theme_neon': 'R 14.99',
+            'theme_wood': 'R 14.99',
+            'buy_me_coffee': 'R 28.99',
+            'sub_offline_mode': 'R 19.99/mo'
         };
 
         const PRODUCTS_INFO = {
@@ -556,7 +556,7 @@
                     vibrate: () => pulseHaptic(),
                     exitApp: () => log('App', 'bridge', 'Exit app called'),
                     openStoreReview: () => win.webkit.messageHandlers.appBridge.postMessage({ action: 'openStoreReview' }),
-                    getDeviceInfo: () => JSON.stringify({ platform: 'ios', model: 'iPhone 16 Pro', osVersion: '18.0' }),
+                    getDeviceInfo: () => JSON.stringify({ platform: 'ios', model: 'iPhone 16 Pro', os: 'iOS', osVersion: '18.0', platformName: 'Apple iOS (App Store)', isIos: true, clientType: 'ios_native' }),
                     getPlatform: () => 'ios',
                     getFlavor: () => 'appstore',
                     isDebug: () => false,
@@ -734,7 +734,34 @@
         function closeSimAd() {
             document.getElementById('ad-overlay').classList.remove('active');
         }
-    </script>
+    
+        let currentVariant = 'qa';
+        function toggleVariant() {
+            currentVariant = currentVariant === 'qa' ? 'prod' : 'qa';
+            const pill = document.getElementById('variant-pill');
+            if (currentVariant === 'qa') {
+                pill.style.background = 'rgba(245,158,11,0.2)';
+                pill.style.borderColor = 'rgba(245,158,11,0.5)';
+                pill.style.color = '#f59e0b';
+                pill.textContent = '🎯 Variant: QA';
+                log('System', 'sys', 'Switched to QA Variant (Test AdMob IDs, Sandbox StoreKit)');
+            } else {
+                pill.style.background = 'rgba(34,197,94,0.2)';
+                pill.style.borderColor = 'rgba(34,197,94,0.5)';
+                pill.style.color = '#22c55e';
+                pill.textContent = '🚀 Variant: PROD';
+                log('System', 'sys', 'Switched to PROD Variant (Production AdMob IDs, Live StoreKit)');
+            }
+            const iframe = document.getElementById('game-frame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.BUILD_VARIANT = currentVariant;
+                if (iframe.contentWindow.AdService) {
+                    iframe.contentWindow.AdService.updateAdsStatus();
+                }
+            }
+        }
+
+</script>
 </body>
 </html>
 

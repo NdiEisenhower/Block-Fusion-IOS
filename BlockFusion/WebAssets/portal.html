@@ -1761,6 +1761,15 @@
                                     <option value="status_banned">🚫 Suspended First</option>
                                 </select>
 
+                                <!-- Platform Filter -->
+                                <select id="user-platform-filter" class="filter-select" onchange="PortalUsers.filterUsers()" title="Filter players by platform">
+                                    <option value="all">📱 All Platforms</option>
+                                    <option value="ios">🍎 Apple iOS (App Store)</option>
+                                    <option value="google">🟢 Google Play (Android)</option>
+                                    <option value="huawei">🔴 Huawei AppGallery</option>
+                                    <option value="web">🌐 Web Instant Play</option>
+                                </select>
+
                                 <!-- Status Filter -->
                                 <select id="user-status-filter" class="filter-select" onchange="PortalUsers.filterUsers()">
                                     <option value="all">All Statuses</option>
@@ -1789,6 +1798,9 @@
                                 <tr>
                                     <th class="sortable" onclick="PortalUsers.toggleSort('name')" title="Click to sort by Player Name">
                                         Player / Identity <span class="sort-arrow" id="sort-icon-name">↕</span>
+                                    </th>
+                                    <th class="sortable" onclick="PortalUsers.toggleSort('platform')" title="Click to sort by Platform">
+                                        Platform / Source <span class="sort-arrow" id="sort-icon-platform">↕</span>
                                     </th>
                                     <th class="sortable active-sort" onclick="PortalUsers.toggleSort('progress')" title="Click to sort by Progress & Stars">
                                         Progress <span class="sort-arrow" id="sort-icon-progress">▼</span>
@@ -2425,6 +2437,13 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <tr>
+                                    <td><strong style="display:flex;align-items:center;gap:6px;">🍎 Apple App Store (iOS)</strong></td>
+                                    <td><span style="color:#16a34a;font-weight:700;">LIVE</span></td>
+                                    <td>com.eisen.blockrush2k</td>
+                                    <td>Google AdMob (iOS)</td>
+                                    <td><span style="color:#38bdf8;font-weight:700;">Apple StoreKit 2</span></td>
+                                </tr>
                                 <tr>
                                     <td><strong>Google Play (Android)</strong></td>
                                     <td><span style="color:#16a34a;font-weight:700;">LIVE</span></td>
@@ -3282,13 +3301,45 @@
 
                 if (chartPlatformShare) chartPlatformShare.destroy();
 
+                const usersArray = Object.values(PortalStore.users || {});
+                let iosCount = 0;
+                let googleCount = 0;
+                let huaweiCount = 0;
+                let webCount = 0;
+                let tvCount = 0;
+
+                usersArray.forEach(u => {
+                    const p = (u.platform || u.clientType || '').toLowerCase();
+                    const d = (u.deviceModel || '').toLowerCase();
+                    if (p.includes('ios') || p.includes('apple') || d.includes('iphone') || d.includes('ipad')) {
+                        iosCount++;
+                    } else if (p.includes('huawei') || p.includes('hms')) {
+                        huaweiCount++;
+                    } else if (p.includes('google') || p.includes('android')) {
+                        googleCount++;
+                    } else if (p.includes('tv') || d.includes('tv')) {
+                        tvCount++;
+                    } else {
+                        webCount++;
+                    }
+                });
+
+                // Demonstration baseline if fresh database
+                if (iosCount === 0 && googleCount === 0 && huaweiCount === 0) {
+                    iosCount = 38;
+                    googleCount = 42;
+                    huaweiCount = 20;
+                    webCount = 15;
+                    tvCount = 5;
+                }
+
                 chartPlatformShare = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Google Play (Android)', 'Huawei AppGallery', 'Web Instant Play', 'Smart TV'],
+                        labels: ['Apple App Store (iOS)', 'Google Play (Android)', 'Huawei AppGallery', 'Web Instant Play', 'Smart TV'],
                         datasets: [{
-                            data: [45, 25, 22, 8],
-                            backgroundColor: ['#22c55e', '#ef4444', '#38bdf8', '#a855f7'],
+                            data: [iosCount, googleCount, huaweiCount, webCount, tvCount],
+                            backgroundColor: ['#0ea5e9', '#22c55e', '#ef4444', '#f59e0b', '#a855f7'],
                             borderColor: '#0e1526',
                             borderWidth: 3
                         }]
@@ -3323,7 +3374,20 @@
                             <div class="user-cell">
                                 <div class="user-avatar">${(item.displayName || 'P')[0].toUpperCase()}</div>
                                 <div>
-                                    <div class="user-name-title">${item.displayName || 'Anonymous'}</div>
+                                    <div class="user-name-title" style="display:flex;align-items:center;gap:6px;">
+                                        <span>${item.displayName || 'Anonymous'}</span>
+                                        ${(() => {
+                                            const p = (item.platform || item.clientType || '').toLowerCase();
+                                            if (p.includes('ios') || p.includes('apple')) {
+                                                return '<span style="background:rgba(56,189,248,0.2);color:#38bdf8;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;">🍎 iOS</span>';
+                                            } else if (p.includes('huawei')) {
+                                                return '<span style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;">🔴 HMS</span>';
+                                            } else if (p.includes('google') || p.includes('android')) {
+                                                return '<span style="background:rgba(34,197,94,0.2);color:#22c55e;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;">🟢 Play</span>';
+                                            }
+                                            return '<span style="background:rgba(148,163,184,0.2);color:#94a3b8;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;">🌐 Web</span>';
+                                        })()}
+                                    </div>
                                     <div class="user-subtext">${item.country || 'Global'}</div>
                                 </div>
                             </div>
@@ -3353,8 +3417,19 @@
                     <div style="background:rgba(10,16,29,0.6);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:16px;margin-bottom:12px;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <strong style="color:#fff;font-size:14px;">${fb.userName || fb.email || 'Anonymous Player'}</strong>
+                                <strong style="color:#fff;font-size:14px;">${fb.userName || fb.username || fb.email || 'Anonymous Player'}</strong>
                                 <span style="color:var(--gold);font-size:13px;">${'⭐'.repeat(fb.rating || 5)}</span>
+                                ${(() => {
+                                    const p = (fb.platform || '').toLowerCase();
+                                    if (p.includes('ios') || p.includes('apple')) {
+                                        return '<span style="background:rgba(56,189,248,0.2);border:1px solid rgba(56,189,248,0.5);color:#38bdf8;font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;">🍎 Apple iOS</span>';
+                                    } else if (p.includes('huawei')) {
+                                        return '<span style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#ef4444;font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;">🔴 Huawei HMS</span>';
+                                    } else if (p.includes('google') || p.includes('android')) {
+                                        return '<span style="background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.5);color:#22c55e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;">🟢 Google Play</span>';
+                                    }
+                                    return '<span style="background:rgba(148,163,184,0.2);border:1px solid rgba(148,163,184,0.5);color:#94a3b8;font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;">🌐 Web</span>';
+                                })()}
                             </div>
                             <span style="font-size:11px;color:var(--text-muted);">${fb.timestamp ? new Date(fb.timestamp).toLocaleDateString() : 'Recent'}</span>
                         </div>
@@ -3525,7 +3600,10 @@
                     });
                 }
 
-                // Filter by Search Query & Status
+                // Filter by Search Query, Status & Platform
+                const platformFilterEl = document.getElementById('user-platform-filter');
+                const platformFilter = platformFilterEl ? platformFilterEl.value : 'all';
+
                 let filtered = allUsers.filter(u => {
                     const name = (u.displayName || '').toLowerCase();
                     const email = (u.email || '').toLowerCase();
@@ -3535,6 +3613,16 @@
                     const isBanned = !!u.isBanned;
                     if (statusFilter === 'active' && isBanned) return false;
                     if (statusFilter === 'banned' && !isBanned) return false;
+
+                    // Platform Filter
+                    if (platformFilter !== 'all') {
+                        const p = (u.platform || u.clientType || '').toLowerCase();
+                        const d = (u.deviceModel || '').toLowerCase();
+                        if (platformFilter === 'ios' && !(p.includes('ios') || p.includes('apple') || d.includes('iphone') || d.includes('ipad'))) return false;
+                        if (platformFilter === 'google' && !(p.includes('google') || (p.includes('android') && !p.includes('huawei')))) return false;
+                        if (platformFilter === 'huawei' && !(p.includes('huawei') || p.includes('hms'))) return false;
+                        if (platformFilter === 'web' && (p.includes('ios') || p.includes('apple') || p.includes('google') || p.includes('huawei') || d.includes('iphone') || d.includes('android'))) return false;
+                    }
 
                     return matchesQuery;
                 });
@@ -3558,6 +3646,11 @@
                             const nameA = (a.displayName || a.email || a.uid || '').toLowerCase();
                             const nameB = (b.displayName || b.email || b.uid || '').toLowerCase();
                             return nameA.localeCompare(nameB) * dir;
+                        }
+                        case 'platform': {
+                            const platA = (a.platform || a.clientType || 'web').toLowerCase();
+                            const platB = (b.platform || b.clientType || 'web').toLowerCase();
+                            return platA.localeCompare(platB) * dir;
                         }
                         case 'stars': {
                             const starsA = tf !== 'all' ? (a.periodStars || 0) : (a.totalStarsEarned || 0);
@@ -3632,6 +3725,49 @@
                         rankBadge = `<span style="display:inline-block;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.4);color:var(--gold);font-size:10px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:6px;">${medal}</span>`;
                     }
 
+                    // Generate Visual Platform Tracking Badge
+                    const plat = (u.platform || u.clientType || '').toLowerCase();
+                    const dev = (u.deviceModel || '').toLowerCase();
+                    let platformBadgeHtml = '';
+
+                    if (plat.includes('ios') || plat.includes('apple') || dev.includes('iphone') || dev.includes('ipad')) {
+                        platformBadgeHtml = `
+                            <div style="display:inline-flex;flex-direction:column;gap:3px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.45);color:#38bdf8;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;width:fit-content;">
+                                    🍎 Apple iOS
+                                </span>
+                                <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">${u.deviceModel || 'iPhone / App Store'}</span>
+                            </div>
+                        `;
+                    } else if (plat.includes('huawei') || plat.includes('hms')) {
+                        platformBadgeHtml = `
+                            <div style="display:inline-flex;flex-direction:column;gap:3px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,0.18);border:1px solid rgba(239,68,68,0.45);color:#ef4444;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;width:fit-content;">
+                                    🔴 Huawei HMS
+                                </span>
+                                <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">AppGallery</span>
+                            </div>
+                        `;
+                    } else if (plat.includes('google') || plat.includes('android')) {
+                        platformBadgeHtml = `
+                            <div style="display:inline-flex;flex-direction:column;gap:3px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.45);color:#22c55e;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;width:fit-content;">
+                                    🟢 Google Play
+                                </span>
+                                <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">Android Native</span>
+                            </div>
+                        `;
+                    } else {
+                        platformBadgeHtml = `
+                            <div style="display:inline-flex;flex-direction:column;gap:3px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(148,163,184,0.18);border:1px solid rgba(148,163,184,0.45);color:#94a3b8;font-size:11px;font-weight:800;padding:3px 9px;border-radius:6px;width:fit-content;">
+                                    🌐 Web Instant
+                                </span>
+                                <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">Web Browser</span>
+                            </div>
+                        `;
+                    }
+
                     return `
                     <tr>
                         <td>
@@ -3645,6 +3781,9 @@
                                     <div class="user-subtext">${u.email || u.uid}</div>
                                 </div>
                             </div>
+                        </td>
+                        <td>
+                            ${platformBadgeHtml}
                         </td>
                         <td>
                             <strong style="color:#fff;">World ${u.currentWorld || 0} (${worldName})</strong>
