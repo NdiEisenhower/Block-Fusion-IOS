@@ -127,7 +127,7 @@ enum NativeBridgeScript {
                 return 'appstore';
             },
             isDebug: function() {
-                return false;
+                return window.BUILD_VARIANT === 'qa';
             },
             getEnvironment: function() {
                 return 'ios';
