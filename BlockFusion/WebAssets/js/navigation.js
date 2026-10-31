@@ -386,7 +386,7 @@ class Navigation {
                 : [];
             const isMultiLangEnabled = (typeof CONFIG !== 'undefined' && CONFIG.ENABLE_MULTI_LANGUAGE !== undefined)
                 ? !!CONFIG.ENABLE_MULTI_LANGUAGE
-                : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : true);
+                : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : false);
 
             // Hide the entire language section if master switch is OFF or if only English is active
             if (!isMultiLangEnabled || availableLangs.length <= 1) {

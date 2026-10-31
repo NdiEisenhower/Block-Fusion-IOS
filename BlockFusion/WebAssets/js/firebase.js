@@ -336,19 +336,75 @@ class FirebaseService {
                 Android.setLandscapeEnabled(!!gen.landscapeEnabled);
             }
 
-            // Maintenance mode
+            // Maintenance mode (per-platform selector)
             if (gen.maintenanceMode) {
-                const msg = gen.maintenanceMessage || 'Block Rush 2K is undergoing temporary maintenance. Please check back shortly!';
-                if (typeof PopupManager !== 'undefined' && PopupManager.show) {
-                    PopupManager.show({
-                        icon: '🚧',
-                        title: 'System Maintenance',
-                        subtitle: 'Scheduled Service',
-                        customContent: `<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">${msg}</div>`,
-                        showConfirm: false,
-                        showCancel: false,
-                        showClose: false
-                    });
+                const currentPlatform = this.getDetectedPlatform();
+                const targetPlatforms = gen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
+                
+                // Active if the current platform is specifically targeted
+                const isUnderMaintenance = targetPlatforms[currentPlatform] === true || (targetPlatforms.all && targetPlatforms[currentPlatform] !== false);
+
+                if (isUnderMaintenance) {
+                    const msg = gen.maintenanceMessage || 'Block Rush 2K is undergoing temporary maintenance. Please check back shortly!';
+                    const platformLabel = this.getPlatformLabel();
+                    if (typeof PopupManager !== 'undefined' && PopupManager.show) {
+                        PopupManager.show({
+                            icon: '🚧',
+                            title: 'Under Maintenance',
+                            subtitle: `${platformLabel} Service Update`,
+                            customContent: `
+                                <div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                                    <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px;margin-bottom:12px;color:#fbbf24;font-size:13px;font-weight:600;">
+                                        🛠️ Server & Platform Updates In Progress
+                                    </div>
+                                    <p style="margin:0 0 12px 0;">${msg}</p>
+                                    <div style="font-size:11px;color:#94a3b8;">Our team is working on updates. Tap below to check status.</div>
+                                </div>
+                            `,
+                            showConfirm: true,
+                            showCancel: false,
+                            showClose: false,
+                            confirmText: '🔄 Refresh & Check Status',
+                            confirmType: 'gold',
+                            onConfirm: async () => {
+                                if (typeof FirebaseService !== 'undefined') {
+                                    const fresh = await FirebaseService.fetchRemoteConfig();
+                                    const freshGen = (fresh && fresh.general) ? fresh.general : {};
+                                    const freshPlatforms = freshGen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
+                                    const stillMaintained = freshGen.maintenanceMode && (freshPlatforms[currentPlatform] === true || (freshPlatforms.all && freshPlatforms[currentPlatform] !== false));
+                                    
+                                    if (!stillMaintained) {
+                                        if (PopupManager.close) PopupManager.close('confirm');
+                                        window.location.reload();
+                                    } else {
+                                        setTimeout(() => FirebaseService.applyRemoteConfig(fresh || config), 300);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    // Platform not in maintenance -> dismiss modal if open
+                    if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+                        const overlay = document.getElementById('popup-overlay');
+                        if (overlay && overlay.classList.contains('active')) {
+                            const titleEl = overlay.querySelector('.popup-title');
+                            if (titleEl && titleEl.textContent.includes('Maintenance')) {
+                                PopupManager.close('cancel');
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Maintenance disabled globally -> dismiss modal if open
+                if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+                    const overlay = document.getElementById('popup-overlay');
+                    if (overlay && overlay.classList.contains('active')) {
+                        const titleEl = overlay.querySelector('.popup-title');
+                        if (titleEl && titleEl.textContent.includes('Maintenance')) {
+                            PopupManager.close('cancel');
+                        }
+                    }
                 }
             }
 

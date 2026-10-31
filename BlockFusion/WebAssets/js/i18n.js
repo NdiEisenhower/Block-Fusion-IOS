@@ -2,13 +2,13 @@
 // Supports English (en), TshiVenda (ve), and isiZulu (zu) with dynamic extensibility
 
 class I18N {
-    static enabled = true;
+    static enabled = false;
     static currentLang = 'en';
 
     static languages = [
         { code: 'en', name: 'English', flag: '🇬🇧', enabled: true },
-        { code: 've', name: 'TshiVenda', flag: '🇿🇦', enabled: true },
-        { code: 'zu', name: 'isiZulu', flag: '🇿🇦', enabled: true }
+        { code: 've', name: 'TshiVenda', flag: '🇿🇦', enabled: false },
+        { code: 'zu', name: 'isiZulu', flag: '🇿🇦', enabled: false }
     ];
 
     static translations = {
@@ -415,7 +415,7 @@ class I18N {
             return [{ code: 'en', name: 'English', flag: '🇬🇧', enabled: true }];
         }
         const list = Array.isArray(this.languages) ? this.languages : [];
-        const active = list.filter(l => l && l.enabled !== false);
+        const active = list.filter(l => l && l.enabled !== false && l.enabled !== 'false' && l.enabled !== 0 && l.enabled !== '0');
         // Guarantee English is always present as base fallback
         if (!active.some(l => l.code === 'en')) {
             const enObj = list.find(l => l.code === 'en') || { code: 'en', name: 'English', flag: '🇬🇧', enabled: true };
@@ -430,7 +430,7 @@ class I18N {
         if (!isMasterEnabled) return false;
         const list = Array.isArray(this.languages) ? this.languages : [];
         const found = list.find(l => l.code === langCode);
-        return !found || found.enabled !== false;
+        return !!(found && found.enabled !== false && found.enabled !== 'false' && found.enabled !== 0 && found.enabled !== '0');
     }
 
     static init() {
