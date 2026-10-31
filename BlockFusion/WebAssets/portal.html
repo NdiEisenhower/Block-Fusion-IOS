@@ -1944,7 +1944,7 @@
                                     <p>Temporarily locks access to web and online sync</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" id="cfg-maintenance-toggle">
+                                    <input type="checkbox" id="cfg-maintenance-toggle" onchange="PortalConfig.onMaintenanceToggleChange(this.checked)">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -2109,7 +2109,7 @@
                                             <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
                                         </div>
                                         <label class="switch">
-                                            <input type="checkbox" id="rc-google-force-update">
+                                            <input type="checkbox" id="rc-google-force-update" onchange="PortalConfig.onForceUpdateToggleChange('google', this.checked)">
                                             <span class="slider"></span>
                                         </label>
                                     </div>
@@ -2183,7 +2183,7 @@
                                             <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
                                         </div>
                                         <label class="switch">
-                                            <input type="checkbox" id="rc-huawei-force-update">
+                                            <input type="checkbox" id="rc-huawei-force-update" onchange="PortalConfig.onForceUpdateToggleChange('huawei', this.checked)">
                                             <span class="slider"></span>
                                         </label>
                                     </div>
@@ -2257,7 +2257,7 @@
                                             <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
                                         </div>
                                         <label class="switch">
-                                            <input type="checkbox" id="rc-ios-force-update">
+                                            <input type="checkbox" id="rc-ios-force-update" onchange="PortalConfig.onForceUpdateToggleChange('ios', this.checked)">
                                             <span class="slider"></span>
                                         </label>
                                     </div>
@@ -4025,6 +4025,34 @@
         // LIVE GAME SETTINGS & ADS CONTROLLER
         // ========================================================
         const PortalConfig = {
+            async onMaintenanceToggleChange(isEnabled) {
+                if (!db) return;
+                try {
+                    const msg = (document.getElementById('cfg-maintenance-msg').value || '').trim() || 'Block Rush 2K is undergoing scheduled maintenance. Please check back shortly!';
+                    await db.ref().update({
+                        'remote_config/general/maintenanceMode': !!isEnabled,
+                        'remote_config/general/maintenanceMessage': msg,
+                        'remote_config/general/updatedAt': firebase.database.ServerValue.TIMESTAMP
+                    });
+                    showToast(`Maintenance mode ${isEnabled ? 'ENABLED 🚧' : 'DISABLED ✅'} live in game!`, isEnabled ? '🚧' : '✅');
+                } catch (e) {
+                    console.warn('Failed to auto-save maintenance toggle:', e);
+                }
+            },
+
+            async onForceUpdateToggleChange(platform, isEnabled) {
+                if (!db) return;
+                try {
+                    const updates = {};
+                    updates[`remote_config/${platform}/forceUpdate`] = !!isEnabled;
+                    updates[`remote_config/${platform}/updatedAt`] = firebase.database.ServerValue.TIMESTAMP;
+                    await db.ref().update(updates);
+                    showToast(`Force Update for ${platform.toUpperCase()} ${isEnabled ? 'ACTIVATED 📦' : 'DEACTIVATED 🔓'}!`, isEnabled ? '📦' : '🔓');
+                } catch (e) {
+                    console.warn('Failed to auto-save force update toggle:', e);
+                }
+            },
+
             async onLanguageToggleChange(isEnabled) {
                 if (!db) return;
                 try {

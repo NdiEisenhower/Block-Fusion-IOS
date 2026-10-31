@@ -567,12 +567,9 @@ class Navigation {
         <button class="btn btn-outline btn-block" style="color:#e94560;border-color:#e94560;margin-bottom:16px;"
             onclick="App.resetAllProgress()">🗑️ Reset All Progress</button>
 
-        <div style="text-align:center;padding:12px 0 24px;border-top:1px solid rgba(255,255,255,0.06);margin-top:10px;">
-            <div style="font-size:12px;font-weight:700;color:${isIos ? '#38bdf8' : '#94a3b8'};display:inline-flex;align-items:center;gap:5px;">
-                ${isIos ? '🍎 Block Rush 2K for Apple iOS' : '🎮 Block Rush 2K'}
-            </div>
-            <div style="font-size:10px;color:var(--text-muted);margin-top:3px;font-family:'JetBrains Mono',monospace;">
-                Version 1.0.0 (Build 1) &bull; Platform: ${isIos ? 'iOS Native (App Store)' : detectedPlat.toUpperCase()}
+        <div style="text-align:center;padding:16px 0 24px;border-top:1px solid rgba(255,255,255,0.06);margin-top:10px;">
+            <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;">
+                Version 1.0.0
             </div>
         </div>`;
 

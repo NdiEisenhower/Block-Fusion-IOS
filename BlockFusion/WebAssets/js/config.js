@@ -9,6 +9,10 @@ const CONFIG = {
         ios: false      // Ads enabled on Apple iOS
     },
 
+    // App Versioning
+    APP_VERSION: '1.0.0',
+    APP_BUILD: 1,
+
     // Show Ads related UI elements ('auto' evaluates per platform, or explicitly true/false)
     SHOW_ADS_UI: 'auto',
     ENABLE_MULTI_LANGUAGE: false,

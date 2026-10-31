@@ -154,6 +154,7 @@ class PopupManager {
         content._onConfirm = onConfirm || null;
         content._onCancel = onCancel || null;
         content._checkboxChecked = checkbox?.checked || false;
+        content._dismissible = (options.dismissible !== undefined) ? options.dismissible : (showClose || showCancel);
 
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -1196,6 +1197,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlay) {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
+                const content = document.getElementById('popup-content');
+                if (content && content._dismissible === false) {
+                    return; // Unskippable system modal (Maintenance or Force Update)
+                }
                 PopupManager.close('cancel');
             }
         });

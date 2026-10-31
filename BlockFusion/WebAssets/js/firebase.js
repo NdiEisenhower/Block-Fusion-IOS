@@ -261,29 +261,8 @@ class FirebaseService {
                 window.Android.initAds(bId, iId, rId);
             }
 
-            // Force update modal for iOS
-            if (isIosPlatform && iosConfig.forceUpdate && iosConfig.versionCode) {
-                const currentIosVersionCode = 1;
-                if (currentIosVersionCode < (parseInt(iosConfig.versionCode) || 1)) {
-                    const storeUrl = iosConfig.storeUrl || 'https://apps.apple.com/app/id6470000000';
-                    if (typeof PopupManager !== 'undefined' && PopupManager.show) {
-                        PopupManager.show({
-                            icon: '🍎',
-                            title: 'Update Required',
-                            subtitle: `Version ${iosConfig.versionName || 'New'} Available`,
-                            customContent: `<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
-                                A new version of Block Rush 2K is available on the App Store with performance updates and new stages. Please update to continue!
-                            </div>`,
-                            confirmText: 'Update on App Store',
-                            showCancel: false,
-                            showClose: false,
-                            onConfirm: () => {
-                                window.location.href = storeUrl;
-                            }
-                        });
-                    }
-                }
-            }
+            // Universal Force Update check
+            FirebaseService.checkForceUpdate(config);
         }
 
         // 2. General, Geo-Locking & Native App Settings
@@ -308,8 +287,8 @@ class FirebaseService {
                 }
                 // If language picker modal is currently visible on screen, close it immediately!
                 if (!isLangOn && typeof PopupManager !== 'undefined') {
-                    const popupEl = document.getElementById('custom-popup-overlay');
-                    if (popupEl && popupEl.classList.contains('show')) {
+                    const popupEl = document.getElementById('popup-overlay');
+                    if (popupEl && popupEl.classList.contains('active')) {
                         const titleEl = popupEl.querySelector('.popup-title');
                         if (titleEl && titleEl.textContent && titleEl.textContent.includes('Language')) {
                             PopupManager.close('cancel');
@@ -336,13 +315,13 @@ class FirebaseService {
                 Android.setLandscapeEnabled(!!gen.landscapeEnabled);
             }
 
-            // Maintenance mode (per-platform selector)
+            // Maintenance mode (per-platform selector or global)
             if (gen.maintenanceMode) {
                 const currentPlatform = this.getDetectedPlatform();
-                const targetPlatforms = gen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
+                const targetPlatforms = gen.maintenancePlatforms || null;
                 
-                // Active if the current platform is specifically targeted
-                const isUnderMaintenance = targetPlatforms[currentPlatform] === true || (targetPlatforms.all && targetPlatforms[currentPlatform] !== false);
+                // Active if no platform restrictions are specified, or current platform is targeted
+                const isUnderMaintenance = !targetPlatforms || targetPlatforms[currentPlatform] === true || (targetPlatforms.all && targetPlatforms[currentPlatform] !== false);
 
                 if (isUnderMaintenance) {
                     const msg = gen.maintenanceMessage || 'Block Rush 2K is undergoing temporary maintenance. Please check back shortly!';
@@ -364,14 +343,15 @@ class FirebaseService {
                             showConfirm: true,
                             showCancel: false,
                             showClose: false,
+                            dismissible: false,
                             confirmText: '🔄 Refresh & Check Status',
                             confirmType: 'gold',
                             onConfirm: async () => {
                                 if (typeof FirebaseService !== 'undefined') {
                                     const fresh = await FirebaseService.fetchRemoteConfig();
                                     const freshGen = (fresh && fresh.general) ? fresh.general : {};
-                                    const freshPlatforms = freshGen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
-                                    const stillMaintained = freshGen.maintenanceMode && (freshPlatforms[currentPlatform] === true || (freshPlatforms.all && freshPlatforms[currentPlatform] !== false));
+                                    const freshPlatforms = freshGen.maintenancePlatforms || null;
+                                    const stillMaintained = freshGen.maintenanceMode && (!freshPlatforms || freshPlatforms[currentPlatform] === true || (freshPlatforms.all && freshPlatforms[currentPlatform] !== false));
                                     
                                     if (!stillMaintained) {
                                         if (PopupManager.close) PopupManager.close('confirm');
@@ -384,30 +364,11 @@ class FirebaseService {
                         });
                     }
                 } else {
-                    // Platform not in maintenance -> dismiss modal if open
-                    if (typeof PopupManager !== 'undefined' && PopupManager.close) {
-                        const overlay = document.getElementById('popup-overlay');
-                        if (overlay && overlay.classList.contains('active')) {
-                            const titleEl = overlay.querySelector('.popup-title');
-                            if (titleEl && titleEl.textContent.includes('Maintenance')) {
-                                PopupManager.close('cancel');
-                            }
-                        }
-                    }
+                    this.dismissMaintenanceModalIfOpen();
                 }
             } else {
-                // Maintenance disabled globally -> dismiss modal if open
-                if (typeof PopupManager !== 'undefined' && PopupManager.close) {
-                    const overlay = document.getElementById('popup-overlay');
-                    if (overlay && overlay.classList.contains('active')) {
-                        const titleEl = overlay.querySelector('.popup-title');
-                        if (titleEl && titleEl.textContent.includes('Maintenance')) {
-                            PopupManager.close('cancel');
-                        }
-                    }
-                }
+                this.dismissMaintenanceModalIfOpen();
             }
-
             // Global announcement banner
             if (gen.broadcastActive && gen.broadcastBanner) {
                 let existingBanner = document.getElementById('global-broadcast-banner');
@@ -436,6 +397,92 @@ class FirebaseService {
         if (config.offline && typeof CONFIG.OFFLINE === 'object') {
             if (config.offline.maxLevels) {
                 CONFIG.OFFLINE.MAX_LEVELS = config.offline.maxLevels;
+            }
+        }
+    }
+
+    // ===== SYSTEM-WIDE FORCE UPDATE CHECKER =====
+    static checkForceUpdate(config) {
+        if (!config) return false;
+
+        const currentPlatform = this.getDetectedPlatform();
+        let targetConfig = null;
+        let defaultStoreUrl = '';
+        let platformLabel = 'App';
+
+        if (currentPlatform === 'ios' && config.ios) {
+            targetConfig = config.ios;
+            defaultStoreUrl = 'https://apps.apple.com/app/id6470000000';
+            platformLabel = 'Apple App Store';
+        } else if (currentPlatform === 'google' && config.google) {
+            targetConfig = config.google;
+            defaultStoreUrl = 'https://play.google.com/store/apps/details?id=com.eisen.blockrush2k';
+            platformLabel = 'Google Play Store';
+        } else if (currentPlatform === 'huawei' && config.huawei) {
+            targetConfig = config.huawei;
+            defaultStoreUrl = 'https://appgallery.huawei.com/app/com.eisen.blockrush2k';
+            platformLabel = 'Huawei AppGallery';
+        }
+
+        if (!targetConfig) return false;
+
+        const currentBuild = (typeof CONFIG !== 'undefined' && CONFIG.APP_BUILD) ? CONFIG.APP_BUILD : 1;
+        const remoteVersionCode = parseInt(targetConfig.versionCode) || 1;
+        const isForceUpdateRequired = !!targetConfig.forceUpdate && (currentBuild < remoteVersionCode);
+
+        if (isForceUpdateRequired) {
+            const storeUrl = targetConfig.storeUrl || defaultStoreUrl;
+            const newVersionName = targetConfig.versionName || `Build ${remoteVersionCode}`;
+
+            if (typeof PopupManager !== 'undefined' && PopupManager.show) {
+                PopupManager.show({
+                    icon: currentPlatform === 'ios' ? '🍎' : '🚀',
+                    title: 'Update Required',
+                    subtitle: `Version ${newVersionName} Available`,
+                    customContent: `
+                        <div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                            <div style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:10px;margin-bottom:12px;color:#38bdf8;font-size:13px;font-weight:600;">
+                                📦 New Version Required
+                            </div>
+                            <p style="margin:0 0 10px 0;">A new version of Block Rush 2K is available on ${platformLabel}. Please update to continue playing.</p>
+                            <div style="font-size:11px;color:#94a3b8;">Current Build: ${currentBuild} &bull; Required Build: ${remoteVersionCode}</div>
+                        </div>
+                    `,
+                    confirmText: `Update on ${platformLabel}`,
+                    confirmType: 'primary',
+                    showConfirm: true,
+                    showCancel: false,
+                    showClose: false,
+                    dismissible: false,
+                    onConfirm: () => {
+                        window.location.href = storeUrl;
+                    }
+                });
+            }
+            return true;
+        } else {
+            // Dismiss force update popup if it was open and update is no longer required
+            if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+                const overlay = document.getElementById('popup-overlay');
+                if (overlay && overlay.classList.contains('active')) {
+                    const titleEl = overlay.querySelector('.popup-title');
+                    if (titleEl && titleEl.textContent && titleEl.textContent.includes('Update Required')) {
+                        PopupManager.close('cancel');
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    static dismissMaintenanceModalIfOpen() {
+        if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+            const overlay = document.getElementById('popup-overlay');
+            if (overlay && overlay.classList.contains('active')) {
+                const titleEl = overlay.querySelector('.popup-title');
+                if (titleEl && titleEl.textContent && titleEl.textContent.includes('Maintenance')) {
+                    PopupManager.close('cancel');
+                }
             }
         }
     }
