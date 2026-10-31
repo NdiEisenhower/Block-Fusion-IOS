@@ -374,19 +374,36 @@ class Navigation {
             </button>
         </div>
 
-        <h3 style="margin:10px 0 4px;color:var(--gold);">🌐 Language / Luambo / Ulimi</h3>
-        <div class="store-item" onclick="Navigation.showLanguagePickerModal()" style="cursor:pointer;">
-            <div class="item-icon" style="font-size:24px;">
-                ${(typeof I18N !== 'undefined' && I18N.languages && I18N.languages.find(l => l.code === I18N.currentLang)) ? (I18N.languages.find(l => l.code === I18N.currentLang).flag || '🌐') : '🌐'}
+        ${(() => {
+            const availableLangs = (typeof I18N !== 'undefined' && typeof I18N.getAvailableLanguages === 'function')
+                ? I18N.getAvailableLanguages()
+                : [];
+            const isMultiLangEnabled = (typeof CONFIG !== 'undefined' && CONFIG.ENABLE_MULTI_LANGUAGE !== undefined)
+                ? !!CONFIG.ENABLE_MULTI_LANGUAGE
+                : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : true);
+
+            // Hide the entire language section if master switch is OFF or if only English is active
+            if (!isMultiLangEnabled || availableLangs.length <= 1) {
+                return '';
+            }
+
+            const activeLangObj = availableLangs.find(l => l.code === I18N.currentLang) || availableLangs[0] || { name: 'English', code: 'en', flag: '🇬🇧' };
+            return `
+            <h3 style="margin:10px 0 4px;color:var(--gold);">🌐 Language / Luambo / Ulimi</h3>
+            <div class="store-item" onclick="Navigation.showLanguagePickerModal()" style="cursor:pointer;">
+                <div class="item-icon" style="font-size:24px;">
+                    ${activeLangObj.flag || '🌐'}
+                </div>
+                <div class="item-info">
+                    <div class="item-name">${activeLangObj.name} (${activeLangObj.code.toUpperCase()})</div>
+                    <div class="item-desc">Tap to change language</div>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); Navigation.showLanguagePickerModal();">
+                    <span>🌐</span> Change
+                </button>
             </div>
-            <div class="item-info">
-                <div class="item-name">${(typeof I18N !== 'undefined' && I18N.languages && I18N.languages.find(l => l.code === I18N.currentLang)) ? I18N.languages.find(l => l.code === I18N.currentLang).name : 'English'} (${((typeof I18N !== 'undefined') ? I18N.currentLang : 'en').toUpperCase()})</div>
-                <div class="item-desc">Tap to change language</div>
-            </div>
-            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); Navigation.showLanguagePickerModal();">
-                <span>🌐</span> Change
-            </button>
-        </div>
+            `;
+        })()}
         
         <h3 style="margin:10px 0 4px;color:var(--gold);">📖 Tutorial</h3>
         <div class="store-item">

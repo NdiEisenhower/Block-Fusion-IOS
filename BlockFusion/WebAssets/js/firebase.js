@@ -290,6 +290,23 @@ class FirebaseService {
         if (config.general) {
             const gen = config.general;
 
+            // Multi-Language master toggle from remote config
+            if (gen.enableMultiLanguage !== undefined) {
+                const isLangOn = !!gen.enableMultiLanguage;
+                if (typeof CONFIG !== 'undefined') {
+                    CONFIG.ENABLE_MULTI_LANGUAGE = isLangOn;
+                }
+                if (typeof I18N !== 'undefined') {
+                    I18N.enabled = isLangOn;
+                    if (!isLangOn && I18N.currentLang !== 'en') {
+                        I18N.setLanguage('en');
+                    }
+                }
+                if (typeof Navigation !== 'undefined' && document.getElementById('screen-settings')?.classList.contains('active')) {
+                    Navigation.renderSettings();
+                }
+            }
+
             // Geo-Locking Whitelist (Allowed Countries)
             if (gen.allowedCountries !== undefined && typeof Android !== 'undefined' && typeof Android.setAllowedCountries === 'function') {
                 Android.setAllowedCountries(gen.allowedCountries);

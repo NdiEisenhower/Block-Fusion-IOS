@@ -1549,8 +1549,8 @@
                     <span>Live Game & Ads</span>
                 </div>
                 <div class="nav-item" data-tab="remote-config">
-                    <span class="icon">🤖</span>
-                    <span>Google & Huawei Config</span>
+                    <span class="icon">📱</span>
+                    <span>Native Mobile Config</span>
                 </div>
                 <div class="nav-item" data-tab="i18n">
                     <span class="icon">🌐</span>
@@ -1929,6 +1929,17 @@
 
                             <div class="toggle-row">
                                 <div class="toggle-info">
+                                    <h4>Multi-Language Localization</h4>
+                                    <p>Show in-game language selector in Settings (English, TshiVenda, isiZulu)</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="cfg-language-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="toggle-row">
+                                <div class="toggle-info">
                                     <h4>Maintenance Mode</h4>
                                     <p>Temporarily locks access to web and online sync</p>
                                 </div>
@@ -2044,14 +2055,14 @@
                 </section>
 
                 <!-- ========================================================
-                     TAB 4: ANDROID (GOOGLE & HUAWEI) REMOTE CONFIG
+                     TAB 4: NATIVE MOBILE (GOOGLE PLAY, HUAWEI & APPLE IOS) REMOTE CONFIG
                      ======================================================== -->
                 <section class="tab-panel" id="panel-remote-config">
                     <div class="config-card">
                         <div class="config-card-header">
                             <div>
-                                <h3 class="chart-title">🤖 Native Mobile Remote Config (Google Play & Huawei HMS)</h3>
-                                <p class="chart-sub">Remote parameters dynamically fetched by APK builds on boot</p>
+                                <h3 class="chart-title">📱 Native Mobile Remote Config (Google Play, Huawei & iOS)</h3>
+                                <p class="chart-sub">Remote parameters dynamically fetched by native mobile builds (Android & iOS) on boot</p>
                             </div>
                             <div style="display: flex; gap: 10px;">
                                 <button class="btn-portal btn-sm btn-outline" onclick="PortalRemoteConfig.loadRemoteConfig()">
@@ -2065,180 +2076,229 @@
 
                         <div class="config-grid-3">
                             <!-- GOOGLE PLAY CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                                    <span style="font-size: 24px;">🟢</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 26px;">🟢</span>
                                     <div>
-                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Google Play (Android)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted);">Package: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Google Play (Android)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Package: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">AdMob App ID</label>
-                                    <input type="text" id="rc-google-app-id" class="input-field mono" value="ca-app-pub-4541991465223368~4111326402">
-                                </div>
+                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
+                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>📦</span>
+                                        <span>Version & Store Release</span>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Banner Ad Unit ID</label>
-                                    <input type="text" id="rc-google-banner-id" class="input-field mono" value="ca-app-pub-4541991465223368/5021200371">
-                                </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
+                                            <input type="text" id="rc-google-version-name" class="input-field mono" value="1.0.5" placeholder="1.0.0">
+                                        </div>
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
+                                            <input type="number" id="rc-google-version-code" class="input-field mono" value="21" placeholder="1">
+                                        </div>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Interstitial Ad Unit ID</label>
-                                    <input type="text" id="rc-google-interstitial-id" class="input-field mono" value="ca-app-pub-4541991465223368/6641883584">
-                                </div>
+                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
+                                        <div class="toggle-info">
+                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
+                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="rc-google-force-update">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Rewarded Ad Unit ID</label>
-                                    <input type="text" id="rc-google-rewarded-id" class="input-field mono" value="ca-app-pub-4541991465223368/3339070860">
-                                </div>
-
-                                <div class="config-grid-2" style="margin-bottom: 12px;">
                                     <div class="input-group">
-                                        <label class="input-label">Latest Version</label>
-                                        <input type="text" id="rc-google-version-name" class="input-field mono" value="1.0.5">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Store Listing URL</label>
+                                        <input type="text" id="rc-google-store-url" class="input-field" value="https://play.google.com/store/apps/details?id=com.eisen.blockrush2k">
                                     </div>
+                                </div>
+
+                                <!-- AD UNITS & MONETIZATION -->
+                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>💰</span>
+                                        <span>Ad Units & Monetization</span>
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AdMob App ID</label>
+                                        <input type="text" id="rc-google-app-id" class="input-field mono" value="ca-app-pub-4541991465223368~4111326402">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Banner Ad Unit ID</label>
+                                        <input type="text" id="rc-google-banner-id" class="input-field mono" value="ca-app-pub-4541991465223368/5021200371">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Interstitial Ad Unit ID</label>
+                                        <input type="text" id="rc-google-interstitial-id" class="input-field mono" value="ca-app-pub-4541991465223368/6641883584">
+                                    </div>
+
                                     <div class="input-group">
-                                        <label class="input-label">Version Code</label>
-                                        <input type="number" id="rc-google-version-code" class="input-field mono" value="21">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Rewarded Ad Unit ID</label>
+                                        <input type="text" id="rc-google-rewarded-id" class="input-field mono" value="ca-app-pub-4541991465223368/3339070860">
                                     </div>
-                                </div>
-
-                                <div class="toggle-row" style="margin-bottom: 12px;">
-                                    <div class="toggle-info">
-                                        <h4 style="font-size: 13px;">Force Update Required</h4>
-                                        <p style="font-size: 11px;">Lock outdated app versions</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="rc-google-force-update">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="input-group">
-                                    <label class="input-label">Store Listing URL</label>
-                                    <input type="text" id="rc-google-store-url" class="input-field" value="https://play.google.com/store/apps/details?id=com.eisen.blockrush2k">
                                 </div>
                             </div>
 
                             <!-- HUAWEI APPGALLERY CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                                    <span style="font-size: 24px;">🔴</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 26px;">🔴</span>
                                     <div>
-                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Huawei AppGallery (HMS)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted);">Package: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Huawei AppGallery (HMS)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Package: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Huawei App ID / Client ID</label>
-                                    <input type="text" id="rc-huawei-app-id" class="input-field mono" value="112344795">
-                                </div>
+                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
+                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>📦</span>
+                                        <span>Version & Store Release</span>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Huawei Banner Ad Unit ID</label>
-                                    <input type="text" id="rc-huawei-banner-id" class="input-field mono" value="testw6vs28auh3">
-                                </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
+                                            <input type="text" id="rc-huawei-version-name" class="input-field mono" value="1.0.5" placeholder="1.0.0">
+                                        </div>
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
+                                            <input type="number" id="rc-huawei-version-code" class="input-field mono" value="21" placeholder="1">
+                                        </div>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Huawei Interstitial Ad Unit ID</label>
-                                    <input type="text" id="rc-huawei-interstitial-id" class="input-field mono" value="testb406mwh7sp">
-                                </div>
+                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
+                                        <div class="toggle-info">
+                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
+                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="rc-huawei-force-update">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Huawei Rewarded Ad Unit ID</label>
-                                    <input type="text" id="rc-huawei-rewarded-id" class="input-field mono" value="testx990eyhrmw">
-                                </div>
-
-                                <div class="config-grid-2" style="margin-bottom: 12px;">
                                     <div class="input-group">
-                                        <label class="input-label">Latest Version</label>
-                                        <input type="text" id="rc-huawei-version-name" class="input-field mono" value="1.0.5">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AppGallery Store URL</label>
+                                        <input type="text" id="rc-huawei-store-url" class="input-field" value="https://appgallery.huawei.com/app/com.eisen.blockrush2k">
                                     </div>
+                                </div>
+
+                                <!-- AD UNITS & MONETIZATION -->
+                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>💰</span>
+                                        <span>Ad Units & Monetization</span>
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei App ID / Client ID</label>
+                                        <input type="text" id="rc-huawei-app-id" class="input-field mono" value="112344795">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Banner Ad Unit ID</label>
+                                        <input type="text" id="rc-huawei-banner-id" class="input-field mono" value="testw6vs28auh3">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Interstitial Ad Unit ID</label>
+                                        <input type="text" id="rc-huawei-interstitial-id" class="input-field mono" value="testb406mwh7sp">
+                                    </div>
+
                                     <div class="input-group">
-                                        <label class="input-label">Version Code</label>
-                                        <input type="number" id="rc-huawei-version-code" class="input-field mono" value="21">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Rewarded Ad Unit ID</label>
+                                        <input type="text" id="rc-huawei-rewarded-id" class="input-field mono" value="testx990eyhrmw">
                                     </div>
-                                </div>
-
-                                <div class="toggle-row" style="margin-bottom: 12px;">
-                                    <div class="toggle-info">
-                                        <h4 style="font-size: 13px;">Force Update Required</h4>
-                                        <p style="font-size: 11px;">Lock outdated app versions</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="rc-huawei-force-update">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="input-group">
-                                    <label class="input-label">AppGallery Store URL</label>
-                                    <input type="text" id="rc-huawei-store-url" class="input-field" value="https://appgallery.huawei.com/app/com.eisen.blockrush2k">
                                 </div>
                             </div>
 
                             <!-- APPLE APP STORE (iOS) CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                                    <span style="font-size: 24px;">🍎</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-size: 26px;">🍎</span>
                                     <div>
-                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Apple App Store (iOS)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted);">Bundle ID: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Apple App Store (iOS)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Bundle ID: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">AdMob iOS App ID</label>
-                                    <input type="text" id="rc-ios-app-id" class="input-field mono" value="ca-app-pub-4255859216659691~4111326402">
-                                </div>
+                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
+                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>📦</span>
+                                        <span>Version & Store Release</span>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Banner Ad Unit ID</label>
-                                    <input type="text" id="rc-ios-banner-id" class="input-field mono" value="ca-app-pub-4255859216659691/6387045959">
-                                </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
+                                            <input type="text" id="rc-ios-version-name" class="input-field mono" value="1.0.0" placeholder="1.0.0">
+                                        </div>
+                                        <div class="input-group">
+                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
+                                            <input type="number" id="rc-ios-version-code" class="input-field mono" value="1" placeholder="1">
+                                        </div>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Interstitial Ad Unit ID</label>
-                                    <input type="text" id="rc-ios-interstitial-id" class="input-field mono" value="ca-app-pub-4255859216659691/7221704767">
-                                </div>
+                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
+                                        <div class="toggle-info">
+                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
+                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="rc-ios-force-update">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
 
-                                <div class="input-group" style="margin-bottom: 12px;">
-                                    <label class="input-label">Rewarded Ad Unit ID</label>
-                                    <input type="text" id="rc-ios-rewarded-id" class="input-field mono" value="ca-app-pub-4255859216659691/3713704595">
-                                </div>
-
-                                <div class="config-grid-2" style="margin-bottom: 12px;">
                                     <div class="input-group">
-                                        <label class="input-label">Latest Version</label>
-                                        <input type="text" id="rc-ios-version-name" class="input-field mono" value="1.0.0">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">App Store URL</label>
+                                        <input type="text" id="rc-ios-store-url" class="input-field" value="https://apps.apple.com/app/id6470000000">
                                     </div>
+                                </div>
+
+                                <!-- AD UNITS & MONETIZATION -->
+                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                        <span>💰</span>
+                                        <span>Ad Units & Monetization</span>
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AdMob iOS App ID</label>
+                                        <input type="text" id="rc-ios-app-id" class="input-field mono" value="ca-app-pub-4255859216659691~4111326402">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Banner Ad Unit ID</label>
+                                        <input type="text" id="rc-ios-banner-id" class="input-field mono" value="ca-app-pub-4255859216659691/6387045959">
+                                    </div>
+
+                                    <div class="input-group" style="margin-bottom: 10px;">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Interstitial Ad Unit ID</label>
+                                        <input type="text" id="rc-ios-interstitial-id" class="input-field mono" value="ca-app-pub-4255859216659691/7221704767">
+                                    </div>
+
                                     <div class="input-group">
-                                        <label class="input-label">Build / Version Code</label>
-                                        <input type="number" id="rc-ios-version-code" class="input-field mono" value="1">
+                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Rewarded Ad Unit ID</label>
+                                        <input type="text" id="rc-ios-rewarded-id" class="input-field mono" value="ca-app-pub-4255859216659691/3713704595">
                                     </div>
-                                </div>
-
-                                <div class="toggle-row" style="margin-bottom: 12px;">
-                                    <div class="toggle-info">
-                                        <h4 style="font-size: 13px;">Force Update Required</h4>
-                                        <p style="font-size: 11px;">Lock outdated app versions</p>
-                                    </div>
-                                    <label class="switch">
-                                        <input type="checkbox" id="rc-ios-force-update">
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-
-                                <div class="input-group">
-                                    <label class="input-label">App Store URL</label>
-                                    <input type="text" id="rc-ios-store-url" class="input-field" value="https://apps.apple.com/app/id6470000000">
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- iKHOKHA PAYMENT GATEWAY CONFIG (WEB COMMERCE) -->
+                        <!-- iKHOKHA PAYMENT GATEWAY CONFIG (WEB COMMERCE) -->
                             <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 20px; grid-column: 1 / -1;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -3982,6 +4042,7 @@
                     document.getElementById('cfg-rewarded-coins').value = ads.rewardedAdCoins || 50;
 
                     const gen = cfg.general || {};
+                    document.getElementById('cfg-language-toggle').checked = gen.enableMultiLanguage !== undefined ? !!gen.enableMultiLanguage : true;
                     document.getElementById('cfg-maintenance-toggle').checked = !!gen.maintenanceMode;
                     document.getElementById('cfg-maintenance-msg').value = gen.maintenanceMessage || '';
                     document.getElementById('cfg-broadcast-toggle').checked = !!gen.broadcastActive;
@@ -4014,6 +4075,7 @@
                         'remote_config/ads/showBannerInGame': document.getElementById('cfg-banner-in-game').checked,
                         'remote_config/ads/interstitialFrequency': parseInt(document.getElementById('cfg-interstitial-freq').value) || 3,
                         'remote_config/ads/rewardedAdCoins': parseInt(document.getElementById('cfg-rewarded-coins').value) || 50,
+                        'remote_config/general/enableMultiLanguage': document.getElementById('cfg-language-toggle').checked,
                         'remote_config/general/maintenanceMode': document.getElementById('cfg-maintenance-toggle').checked,
                         'remote_config/general/maintenanceMessage': document.getElementById('cfg-maintenance-msg').value.trim(),
                         'remote_config/general/broadcastActive': document.getElementById('cfg-broadcast-toggle').checked,
@@ -4269,7 +4331,7 @@
                 `;
             },
 
-            toggleLanguageActive(code) {
+            async toggleLanguageActive(code) {
                 if (code === 'en') {
                     alert('English is the core default fallback language and cannot be disabled.');
                     return;
@@ -4280,7 +4342,9 @@
                 lang.enabled = lang.enabled === false ? true : false;
                 this.renderLanguagePills();
                 this.renderActiveLangCard();
-                showToast(`Language [${lang.name}] is now ${lang.enabled ? '🟢 ACTIVE (ON)' : '⚪ DISABLED (OFF)'}. Remember to click "🚀 Deploy Translations" to publish live!`, lang.enabled ? '🟢' : '⚪');
+
+                // Auto-save live to Firebase immediately so game clients reflect it instantly!
+                await this.saveTranslations();
             },
 
             deleteLanguage(code) {

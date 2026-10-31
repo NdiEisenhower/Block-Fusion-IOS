@@ -2,6 +2,7 @@
 // Supports English (en), TshiVenda (ve), and isiZulu (zu) with dynamic extensibility
 
 class I18N {
+    static enabled = true;
     static currentLang = 'en';
 
     static languages = [
@@ -409,6 +410,9 @@ class I18N {
     };
 
     static getAvailableLanguages() {
+        if (this.enabled === false) {
+            return [{ code: 'en', name: 'English', flag: '🇬🇧', enabled: true }];
+        }
         const list = Array.isArray(this.languages) ? this.languages : [];
         const active = list.filter(l => l && l.enabled !== false);
         // Guarantee English is always present as base fallback
