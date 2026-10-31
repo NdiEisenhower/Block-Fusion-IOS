@@ -22,10 +22,11 @@
 		1100000D29B000000000000D /* WebAssets in Resources */ = {isa = PBXBuildFile; fileRef = 2200000D29B000000000000D /* WebAssets */; };
 		1100000E29B000000000000E /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2200000E29B000000000000E /* Products.storekit */; };
 		1100000F29B000000000000F /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 3300000129B0000000000001 /* GoogleMobileAds */; };
+		398C4C1530958B57008AC36E /* GameKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398C4C1430958B57008AC36E /* GameKitManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0000000129B0000000000001 /* BlockRush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BlockRush.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0000000129B0000000000001 /* BlockRush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlockRush.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2200000129B0000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2200000229B0000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		2200000329B0000000000003 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -41,6 +42,7 @@
 		2200000D29B000000000000D /* WebAssets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = WebAssets; sourceTree = "<group>"; };
 		2200000E29B000000000000E /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Products.storekit; sourceTree = "<group>"; };
 		2200000F29B000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		398C4C1430958B57008AC36E /* GameKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameKitManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +131,7 @@
 				2200000829B0000000000008 /* AppTrackingManager.swift */,
 				2200000929B0000000000009 /* HapticManager.swift */,
 				2200000A29B000000000000A /* PreferencesManager.swift */,
+				398C4C1430958B57008AC36E /* GameKitManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -223,6 +226,7 @@
 				1100000229B0000000000002 /* SceneDelegate.swift in Sources */,
 				1100000329B0000000000003 /* MainViewController.swift in Sources */,
 				1100000429B0000000000004 /* ScriptBridge.swift in Sources */,
+				398C4C1530958B57008AC36E /* GameKitManager.swift in Sources */,
 				1100000529B0000000000005 /* NativeBridgeScript.swift in Sources */,
 				1100000629B0000000000006 /* StoreKitManager.swift in Sources */,
 				1100000729B0000000000007 /* AdMobManager.swift in Sources */,
@@ -345,7 +349,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = "wholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -356,6 +360,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -372,7 +377,8 @@
 				);
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eisen.blockrush2k;
-				PRODUCT_NAME = "BlockRush";
+				PRODUCT_NAME = BlockRush;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -400,7 +406,7 @@
 				);
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.eisen.blockrush2k;
-				PRODUCT_NAME = "BlockRush";
+				PRODUCT_NAME = BlockRush;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -448,7 +454,6 @@
 			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
-
 	};
 	rootObject = AA00000129B0000000000001 /* Project object */;
 }

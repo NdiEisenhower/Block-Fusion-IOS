@@ -1944,6 +1944,11 @@ class App {
 
         this.saveState();
 
+        // Submit score to Game Center
+        if (typeof GameCenter !== 'undefined' && typeof GameCenter.submitScore === 'function') {
+            GameCenter.submitScore(this.state.totalStarsEarned || 0);
+        }
+
         // Save to Firebase leaderboard when level is won
         if (this.state.isLoggedIn && typeof FirebaseService !== 'undefined') {
             FirebaseService.saveUserData(this.state);

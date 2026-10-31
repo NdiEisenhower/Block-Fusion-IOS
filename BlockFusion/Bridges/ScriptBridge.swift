@@ -37,6 +37,9 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
         case "appBridge":
             handleAppBridge(action: action, body: body)
             
+        case "gameCenterBridge":
+            handleGameCenterBridge(action: action, body: body)
+            
         default:
             break
         }
@@ -101,7 +104,23 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
     // MARK: - Haptic Handler
     private func handleHapticBridge(action: String, body: [String: Any]) {
         if action == "vibrate" {
-            HapticManager.shared.impact(style: .medium)
+            let type = body["type"] as? String ?? "medium"
+            switch type {
+            case "light":
+                HapticManager.shared.impact(style: .light)
+            case "heavy":
+                HapticManager.shared.impact(style: .heavy)
+            case "selection":
+                HapticManager.shared.selection()
+            case "success":
+                HapticManager.shared.notification(type: .success)
+            case "error":
+                HapticManager.shared.notification(type: .error)
+            case "warning":
+                HapticManager.shared.notification(type: .warning)
+            default:
+                HapticManager.shared.impact(style: .medium)
+            }
         }
     }
     
@@ -128,6 +147,26 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             delegate?.openStoreReview()
         case "exitApp":
             delegate?.exitApp()
+        default:
+            break
+        }
+    }
+    
+    // MARK: - Game Center Handler
+    private func handleGameCenterBridge(action: String, body: [String: Any]) {
+        switch action {
+        case "submitScore":
+            if let score = body["score"] as? Int {
+                let leaderboardId = body["leaderboardId"] as? String ?? "main_leaderboard"
+                GameKitManager.shared.submitScore(score, leaderboardId: leaderboardId)
+            }
+        case "reportAchievement":
+            if let id = body["id"] as? String {
+                let percent = body["percent"] as? Double ?? 100.0
+                GameKitManager.shared.reportAchievement(id: id, percentComplete: percent)
+            }
+        case "showDashboard":
+            GameKitManager.shared.showGameCenterDashboard()
         default:
             break
         }

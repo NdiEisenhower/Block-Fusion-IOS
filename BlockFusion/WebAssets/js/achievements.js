@@ -31,6 +31,11 @@ class Achievements {
             newUnlocks.forEach(a => {
                 App.showToast(`🏆 Achievement: ${a.name}! +100 coins`);
                 App.state.coins += 100;
+                
+                // Report to Game Center
+                if (typeof GameCenter !== 'undefined' && typeof GameCenter.reportAchievement === 'function') {
+                    GameCenter.reportAchievement(a.id, 100.0);
+                }
             });
             App.saveState();
             App.updateAllCoinDisplays();
