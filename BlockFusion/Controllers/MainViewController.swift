@@ -10,6 +10,41 @@ final class MainViewController: UIViewController {
     
     private static let remoteGameUrl = "https://blockrush2k.kharitambe.co.za"
     
+    // MARK: - Safe Area Handling
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        updateSafeAreaInsets()
+    }
+    
+    private func updateSafeAreaInsets() {
+        let top = max(view.safeAreaInsets.top, 50.0)
+        let bottom = max(view.safeAreaInsets.bottom, 24.0)
+        let js = """
+        (function() {
+            var el = document.getElementById('ios-safe-area-rules');
+            if (!el) {
+                el = document.createElement('style');
+                el.id = 'ios-safe-area-rules';
+                if (document.head) document.head.appendChild(el);
+            }
+            if (el) {
+                el.textContent = `
+                    :root {
+                        --safe-area-top: \(top)px !important;
+                        --safe-area-bottom: \(bottom)px !important;
+                    }
+                    #app {
+                        padding-top: \(top)px !important;
+                        padding-bottom: \(bottom)px !important;
+                        box-sizing: border-box !important;
+                    }
+                `;
+            }
+        })();
+        """
+        webView?.evaluateJavaScript(js, completionHandler: nil)
+    }
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -148,6 +183,9 @@ extension MainViewController: WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("✅ Game web view finished loading")
         
+        // Update Safe Area Insets dynamically
+        updateSafeAreaInsets()
+        
         // Notify cached prices to JS
         if #available(iOS 15.0, *) {
             let prices = StoreKitManager.shared.formattedPrices
@@ -247,4 +285,3 @@ extension MainViewController: ScriptBridgeDelegate {
         UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
     }
 }
-

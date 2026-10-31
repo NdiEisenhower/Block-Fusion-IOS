@@ -62,3 +62,4 @@ server.listen(PORT, () => {
     const startCmd = process.platform === 'win32' ? `start ${url}` : `open ${url}`;
     exec(startCmd);
 });
+

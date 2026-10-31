@@ -453,6 +453,34 @@
                 const win = iframe.contentWindow;
                 if (!win) return;
 
+                // Enforce iOS Safe Area padding to protect against Dynamic Island & Notch
+                try {
+                    const doc = win.document;
+                    if (doc) {
+                        let style = doc.getElementById('ios-sim-safe-area');
+                        if (!style) {
+                            style = doc.createElement('style');
+                            style.id = 'ios-sim-safe-area';
+                            if (doc.head) doc.head.appendChild(style);
+                        }
+                        if (style) {
+                            style.textContent = `
+                                :root {
+                                    --safe-area-top: 54px !important;
+                                    --safe-area-bottom: 28px !important;
+                                }
+                                #app {
+                                    padding-top: 54px !important;
+                                    padding-bottom: 28px !important;
+                                    box-sizing: border-box !important;
+                                }
+                            `;
+                        }
+                    }
+                } catch(e) {
+                    console.warn('Safe area injection error:', e);
+                }
+
                 log('Bridge', 'bridge', '⚡ Injecting iOS Native Bridges into WKWebView frame...');
 
                 // Injected variables
@@ -709,3 +737,4 @@
     </script>
 </body>
 </html>
+

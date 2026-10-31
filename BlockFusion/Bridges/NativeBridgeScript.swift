@@ -6,6 +6,35 @@ enum NativeBridgeScript {
     (function() {
         console.log('⚡ Initializing iOS Native Bridges (Android, Billing, Social, iOS)...');
         
+        // Enforce iOS Safe Area padding to protect against notch & Dynamic Island
+        try {
+            var safeStyle = document.getElementById('ios-safe-area-rules');
+            if (!safeStyle) {
+                safeStyle = document.createElement('style');
+                safeStyle.id = 'ios-safe-area-rules';
+                safeStyle.textContent = `
+                    :root {
+                        --safe-area-top: env(safe-area-inset-top, 50px);
+                        --safe-area-bottom: env(safe-area-inset-bottom, 24px);
+                    }
+                    #app {
+                        padding-top: max(env(safe-area-inset-top, 0px), 50px) !important;
+                        padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px) !important;
+                        box-sizing: border-box !important;
+                    }
+                `;
+                if (document.head) {
+                    document.head.appendChild(safeStyle);
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (document.head) document.head.appendChild(safeStyle);
+                    });
+                }
+            }
+        } catch(e) {
+            console.warn('Safe area injection error:', e);
+        }
+
         window._cachedPrices = {};
         window._purchasedProducts = [];
         window._activeTheme = 'numbers';
@@ -169,4 +198,3 @@ enum NativeBridgeScript {
     })();
     """
 }
-
