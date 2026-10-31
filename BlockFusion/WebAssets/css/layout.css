@@ -1,14 +1,14 @@
 :root {
-    --safe-area-top: 54px;
-    --safe-area-bottom: 28px;
+    --safe-area-top: 60px;
+    --safe-area-bottom: 34px;
     --safe-area-left: 0px;
     --safe-area-right: 0px;
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {
     :root {
-        --safe-area-top: max(env(safe-area-inset-top, 0px), 50px);
-        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+        --safe-area-top: max(env(safe-area-inset-top, 0px), 60px);
+        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
     }
 }
 
@@ -37,8 +37,8 @@
     touch-action: manipulation;
     overscroll-behavior: none;
     overflow: hidden;
-    padding-top: var(--safe-area-top, 54px) !important;
-    padding-bottom: var(--safe-area-bottom, 28px) !important;
+    padding-top: var(--safe-area-top, 60px) !important;
+    padding-bottom: var(--safe-area-bottom, 34px) !important;
     padding-left: var(--safe-area-left, 0px);
     padding-right: var(--safe-area-right, 0px);
     box-sizing: border-box !important;

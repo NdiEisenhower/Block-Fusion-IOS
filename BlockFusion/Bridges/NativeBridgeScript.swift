@@ -14,12 +14,12 @@ enum NativeBridgeScript {
                 safeStyle.id = 'ios-safe-area-rules';
                 safeStyle.textContent = `
                     :root {
-                        --safe-area-top: env(safe-area-inset-top, 50px);
-                        --safe-area-bottom: env(safe-area-inset-bottom, 24px);
+                        --safe-area-top: max(env(safe-area-inset-top, 0px), 60px);
+                        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
                     }
                     #app {
-                        padding-top: max(env(safe-area-inset-top, 0px), 50px) !important;
-                        padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px) !important;
+                        padding-top: max(env(safe-area-inset-top, 0px), 60px) !important;
+                        padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px) !important;
                         box-sizing: border-box !important;
                     }
                     /* Remove all download UI on iOS app side */

@@ -18,9 +18,9 @@ final class MainViewController: UIViewController {
     }
     
     private func updateSafeAreaInsets() {
-        let top = max(view.safeAreaInsets.top, 50.0)
+        let top = max(view.safeAreaInsets.top, 60.0)
         let bottomWithBanner = view.safeAreaInsets.bottom + currentBannerHeight + (currentBannerHeight > 0 ? 8.0 : 0.0)
-        let bottom = max(bottomWithBanner, 24.0)
+        let bottom = max(bottomWithBanner, 34.0)
         let js = """
         (function() {
             var el = document.getElementById('ios-safe-area-rules');
