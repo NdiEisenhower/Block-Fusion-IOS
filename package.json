@@ -1,0 +1,12 @@
+{
+  "name": "block-rush-ios-simulator",
+  "version": "1.0.0",
+  "description": "iOS Test Harness & Bridge Simulator for Block Rush 2K",
+  "main": "start-ios-simulator.js",
+  "scripts": {
+    "start": "node start-ios-simulator.js"
+  },
+  "keywords": ["ios", "test", "storekit", "admob"],
+  "author": "Eisen",
+  "license": "MIT"
+}
