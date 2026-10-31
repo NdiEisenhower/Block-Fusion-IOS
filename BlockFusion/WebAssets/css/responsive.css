@@ -998,13 +998,14 @@ body:not(.tv-mode) [tabindex]:focus {
         margin-top: 12px !important;
     }
 }
-/* ===== Store & Settings list item polish ===== */
+
+/* ===== Store & Settings list item polish (FLEX COLUMN FIX) ===== */
 #store-content .store-item,
 #settings-content .store-item,
 .store-item {
-    padding: 12px 14px !important;
+    padding: 10px 12px !important;
     margin: 0 0 6px 0 !important;
-    gap: 12px !important;
+    gap: 10px !important;
     min-height: 56px !important;
     height: auto !important;
     border-radius: 14px !important;
@@ -1022,27 +1023,63 @@ body:not(.tv-mode) [tabindex]:focus {
 #store-content .store-item .item-info,
 #settings-content .store-item .item-info,
 .store-item .item-info {
-    flex: 1 !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
     align-self: center !important;
+    gap: 3px !important;
     height: auto !important;
+}
+
+#store-content .store-item .item-name,
+#settings-content .store-item .item-name,
+.store-item .item-name {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    display: block !important;
+}
+
+#store-content .store-item .item-desc,
+#settings-content .store-item .item-desc,
+.store-item .item-desc {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    display: block !important;
 }
 
 #store-content .store-item > div:first-child,
 #settings-content .store-item > div:first-child,
 #settings-content .store-item > .item-icon {
-    margin-left: 2px !important;
+    margin-left: 0 !important;
 }
 
 #store-content .store-item .item-icon,
 #settings-content .store-item .item-icon {
-    width: 40px !important;
-    height: 40px !important;
-    margin-right: 2px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    margin-right: 0 !important;
     border-radius: 10px !important;
     flex-shrink: 0 !important;
     align-self: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
 }
 
 #store-content .store-item .btn,
@@ -1050,10 +1087,10 @@ body:not(.tv-mode) [tabindex]:focus {
 .store-item .btn,
 .store-item button,
 .store-item a.btn {
-    padding: 6px 14px !important;
-    height: 34px !important;
-    min-height: 34px !important;
-    max-height: 34px !important;
+    padding: 6px 12px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     line-height: 1 !important;
@@ -1066,66 +1103,19 @@ body:not(.tv-mode) [tabindex]:focus {
     justify-content: center !important;
     box-sizing: border-box !important;
     border-radius: 10px !important;
-}
-
-#store-content .store-item.store-item-best-value {
-    margin-top: 18px !important;
-    margin-bottom: 6px !important;
-    overflow: visible !important;
-    border: 1px solid rgba(247, 201, 72, 0.35) !important;
-}
-
-.store-grid .store-item.store-item-best-value {
-    margin-top: 6px !important;
-    margin-bottom: 0 !important;
-}
-
-@media (min-width: 600px) {
-    .store-grid .store-item.store-item-best-value {
-        margin-top: 0 !important;
-    }
-}
-
-#store-content .store-item .store-badge-best-value {
-    top: -11px !important;
-    left: 16px !important;
-    z-index: 20 !important;
-    padding: 3px 10px !important;
-    font-size: 9px !important;
-    line-height: 1.2 !important;
     white-space: nowrap !important;
 }
 
-/* Keep content away from card borders and screen edges */
+/* Remove double-nesting horizontal padding on settings and store content */
 #store-content,
 #settings-content {
-    padding: 14px 16px 32px 16px !important;
-}
-
-#store-content .store-item,
-#settings-content .store-item {
-    padding: 12px 16px !important;
-    gap: 14px !important;
-}
-
-#store-content .store-item > div:first-child,
-#settings-content .store-item > div:first-child {
-    margin-left: 0 !important;
-}
-
-#store-content .store-item .btn,
-#settings-content .store-item .btn,
-.store-item button {
-    margin-right: 0 !important;
-    min-width: 76px !important;
-    padding: 6px 14px !important;
+    padding: 8px 0 32px 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 #store-content > h3,
-#settings-content > h3 {
-    margin-top: 10px !important;
-    margin-bottom: 4px !important;
-}
+#settings-content > h3 { margin-top: 10px !important; margin-bottom: 4px !important; }
 
 /* Offline Subscription card polish - Prevent text cutoff and harmonize blue theme */
 #store-content .store-item.store-item-offline,
