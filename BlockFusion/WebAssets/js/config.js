@@ -11,7 +11,7 @@ const CONFIG = {
 
     // Show Ads related UI elements ('auto' evaluates per platform, or explicitly true/false)
     SHOW_ADS_UI: 'auto',
-    ENABLE_MULTI_LANGUAGE: true,
+    ENABLE_MULTI_LANGUAGE: false,
 
     isAdsUiEnabled() {
         if (this.SHOW_ADS_UI === true) return true;

@@ -291,8 +291,12 @@ class FirebaseService {
             const gen = config.general;
 
             // Multi-Language master toggle from remote config
-            if (gen.enableMultiLanguage !== undefined) {
-                const isLangOn = !!gen.enableMultiLanguage;
+            const isLangConfigured = gen.enableMultiLanguage !== undefined 
+                ? gen.enableMultiLanguage 
+                : gen.languageEnabled;
+
+            if (isLangConfigured !== undefined) {
+                const isLangOn = !!isLangConfigured;
                 if (typeof CONFIG !== 'undefined') {
                     CONFIG.ENABLE_MULTI_LANGUAGE = isLangOn;
                 }
@@ -300,6 +304,16 @@ class FirebaseService {
                     I18N.enabled = isLangOn;
                     if (!isLangOn && I18N.currentLang !== 'en') {
                         I18N.setLanguage('en');
+                    }
+                }
+                // If language picker modal is currently visible on screen, close it immediately!
+                if (!isLangOn && typeof PopupManager !== 'undefined') {
+                    const popupEl = document.getElementById('custom-popup-overlay');
+                    if (popupEl && popupEl.classList.contains('show')) {
+                        const titleEl = popupEl.querySelector('.popup-title');
+                        if (titleEl && titleEl.textContent && titleEl.textContent.includes('Language')) {
+                            PopupManager.close('cancel');
+                        }
                     }
                 }
                 if (typeof Navigation !== 'undefined' && document.getElementById('screen-settings')?.classList.contains('active')) {

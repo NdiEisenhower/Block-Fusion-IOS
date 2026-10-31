@@ -410,7 +410,8 @@ class I18N {
     };
 
     static getAvailableLanguages() {
-        if (this.enabled === false) {
+        const isMasterEnabled = this.enabled !== false && (typeof CONFIG === 'undefined' || CONFIG.ENABLE_MULTI_LANGUAGE !== false);
+        if (!isMasterEnabled) {
             return [{ code: 'en', name: 'English', flag: '🇬🇧', enabled: true }];
         }
         const list = Array.isArray(this.languages) ? this.languages : [];
@@ -425,6 +426,8 @@ class I18N {
 
     static isLanguageEnabled(langCode) {
         if (!langCode || langCode === 'en') return true;
+        const isMasterEnabled = this.enabled !== false && (typeof CONFIG === 'undefined' || CONFIG.ENABLE_MULTI_LANGUAGE !== false);
+        if (!isMasterEnabled) return false;
         const list = Array.isArray(this.languages) ? this.languages : [];
         const found = list.find(l => l.code === langCode);
         return !found || found.enabled !== false;

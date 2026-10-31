@@ -1933,7 +1933,7 @@
                                     <p>Show in-game language selector in Settings (English, TshiVenda, isiZulu)</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" id="cfg-language-toggle" checked>
+                                    <input type="checkbox" id="cfg-language-toggle" onchange="PortalConfig.onLanguageToggleChange(this.checked)">
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -4025,6 +4025,20 @@
         // LIVE GAME SETTINGS & ADS CONTROLLER
         // ========================================================
         const PortalConfig = {
+            async onLanguageToggleChange(isEnabled) {
+                if (!db) return;
+                try {
+                    await db.ref().update({
+                        'remote_config/general/enableMultiLanguage': !!isEnabled,
+                        'remote_config/general/languageEnabled': !!isEnabled,
+                        'remote_config/general/updatedAt': firebase.database.ServerValue.TIMESTAMP
+                    });
+                    showToast(`Multi-Language selector ${isEnabled ? 'ENABLED 🌐' : 'DISABLED 🔒'} live in game!`, isEnabled ? '🌐' : '🔒');
+                } catch (e) {
+                    console.warn('Failed to auto-save language toggle:', e);
+                }
+            },
+
             async loadLiveSettings() {
                 if (!db) return;
                 try {
@@ -4042,7 +4056,8 @@
                     document.getElementById('cfg-rewarded-coins').value = ads.rewardedAdCoins || 50;
 
                     const gen = cfg.general || {};
-                    document.getElementById('cfg-language-toggle').checked = gen.enableMultiLanguage !== undefined ? !!gen.enableMultiLanguage : true;
+                    const multiLangVal = gen.enableMultiLanguage !== undefined ? gen.enableMultiLanguage : gen.languageEnabled;
+                    document.getElementById('cfg-language-toggle').checked = multiLangVal !== undefined ? !!multiLangVal : false;
                     document.getElementById('cfg-maintenance-toggle').checked = !!gen.maintenanceMode;
                     document.getElementById('cfg-maintenance-msg').value = gen.maintenanceMessage || '';
                     document.getElementById('cfg-broadcast-toggle').checked = !!gen.broadcastActive;
@@ -4076,6 +4091,7 @@
                         'remote_config/ads/interstitialFrequency': parseInt(document.getElementById('cfg-interstitial-freq').value) || 3,
                         'remote_config/ads/rewardedAdCoins': parseInt(document.getElementById('cfg-rewarded-coins').value) || 50,
                         'remote_config/general/enableMultiLanguage': document.getElementById('cfg-language-toggle').checked,
+                        'remote_config/general/languageEnabled': document.getElementById('cfg-language-toggle').checked,
                         'remote_config/general/maintenanceMode': document.getElementById('cfg-maintenance-toggle').checked,
                         'remote_config/general/maintenanceMessage': document.getElementById('cfg-maintenance-msg').value.trim(),
                         'remote_config/general/broadcastActive': document.getElementById('cfg-broadcast-toggle').checked,

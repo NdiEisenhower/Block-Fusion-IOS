@@ -264,7 +264,13 @@ class Navigation {
 
     static showLanguagePickerModal() {
         if (typeof I18N === 'undefined') return;
+        const isMultiLangEnabled = (typeof CONFIG !== 'undefined' && CONFIG.ENABLE_MULTI_LANGUAGE !== undefined)
+            ? !!CONFIG.ENABLE_MULTI_LANGUAGE
+            : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : false);
         const availableLangs = I18N.getAvailableLanguages();
+        if (!isMultiLangEnabled || availableLangs.length <= 1) {
+            return;
+        }
         const currentCode = I18N.currentLang;
 
         const listHtml = `
