@@ -30,3 +30,4 @@ final class AppTrackingManager {
         return true
     }
 }
+

@@ -98,3 +98,4 @@ final class PreferencesManager {
         set { defaults.set(newValue, forKey: Keys.customQaUrl) }
     }
 }
+

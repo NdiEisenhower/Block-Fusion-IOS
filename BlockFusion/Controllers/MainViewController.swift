@@ -247,3 +247,4 @@ extension MainViewController: ScriptBridgeDelegate {
         UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
     }
 }
+

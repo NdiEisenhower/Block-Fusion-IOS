@@ -55,3 +55,4 @@ final class HapticManager {
         selectionGenerator.selectionChanged()
     }
 }
+

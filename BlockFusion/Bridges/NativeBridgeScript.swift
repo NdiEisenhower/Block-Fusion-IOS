@@ -169,3 +169,4 @@ enum NativeBridgeScript {
     })();
     """
 }
+

@@ -200,3 +200,4 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
         """)
     }
 }
+
