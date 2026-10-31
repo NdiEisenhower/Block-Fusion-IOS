@@ -22,6 +22,15 @@ enum NativeBridgeScript {
                         padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px) !important;
                         box-sizing: border-box !important;
                     }
+                    /* Remove all download UI on iOS app side */
+                    a[href*="download"],
+                    button[onclick*="download"],
+                    .web-only-download,
+                    .store-web-notice,
+                    .download-card,
+                    .download-grid {
+                        display: none !important;
+                    }
                 `;
                 if (document.head) {
                     document.head.appendChild(safeStyle);

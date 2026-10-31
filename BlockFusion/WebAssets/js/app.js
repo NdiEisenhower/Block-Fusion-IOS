@@ -346,19 +346,8 @@ class App {
     // APP STORE / DOWNLOAD PROMPT (Task 3)
     // ============================================================
     static checkAndPromptAppDownload() {
-        const isNative = (typeof window.Android !== 'undefined' && window.Android !== null) ||
-                         (typeof window.AdMob !== 'undefined');
-        if (isNative) return;
-
-        const dismissed = sessionStorage.getItem('br2k_app_prompt_dismissed');
-        if (dismissed) return;
-
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        if (isAndroid) {
-            setTimeout(() => {
-                this.showAppDownloadPrompt('android');
-            }, 3000);
-        }
+        // Disabled on mobile and native apps
+        return;
     }
 
     static showAppDownloadPrompt(platform = 'android') {

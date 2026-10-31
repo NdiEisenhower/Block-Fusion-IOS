@@ -10,8 +10,10 @@ class Store {
     }
 
     static isNativeBillingAvailable() {
-        return (typeof Android !== 'undefined' && typeof Android.launchPurchase === 'function') ||
-               (typeof Billing !== 'undefined' && typeof Billing.launchPurchase === 'function');
+        return (typeof window.Android !== 'undefined' && typeof window.Android.launchPurchase === 'function') ||
+               (typeof window.Billing !== 'undefined' && typeof window.Billing.launchPurchase === 'function') ||
+               (typeof window.iOS !== 'undefined') ||
+               (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.billingBridge);
     }
 
     static renderStoreContent() {

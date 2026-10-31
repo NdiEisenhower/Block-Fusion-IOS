@@ -26,9 +26,8 @@ class Navigation {
                 App.updatePlayerDisplay();
                 App.updateOfflineIndicator();
                 App.updateLoginButtonVisibility();
-                if (typeof window !== 'undefined' && (window.Android || typeof Android !== 'undefined')) {
-                    document.querySelectorAll('a[href*="download"], button[onclick*="download"]').forEach(el => el.style.display = 'none');
-                }
+                // Completely remove download elements on app side
+                document.querySelectorAll('a[href*="download"], button[onclick*="download"], .store-web-notice').forEach(el => el.remove());
                 break;
             case 'world-select':
                 this.renderWorldSelect();
