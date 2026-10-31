@@ -65,6 +65,11 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
         case "showRewardedAd":
             AdMobManager.shared.showRewardedAd()
             
+        case "logEvent":
+            let name = body["name"] as? String ?? "unknown"
+            let params = body["params"] as? String ?? "{}"
+            print("📊 [iOS Tracking] Native Log: [\(name)] -> \(params)")
+            
         default:
             break
         }

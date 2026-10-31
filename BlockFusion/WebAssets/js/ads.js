@@ -94,6 +94,10 @@ class AdService {
         }
     }
 
+    static getPlatform() {
+        return this.platform || this.detectPlatform();
+    }
+
     static detectPlatform() {
         // 1. Check URL overrides
         try {

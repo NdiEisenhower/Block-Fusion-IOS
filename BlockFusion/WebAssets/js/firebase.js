@@ -1,5 +1,56 @@
 // Firebase Service with Analytics and Crashlytics
 class FirebaseService {
+    // ===== PLATFORM & DEVICE TRACKING HELPERS =====
+    static getDetectedPlatform() {
+        if (typeof window !== 'undefined') {
+            if (typeof window.iOS !== 'undefined') return 'ios';
+            if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) return 'ios';
+            if (typeof window.Android !== 'undefined' && window.Android !== null) {
+                if (typeof window.Android.getPlatform === 'function') {
+                    const p = window.Android.getPlatform();
+                    if (p && (p.toLowerCase() === 'ios' || p.toLowerCase() === 'apple')) return 'ios';
+                }
+                if (typeof window.Android.getEnvironment === 'function' && window.Android.getEnvironment() === 'ios') return 'ios';
+            }
+            if (typeof AdService !== 'undefined' && typeof AdService.detectPlatform === 'function') {
+                const p = AdService.detectPlatform();
+                if (p === 'ios') return 'ios';
+            }
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) return 'ios';
+            if (typeof window.Android !== 'undefined' && window.Android !== null) {
+                if (window.Android.isHuawei || window.Android.isHMS) return 'huawei';
+                return 'google';
+            }
+            if (/Android/i.test(navigator.userAgent)) return 'google';
+        }
+        return 'web';
+    }
+
+    static getDeviceModel() {
+        if (typeof window !== 'undefined') {
+            if (typeof window.Android !== 'undefined' && typeof window.Android.getDeviceInfo === 'function') {
+                try {
+                    const info = JSON.parse(window.Android.getDeviceInfo());
+                    if (info.model) return info.model;
+                } catch (e) {}
+            }
+            if (/iPhone/i.test(navigator.userAgent)) return 'iPhone';
+            if (/iPad/i.test(navigator.userAgent)) return 'iPad';
+            if (/Android/i.test(navigator.userAgent)) return 'Android Device';
+        }
+        return 'Web Browser';
+    }
+
+    static getPlatformLabel() {
+        const p = this.getDetectedPlatform();
+        switch (p) {
+            case 'ios': return '🍎 Apple iOS (App Store)';
+            case 'google': return '🟢 Google Play (Android)';
+            case 'huawei': return '🔴 Huawei AppGallery';
+            default: return '🌐 Web Instant Play';
+        }
+    }
+
     static db = null;
     static auth = null;
     static currentUser = null;
@@ -388,7 +439,28 @@ class FirebaseService {
 
     // Analytics Methods
     static logEvent(eventName, eventParams = {}) {
-        // If on Android, forward to native analytics
+        const detectedPlatform = this.getDetectedPlatform();
+        const enrichedParams = {
+            platform: detectedPlatform,
+            os: detectedPlatform === 'ios' ? 'iOS' : (detectedPlatform === 'google' || detectedPlatform === 'huawei') ? 'Android' : 'Web',
+            deviceModel: this.getDeviceModel(),
+            platformLabel: this.getPlatformLabel(),
+            clientType: detectedPlatform === 'ios' ? 'ios_native' : (detectedPlatform === 'google' || detectedPlatform === 'huawei') ? 'android_native' : 'web_client',
+            ...eventParams
+        };
+
+        if (detectedPlatform === 'ios') {
+            console.log(`📊 [iOS Tracking] Logged event [${eventName}]:`, enrichedParams);
+        }
+
+        // If on Android or iOS native bridge, forward to native analytics
+        if (typeof Android !== 'undefined' && typeof Android.logEvent === 'function') {
+            try {
+                Android.logEvent(eventName, JSON.stringify(enrichedParams));
+            } catch (e) {
+                console.warn('Native logEvent failed:', e.message);
+            }
+        }
         if (typeof Android !== 'undefined' && typeof Android.logEvent === 'function') {
             try {
                 Android.logEvent(eventName, JSON.stringify(eventParams));
@@ -795,6 +867,10 @@ class FirebaseService {
                 totalMovesMade: data.totalMovesMade || 0,
                 totalGamesPlayed: data.totalGamesPlayed || 0,
                 totalWins: data.totalWins || 0,
+                platform: this.getDetectedPlatform(),
+                platformLabel: this.getPlatformLabel(),
+                deviceModel: this.getDeviceModel(),
+                clientType: this.getDetectedPlatform() === 'ios' ? 'ios_native' : (this.getDetectedPlatform() === 'google' || this.getDetectedPlatform() === 'huawei') ? 'android_native' : 'web_client',
                 updatedAt: firebase.database.ServerValue.TIMESTAMP,
                 uid: this.currentUser.uid,
                 displayName: (this.currentUser.displayName && this.currentUser.displayName !== 'Player' && this.currentUser.displayName !== 'Guest Player')
@@ -1505,13 +1581,16 @@ class FirebaseService {
             ? firebase.database.ServerValue.TIMESTAMP
             : Date.now();
 
+        const detectedPlatform = this.getDetectedPlatform();
         const feedbackData = {
             uid: uid,
             username: username,
             email: email,
             rating: Number(rating),
             feedback: feedbackText,
-            platform: platform,
+            platform: detectedPlatform,
+            platformLabel: this.getPlatformLabel(),
+            deviceModel: this.getDeviceModel(),
             timestamp: timestamp
         };
 

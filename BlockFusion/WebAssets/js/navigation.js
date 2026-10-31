@@ -536,10 +536,23 @@ class Navigation {
             <a href="delete-data.html" target="_blank" class="btn btn-sm btn-danger" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:rgba(233,69,96,0.18);border:1px solid rgba(233,69,96,0.4);color:#FF8BA7;">Request</a>
         </div>`;
 
+        // Device & Platform Info Footer
+        const detectedPlat = (typeof FirebaseService !== 'undefined' && FirebaseService.getDetectedPlatform) ? FirebaseService.getDetectedPlatform() : 'web';
+        const isIos = detectedPlat === 'ios';
+
         html += `
         <h3 style="margin:12px 0 4px;color:#e94560;">⚠️ Danger Zone</h3>
-        <button class="btn btn-outline btn-block" style="color:#e94560;border-color:#e94560;margin-bottom:12px;"
-            onclick="App.resetAllProgress()">🗑️ Reset All Progress</button>`;
+        <button class="btn btn-outline btn-block" style="color:#e94560;border-color:#e94560;margin-bottom:16px;"
+            onclick="App.resetAllProgress()">🗑️ Reset All Progress</button>
+
+        <div style="text-align:center;padding:12px 0 24px;border-top:1px solid rgba(255,255,255,0.06);margin-top:10px;">
+            <div style="font-size:12px;font-weight:700;color:${isIos ? '#38bdf8' : '#94a3b8'};display:inline-flex;align-items:center;gap:5px;">
+                ${isIos ? '🍎 Block Rush 2K for Apple iOS' : '🎮 Block Rush 2K'}
+            </div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:3px;font-family:'JetBrains Mono',monospace;">
+                Version 1.0.0 (Build 1) &bull; Platform: ${isIos ? 'iOS Native (App Store)' : detectedPlat.toUpperCase()}
+            </div>
+        </div>`;
 
         container.innerHTML = html;
 

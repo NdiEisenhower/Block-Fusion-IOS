@@ -556,7 +556,7 @@
                     vibrate: () => pulseHaptic(),
                     exitApp: () => log('App', 'bridge', 'Exit app called'),
                     openStoreReview: () => win.webkit.messageHandlers.appBridge.postMessage({ action: 'openStoreReview' }),
-                    getDeviceInfo: () => JSON.stringify({ platform: 'ios', model: 'iPhone 16 Pro', osVersion: '18.0' }),
+                    getDeviceInfo: () => JSON.stringify({ platform: 'ios', model: 'iPhone 16 Pro', os: 'iOS', osVersion: '18.0', platformName: 'Apple iOS (App Store)', isIos: true, clientType: 'ios_native' }),
                     getPlatform: () => 'ios',
                     getFlavor: () => 'appstore',
                     isDebug: () => false,
