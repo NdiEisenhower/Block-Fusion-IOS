@@ -259,29 +259,64 @@ body:not(.tv-mode) [tabindex]:focus {
     }
 }
 
-/* Desktop / large tablets (>= 768px) Portrait */
+/* Desktop / iPad & large tablets (>= 768px) Portrait */
 @media (min-width: 768px) and (orientation: portrait) {
     :root {
-        --cell-size: 90px;
-        --gap: 10px;
-        --board-pad: 14px;
-        --tile-size: 90px;
-        --gap-size: 10px;
+        --cell-size: clamp(86px, 11vw, 110px);
+        --gap: 12px;
+        --board-pad: 18px;
+        --tile-size: clamp(86px, 11vw, 110px);
+        --gap-size: 12px;
     }
 
     #app {
-        max-width: 520px;
-        border-radius: 24px;
-        box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+        max-width: 680px;
+        width: 100%;
+        border-radius: 28px;
+        box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
         margin: 20px auto;
         min-height: auto;
-        height: 95vh;
+        height: 96vh;
+        overflow: hidden;
     }
 
-    .tile { font-size: 26px; }
-    .tile[data-value="1024"] { font-size: 18px; }
-    .tile[data-value="2048"] { font-size: 17px; }
-    .tile[data-value="4096"] { font-size: 16px; }
+    .screen.active {
+        padding: 20px 28px 24px 28px !important;
+    }
+
+    .tile { font-size: 32px; font-weight: 800; }
+    .tile[data-value="1024"] { font-size: 24px; }
+    .tile[data-value="2048"] { font-size: 22px; }
+    .tile[data-value="4096"] { font-size: 20px; }
+    .tile[data-value="8192"] { font-size: 18px; }
+
+    .game-top-bar {
+        padding: 10px 18px;
+        font-size: 16px;
+    }
+
+    .goal-badge {
+        font-size: 14px;
+        padding: 8px 16px;
+        height: 40px;
+    }
+
+    .coins-display {
+        font-size: 15px;
+        padding: 8px 16px;
+        height: 40px;
+    }
+
+    .power-ups-bar {
+        gap: 14px;
+        padding: 12px 0;
+    }
+
+    .power-up-btn {
+        width: 58px;
+        height: 58px;
+        font-size: 24px;
+    }
 }
 
 /* ============================================================

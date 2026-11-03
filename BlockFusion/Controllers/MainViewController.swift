@@ -297,10 +297,8 @@ extension MainViewController: ScriptBridgeDelegate {
     }
     
     func openStoreReview() {
-        if #available(iOS 14.0, *), let scene = view.window?.windowScene {
+        if let scene = view.window?.windowScene {
             SKStoreReviewController.requestReview(in: scene)
-        } else {
-            SKStoreReviewController.requestReview()
         }
     }
     

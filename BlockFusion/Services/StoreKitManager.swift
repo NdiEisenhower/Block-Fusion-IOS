@@ -60,15 +60,12 @@ final class StoreKitManager: NSObject {
     func loadProducts() async {
         do {
             let products = try await Product.products(for: Self.allProductIds)
-            var prices: [String: String] = [:]
-            var mapped: [String: Product] = [:]
-            
-            for product in products {
-                mapped[product.id] = product
-                prices[product.id] = product.displayPrice
+            let (mapped, prices): ([String: Product], [String: String]) = products.reduce(into: ([:], [:])) { acc, product in
+                acc.0[product.id] = product
+                acc.1[product.id] = product.displayPrice
             }
             
-            await MainActor.run {
+            await MainActor.run { [mapped, prices] in
                 self.availableProducts = mapped
                 self.formattedPrices = prices
                 self.delegate?.onPricesLoaded(prices: prices)
@@ -98,19 +95,20 @@ final class StoreKitManager: NSObject {
     
     // MARK: - Check Current Entitlements
     func checkCurrentEntitlements() async {
-        var restored: [String] = []
+        var collectedRestored: [String] = []
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
                 await handleTransaction(transaction)
-                restored.append(transaction.productID)
+                collectedRestored.append(transaction.productID)
             } catch {
                 print("❌ Failed to verify current entitlement: \(error)")
             }
         }
         
+        let restored = collectedRestored
         if !restored.isEmpty {
-            await MainActor.run {
+            await MainActor.run { [restored] in
                 self.delegate?.onPurchasesRestored(restoredProducts: restored)
             }
         }
@@ -183,13 +181,14 @@ final class StoreKitManager: NSObject {
                 try await AppStore.sync()
                 await checkCurrentEntitlements()
                 let restored = Array(preferences.purchasedProducts)
-                await MainActor.run {
+                await MainActor.run { [restored] in
                     HapticManager.shared.notification(type: .success)
                     self.delegate?.onPurchasesRestored(restoredProducts: restored)
                 }
             } catch {
-                await MainActor.run {
-                    self.delegate?.onPurchaseFailed(errorMessage: "Failed to restore: \(error.localizedDescription)")
+                let errorMessage = "Failed to restore: \(error.localizedDescription)"
+                await MainActor.run { [errorMessage] in
+                    self.delegate?.onPurchaseFailed(errorMessage: errorMessage)
                 }
             }
         }
