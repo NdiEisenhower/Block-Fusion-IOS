@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6600000129B0000000000001"
-               BuildableName = "BlockRush.app"
+               BuildableName = "Block Rush 2K.app"
                BlueprintName = "BlockFusion"
                ReferencedContainer = "container:BlockFusion.xcodeproj">
             </BuildableReference>
@@ -44,7 +44,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6600000129B0000000000001"
-            BuildableName = "BlockRush.app"
+            BuildableName = "Block Rush 2K.app"
             BlueprintName = "BlockFusion"
             ReferencedContainer = "container:BlockFusion.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6600000129B0000000000001"
-            BuildableName = "BlockRush.app"
+            BuildableName = "Block Rush 2K.app"
             BlueprintName = "BlockFusion"
             ReferencedContainer = "container:BlockFusion.xcodeproj">
          </BuildableReference>
