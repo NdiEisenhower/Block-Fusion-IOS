@@ -1,4 +1,4 @@
-# Block Rush 2K - iOS Application
+Downloaded your Key (.p8) and entered it into Firebase Console# Block Rush 2K - iOS Application
 
 Native iOS version of **Block Rush 2K** with full In-App Purchases (StoreKit 2), Google AdMob (Adaptive Banners, Interstitials, Rewarded Ads), App Tracking Transparency (ATT), Apple Taptic Engine haptics, offline asset bundling, and native JavaScript-to-Swift bridges matching the Android edition.
 

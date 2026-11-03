@@ -96,3 +96,4 @@ Challenge your mind, train your brain, and set new high scores in Block Rush 2K 
 ## 5. App Review Information
 * **Sign-in required**: No (Guests can play fully; Sign in with Apple/Google is optional).
 * **Notes**: "All features including offline play, powerups, daily challenges, and StoreKit 2 in-app purchases can be tested in Sandbox mode."
+
