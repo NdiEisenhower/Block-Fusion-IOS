@@ -10,6 +10,7 @@ All generated graphics are organized in `F:\Projects\Apps\iOS Apps\Block-Fusion-
 * **Where to upload**: Click **"Upload"** in the dotted rectangle under **"Header and Search Results"**.
 * *(Note: This header asset is optional for search discovery, but highly recommended for featuring!)*
 
+
 ---
 
 ## 2. App Previews and Screenshots (Tab 2)
