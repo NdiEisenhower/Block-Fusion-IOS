@@ -1,3 +1,4 @@
+import UIKit
 import WebKit
 import StoreKit
 
@@ -145,14 +146,6 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             let urlStr = body["url"] as? String
             let url = urlStr.flatMap { URL(string: $0) }
             delegate?.openShareSheet(text: text, url: url)
-        } else if action == "performAppleSignIn" {
-            let presentingVC = (delegate as? UIViewController) ?? webView?.window?.rootViewController ?? UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap({ $0.windows })
-                .first(where: { $0.isKeyWindow })?.rootViewController
-            if let vc = presentingVC {
-                AppleSignInManager.shared.performAppleSignIn(from: vc, scriptBridge: self)
-            }
         }
     }
     

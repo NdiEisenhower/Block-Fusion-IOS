@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BF0000012B00000100000001"
+               BlueprintIdentifier = "6600000129B0000000000001"
                BuildableName = "Block Rush 2K.app"
                BlueprintName = "BlockFusion"
                ReferencedContainer = "container:BlockFusion.xcodeproj">
@@ -36,7 +36,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BF0000012B00000100000001"
+            BlueprintIdentifier = "6600000129B0000000000001"
             BuildableName = "Block Rush 2K.app"
             BlueprintName = "BlockFusion"
             ReferencedContainer = "container:BlockFusion.xcodeproj">

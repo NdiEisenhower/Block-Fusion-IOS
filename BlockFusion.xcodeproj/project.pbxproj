@@ -21,7 +21,6 @@
 		1100000B29B000000000000B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2200000B29B000000000000B /* LaunchScreen.storyboard */; };
 		1100000C29B000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2200000C29B000000000000C /* Assets.xcassets */; };
 		1100000D29B000000000000D /* WebAssets in Resources */ = {isa = PBXBuildFile; fileRef = 2200000D29B000000000000D /* WebAssets */; };
-		1100000E29B000000000000E /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2200000E29B000000000000E /* Products.storekit */; };
 		1100000F29B000000000000F /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 3300000129B0000000000001 /* GoogleMobileAds */; };
 		398C4C1530958B57008AC36E /* GameKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398C4C1430958B57008AC36E /* GameKitManager.swift */; };
 /* End PBXBuildFile section */
@@ -136,6 +135,7 @@
 				2200000929B0000000000009 /* HapticManager.swift */,
 				2200000A29B000000000000A /* PreferencesManager.swift */,
 				398C4C1430958B57008AC36E /* GameKitManager.swift */,
+				398C4C1630958B57008AC36E /* AppleSignInManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -215,7 +215,6 @@
 				1100000B29B000000000000B /* LaunchScreen.storyboard in Resources */,
 				1100000C29B000000000000C /* Assets.xcassets in Resources */,
 				1100000D29B000000000000D /* WebAssets in Resources */,
-				1100000E29B000000000000E /* Products.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +230,7 @@
 				1100000329B0000000000003 /* MainViewController.swift in Sources */,
 				1100000429B0000000000004 /* ScriptBridge.swift in Sources */,
 				398C4C1530958B57008AC36E /* GameKitManager.swift in Sources */,
+				398C4C1730958B57008AC36E /* AppleSignInManager.swift in Sources */,
 				1100000529B0000000000005 /* NativeBridgeScript.swift in Sources */,
 				1100000629B0000000000006 /* StoreKitManager.swift in Sources */,
 				1100000729B0000000000007 /* AdMobManager.swift in Sources */,

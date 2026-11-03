@@ -38,21 +38,12 @@ final class GameKitManager: NSObject {
     func submitScore(_ score: Int, leaderboardId: String = "main_leaderboard") {
         guard isAuthenticated else { return }
         
-        if #available(iOS 14.0, *) {
-            GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [leaderboardId]) { error in
-                if let error = error {
-                    print("⚠️ Failed to submit Game Center score: \(error.localizedDescription)")
-                } else {
-                    print("🏆 Score \(score) submitted to Game Center leaderboard '\(leaderboardId)'")
-                }
-            }
-        } else {
-            let scoreReporter = GKScore(leaderboardIdentifier: leaderboardId)
-            scoreReporter.value = Int64(score)
-            GKScore.report([scoreReporter]) { error in
-                if let error = error {
-                    print("⚠️ Failed to submit Game Center score: \(error.localizedDescription)")
-                }
+        // Deployment target is iOS 15+, so the modern GKLeaderboard API is always available
+        GKLeaderboard.submitScore(score, context: 0, player: GKLocalPlayer.local, leaderboardIDs: [leaderboardId]) { error in
+            if let error = error {
+                print("⚠️ Failed to submit Game Center score: \(error.localizedDescription)")
+            } else {
+                print("🏆 Score \(score) submitted to Game Center leaderboard '\(leaderboardId)'")
             }
         }
     }

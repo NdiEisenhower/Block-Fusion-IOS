@@ -61,7 +61,7 @@ final class AdMobManager: NSObject {
     
     private func startSdk() {
         #if canImport(GoogleMobileAds)
-        GADMobileAds.sharedInstance().start { [weak self] status in
+        GADMobileAds.sharedInstance().start { [weak self] _ in
             guard let self = self else { return }
             self.isInitialized = true
             print("🚀 AdMob initialized on iOS")
@@ -97,7 +97,6 @@ final class AdMobManager: NSObject {
         guard let vc = presentingViewController else { return }
         
         if bannerView == nil {
-            let frame = CGRect(x: 0, y: 0, width: containerView.bounds.width, height: 50)
             let adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(containerView.bounds.width)
             let banner = GADBannerView(adSize: adSize)
             banner.adUnitID = bannerAdUnitId
