@@ -507,7 +507,8 @@ class Navigation {
                 <div class="item-name" style="font-size:15px;word-break:break-word;">${displayName}</div>
                 <div class="item-desc" style="word-break:break-word;">${email}</div>
                 <div style="font-size:11px;color:var(--text-muted);margin-top:1px;">
-                    ${App.state.loginProvider === 'google' ? '🔵 Google Account' :
+                    ${App.state.loginProvider === 'apple' ? ' Apple Account' :
+                    App.state.loginProvider === 'google' ? '🔵 Google Account' :
                     App.state.loginProvider === 'anonymous' ? '👤 Anonymous' :
                         '✉️ Email Account'}
                 </div>

@@ -524,6 +524,17 @@
                         },
                         socialBridge: {
                             postMessage: function(msg) {
+                                if (msg.action === 'performAppleSignIn') {
+                                    log('Auth', 'auth', ' Native Sign in with Apple dialog presented (AuthenticationServices)');
+                                    pulseHaptic();
+                                    setTimeout(() => {
+                                        if (win.onAppleSignInSuccess) {
+                                            win.onAppleSignInSuccess('sim_apple_jwt_token', 'sim_nonce_123', 'apple.player@icloud.com', { givenName: 'Apple', familyName: 'Player' });
+                                            log('Auth', 'auth', '✅ Apple ID credential verified! Logged in via Apple.');
+                                        }
+                                    }, 500);
+                                    return;
+                                }
                                 log('Social', 'bridge', `Native Share Sheet requested: ${JSON.stringify(msg)}`);
                                 alert(`[iOS Share Sheet UIActivityViewController]\n\n${msg.text || ''}\n${msg.shareUrl || ''}`);
                             }

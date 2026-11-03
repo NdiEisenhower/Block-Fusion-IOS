@@ -1367,6 +1367,10 @@ class App {
                        </div>` : ''}
 
                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <button class="btn btn-apple-signin" onclick="App.handleAppleSignIn()" style="background:#000000;color:#ffffff;border:1px solid #333333;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:14px;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,0.4);">
+                                <svg width="17" height="20" viewBox="0 0 170 170" fill="#ffffff" style="display:inline-block;vertical-align:middle;"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.58-7.78-11.65-14.23-6.19-9.82-11.05-21.2-14.59-34.12-3.53-12.93-5.3-25.02-5.3-36.27 0-14.75 3.53-27.14 10.59-37.17 7.07-10.03 16.3-15.15 27.69-15.37 5.01 0 10.59 1.25 16.74 3.76 6.15 2.5 10.23 3.81 12.24 3.91 2.02-.1 6.27-1.47 12.74-4.11 6.47-2.65 11.96-3.86 16.48-3.65 12.3.66 22.18 5.48 29.65 14.46-10.88 6.64-16.19 15.68-15.93 27.12.25 9.04 3.75 16.65 10.5 22.83 6.74 6.18 14.78 9.53 24.11 10.05-2.29 6.97-4.99 13.91-8.11 20.81zM119.22 31.84c0-7.72 2.76-14.89 8.28-21.51 5.53-6.61 12.34-10.33 20.44-11.15.11 1.2.16 2.18.16 2.94 0 7.84-3.05 15.22-9.16 22.14-6.1 6.92-13.43 10.74-21.99 11.47-.22-1.32-.33-2.62-.33-3.89z"/></svg>
+                                <span>Sign in with Apple</span>
+                            </button>
                            <button class="btn btn-primary" onclick="App.handleGoogleSignIn()" style="background:#4285F4;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;">
                                <span style="font-size:20px;">G</span> Sign in with Google
                            </button>
@@ -2111,6 +2115,26 @@ class App {
     }
 
     // ===== AUTH HANDLERS =====
+
+    // ===== APPLE AUTH HANDLER =====
+    static async handleAppleSignIn() {
+        if (typeof FirebaseService === 'undefined') {
+            this.showToast('⚠️ Firebase not available');
+            return;
+        }
+        try {
+            const result = await FirebaseService.signInWithApple();
+            if (result && result.success && result.user) {
+                this.handleSuccessfulLogin(result.user, 'apple');
+            } else if (result && !result.success && result.error && result.error !== 'Cancelled') {
+                this.showToast('❌ ' + result.error);
+            }
+        } catch (e) {
+            this.showToast('❌ Apple sign-in failed');
+            console.error(e);
+        }
+    }
+
     static async handleGoogleSignIn() {
         if (typeof FirebaseService === 'undefined') {
             this.showToast('⚠️ Firebase not available');
@@ -2855,3 +2879,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.App = App;
+// ===== NATIVE iOS APPLE SIGN IN CALLBACKS =====
+window.onAppleSignInSuccess = async function(idToken, rawNonce, email, fullName) {
+    if (typeof FirebaseService !== 'undefined') {
+        const result = await FirebaseService.completeAppleSignInWithCredential(idToken, rawNonce, email, fullName);
+        if (result && result.success && result.user) {
+            if (typeof App !== 'undefined' && App.handleSuccessfulLogin) {
+                App.handleSuccessfulLogin(result.user, 'apple');
+            }
+        } else {
+            if (typeof App !== 'undefined' && App.showToast) {
+                App.showToast('⚠️ ' + (result?.error || 'Apple Sign-in failed'));
+            }
+        }
+        if (typeof window._appleSignInResolve === 'function') {
+            window._appleSignInResolve(result);
+            window._appleSignInResolve = null;
+        }
+    }
+};
+
+window.onAppleSignInError = function(errorMsg) {
+    if (errorMsg !== 'Cancelled') {
+        if (typeof App !== 'undefined' && App.showToast) {
+            App.showToast('⚠️ Apple Sign-in: ' + errorMsg);
+        }
+    }
+    if (typeof window._appleSignInResolve === 'function') {
+        window._appleSignInResolve({ success: false, error: errorMsg });
+        window._appleSignInResolve = null;
+    }
+};

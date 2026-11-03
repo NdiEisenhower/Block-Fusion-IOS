@@ -210,9 +210,16 @@ enum NativeBridgeScript {
             vibrate: function(type) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium' }); },
             share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
             showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); }
+            signInWithApple: function() { postToNative('socialBridge', 'performAppleSignIn'); },
         };
 
         // Game Center Bridge
+        // Apple Authentication Bridge
+        window.AppleAuth = {
+            signIn: function() { postToNative('socialBridge', 'performAppleSignIn'); },
+            isAvailable: true
+        };
+
         window.GameCenter = {
             submitScore: function(score, leaderboardId) {
                 postToNative('gameCenterBridge', 'submitScore', { score: score, leaderboardId: leaderboardId || 'main_leaderboard' });

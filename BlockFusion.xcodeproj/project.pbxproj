@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		398C4C1730958B57008AC36E /* AppleSignInManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398C4C1630958B57008AC36E /* AppleSignInManager.swift */; };
 		1100000129B0000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2200000129B0000000000001 /* AppDelegate.swift */; };
 		1100000229B0000000000002 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2200000229B0000000000002 /* SceneDelegate.swift */; };
 		1100000329B0000000000003 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2200000329B0000000000003 /* MainViewController.swift */; };
@@ -26,6 +27,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		398C4C1630958B57008AC36E /* AppleSignInManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInManager.swift; sourceTree = "<group>"; };
+		398C4C1830958B57008AC36E /* BlockFusion.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BlockFusion.entitlements; sourceTree = "<group>"; };
 		0000000129B0000000000001 /* Block Rush 2K.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Block Rush 2K.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2200000129B0000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2200000229B0000000000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -364,6 +367,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4J687JQ55J;
+				CODE_SIGN_ENTITLEMENTS = BlockFusion/App/BlockFusion.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BlockFusion/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Block Rush 2K";
@@ -393,6 +397,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4J687JQ55J;
+				CODE_SIGN_ENTITLEMENTS = BlockFusion/App/BlockFusion.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BlockFusion/App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Block Rush 2K";

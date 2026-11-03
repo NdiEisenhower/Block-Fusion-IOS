@@ -132,11 +132,27 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             let text = "🎮 Join me on Block Rush 2K! Use my referral code \(code) to get 500 BONUS COINS! Play here:"
             let url = URL(string: shareUrlStr)
             delegate?.openShareSheet(text: text, url: url)
+        } else if action == "performAppleSignIn" {
+            let presentingVC = (delegate as? UIViewController) ?? webView?.window?.rootViewController ?? UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow })?.rootViewController
+            if let vc = presentingVC {
+                AppleSignInManager.shared.performAppleSignIn(from: vc, scriptBridge: self)
+            }
         } else if action == "share" {
             let text = body["text"] as? String ?? "Play Block Rush 2K!"
             let urlStr = body["url"] as? String
             let url = urlStr.flatMap { URL(string: $0) }
             delegate?.openShareSheet(text: text, url: url)
+        } else if action == "performAppleSignIn" {
+            let presentingVC = (delegate as? UIViewController) ?? webView?.window?.rootViewController ?? UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow })?.rootViewController
+            if let vc = presentingVC {
+                AppleSignInManager.shared.performAppleSignIn(from: vc, scriptBridge: self)
+            }
         }
     }
     

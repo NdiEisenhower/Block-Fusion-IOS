@@ -781,6 +781,77 @@ class FirebaseService {
         }
     }
 
+
+    // ===== APPLE SIGN IN (NATIVE iOS + WEB OAUTH) =====
+    static async signInWithApple() {
+        if (!this.initialized) return { success: false, error: 'Not initialized' };
+
+        // 1. If running inside native iOS app and socialBridge is available:
+        if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.socialBridge) {
+            return new Promise((resolve) => {
+                window._appleSignInResolve = resolve;
+                try {
+                    window.webkit.messageHandlers.socialBridge.postMessage({ action: 'performAppleSignIn' });
+                } catch (e) {
+                    console.warn('Native Apple Sign In bridge error, falling back to Web OAuth:', e);
+                    this._signInWithAppleWeb().then(resolve);
+                }
+            });
+        }
+
+        // 2. Web browser / Simulator OAuth flow
+        return this._signInWithAppleWeb();
+    }
+
+    static async _signInWithAppleWeb() {
+        if (!this.initialized) return { success: false, error: 'Not initialized' };
+        try {
+            this.logEvent('login_attempt', { method: 'apple' });
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            provider.addScope('email');
+            provider.addScope('name');
+
+            const result = await this.auth.signInWithPopup(provider);
+            this.currentUser = result.user;
+            this.logEvent('login_success', { method: 'apple' });
+            return { success: true, user: result.user };
+        } catch (error) {
+            let msg = 'Apple Sign-in failed';
+            if (error.code === 'auth/popup-closed-by-user') msg = 'Cancelled';
+            if (error.code === 'auth/popup-blocked') msg = 'Pop-up blocked';
+            this.logCrash('apple_signin_error', error.code);
+            return { success: false, error: msg };
+        }
+    }
+
+    static async completeAppleSignInWithCredential(idToken, rawNonce, email, fullName) {
+        if (!this.initialized) return { success: false, error: 'Not initialized' };
+        try {
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            const credential = provider.credential({
+                idToken: idToken,
+                rawNonce: rawNonce
+            });
+            const result = await this.auth.signInWithCredential(credential);
+            this.currentUser = result.user;
+
+            if (fullName && (fullName.givenName || fullName.familyName)) {
+                const displayName = `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim();
+                if (displayName && (!this.currentUser.displayName || this.currentUser.displayName === 'Player')) {
+                    try {
+                        await this.currentUser.updateProfile({ displayName: displayName });
+                    } catch (e) { }
+                }
+            }
+            this.logEvent('login_success', { method: 'apple_native' });
+            return { success: true, user: result.user };
+        } catch (error) {
+            console.error('Apple credential error:', error);
+            this.logCrash('apple_credential_error', error.code || error.message);
+            return { success: false, error: error.message || 'Credential verification failed' };
+        }
+    }
+
     // Email/Password Sign In
     static async signInWithEmail(email, password) {
         if (!this.initialized) return { success: false, error: 'Not initialized' };
