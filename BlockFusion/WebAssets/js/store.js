@@ -109,7 +109,7 @@ class Store {
             const removeAdsPrice = prices['remove_ads'] || (CONFIG && CONFIG.STORE_ITEMS && CONFIG.STORE_ITEMS.removeAds ? CONFIG.STORE_ITEMS.removeAds.price : 'R56.99');
 
             let specialOffersHtml = '';
-            if (isNative && showAdsUi && !adsRemoved) {
+            if (showAdsUi && !adsRemoved) {
                 specialOffersHtml += `
                 <div class="store-item" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-surface);border-radius:16px;border:1px solid rgba(255,255,255,0.05);gap:12px;">
                     <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
@@ -133,7 +133,7 @@ class Store {
             // Offline Subscription - only on native app wrapper and NOT on TV
             const isTvDevice = (typeof window.isTv !== 'undefined' && window.isTv) || (typeof Billing !== 'undefined' && typeof Billing.isTvDevice === 'function' && Billing.isTvDevice());
 
-            if (isNative && !isTvDevice) {
+            if (!isTvDevice) {
                 const offlineSubOwned = (typeof App !== 'undefined' && App.state) ? App.state.offlineSubOwned : false;
                 const offlineSubPrice = prices['sub_offline_mode'] || (CONFIG && CONFIG.STORE_ITEMS && CONFIG.STORE_ITEMS.offlineSub ? CONFIG.STORE_ITEMS.offlineSub.price : 'R19.99/mo');
                 specialOffersHtml += `
@@ -284,6 +284,12 @@ class Store {
             return;
         }
 
+        // Check if running on iOS with WebKit MessageHandler
+        if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.billingBridge) {
+            window.webkit.messageHandlers.billingBridge.postMessage({ action: 'launchPurchase', productId: productId });
+            return;
+        }
+
         // Check if running on Android with Native Billing Bridge
         if (typeof Android !== 'undefined' && typeof Android.launchPurchase === 'function') {
             Android.launchPurchase(productId);
@@ -378,6 +384,11 @@ class Store {
     // Restore Purchases
     static restorePurchases() {
         console.log('🔄 Restore purchases requested');
+
+        if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.billingBridge) {
+            window.webkit.messageHandlers.billingBridge.postMessage({ action: 'restorePurchases' });
+            return;
+        }
 
         if (typeof Android !== 'undefined' && typeof Android.restorePurchases === 'function') {
 
