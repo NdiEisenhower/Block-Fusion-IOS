@@ -105,6 +105,7 @@
 				2200000129B0000000000001 /* AppDelegate.swift */,
 				2200000229B0000000000002 /* SceneDelegate.swift */,
 				2200000F29B000000000000F /* Info.plist */,
+				398C4C1830958B57008AC36E /* BlockFusion.entitlements */,
 			);
 			path = App;
 			sourceTree = "<group>";
