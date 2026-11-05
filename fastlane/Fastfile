@@ -31,12 +31,12 @@ platform :ios do
       build_number: latest_testflight_build_number(api_key: api_key) + 1
     )
 
-    # 4. Force Xcode to use the exact downloaded profile (Manual Signing)
+    # 4. Force Xcode to use the exact downloaded profile during Archive AND Export
     build_app(
       project: "BlockFusion.xcodeproj",
       scheme: "BlockFusion",
       export_method: "app-store",
-      xcargs: "CODE_SIGN_STYLE=Manual",
+      xcargs: "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER=\"#{ENV['SIGH_NAME']}\"",
       export_options: {
         provisioningProfiles: {
           "com.eisen.blockrush2k" => ENV["SIGH_NAME"]
