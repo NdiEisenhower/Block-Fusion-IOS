@@ -21,8 +21,7 @@ jobs:
 
       - name: Install Bundler & Fastlane
         run: |
-          gem install bundler
-          bundle install || bundle add fastlane
+          bundle install
 
       - name: Run Fastlane Deployment
         env:
