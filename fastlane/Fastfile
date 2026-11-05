@@ -28,12 +28,18 @@ platform :ios do
       build_number: latest_testflight_build_number(api_key: api_key) + 1
     )
 
-    # Allow xcodebuild to process the new provisioning profile
+# Build and archive Xcode project with explicit manual signing
     build_app(
       project: "BlockFusion.xcodeproj",
       scheme: "BlockFusion",
       export_method: "app-store",
-      xcargs: "-allowProvisioningUpdates"
+      export_options: {
+        provisioningProfiles: {
+          # Make sure the bundle ID matches exactly
+          "com.eisen.blockrush2k" => ENV["SIGH_NAME"] || "com.eisen.blockrush2k AppStore"
+        }
+      },
+      xcargs: "CODE_SIGN_STYLE=Manual"
     )
 
     upload_to_testflight(
