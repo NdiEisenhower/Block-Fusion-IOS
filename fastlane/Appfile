@@ -1,0 +1,2 @@
+app_identifier("com.eisen.blockrush2k") # Your App's Bundle ID
+apple_id("mmbadimunei@gmail.com")     # Developer account email
