@@ -12,10 +12,11 @@ platform :ios do
       in_house: false
     )
 
-    # 1. Generate new distribution certificate + private key in keychain
+    # 1. Create or download the Distribution Certificate into build.keychain
     get_certificates(
       api_key: api_key,
-      create_if_needed: true
+      keychain_path: File.expand_path("~/Library/Keychains/build.keychain-db"),
+      force: true
     )
 
     # 2. Download or create App Store profile linked to the certificate
@@ -25,7 +26,7 @@ platform :ios do
       force: true
     )
 
-    # 3. Bump build number from latest TestFlight version
+    # 3. Bump build number based on latest TestFlight version
     increment_build_number(
       build_number: latest_testflight_build_number(api_key: api_key) + 1
     )
