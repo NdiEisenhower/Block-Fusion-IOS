@@ -35,5 +35,5 @@ jobs:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
-          KEYCHAIN_NAME: "build.keychain"
+          KEYCHAIN_PATH: /Users/runner/Library/Keychains/build.keychain-db
         run: bundle exec fastlane beta
