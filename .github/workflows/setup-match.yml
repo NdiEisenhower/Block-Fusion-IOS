@@ -1,0 +1,86 @@
+name: Set up Fastlane Match
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Validate required secrets
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: |
+          for name in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_CONTENT MATCH_GIT_TOKEN MATCH_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Add the $name repository Actions secret before running this workflow."
+              exit 1
+            fi
+          done
+
+      - name: Prepare temporary keychain
+        run: |
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 32)"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+
+      - name: Configure Match repository access
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$MATCH_GIT_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
+          echo "MATCH_GIT_BASIC_AUTHORIZATION=$MATCH_GIT_BASIC_AUTHORIZATION" >> "$GITHUB_ENV"
+
+      - name: Initialize empty Match repository
+        run: |
+          set -euo pipefail
+          export GIT_CONFIG_COUNT=1
+          export GIT_CONFIG_KEY_0="http.https://github.com/.extraheader"
+          export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $MATCH_GIT_BASIC_AUTHORIZATION"
+          MATCH_GIT_URL="https://github.com/NdiEisenhower/Block-Fusion-IOS-match.git"
+          REFS_FILE="$RUNNER_TEMP/match-refs"
+          git ls-remote --heads "$MATCH_GIT_URL" refs/heads/main > "$REFS_FILE"
+
+          if [ ! -s "$REFS_FILE" ]; then
+            MATCH_REPO_DIR="$RUNNER_TEMP/match-repo"
+            mkdir "$MATCH_REPO_DIR"
+            git -C "$MATCH_REPO_DIR" init --initial-branch=main
+            git -C "$MATCH_REPO_DIR" config user.name "github-actions[bot]"
+            git -C "$MATCH_REPO_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            printf '%s\n' "Encrypted Fastlane Match signing assets are stored in this repository." > "$MATCH_REPO_DIR/README.md"
+            git -C "$MATCH_REPO_DIR" add README.md
+            git -C "$MATCH_REPO_DIR" commit -m "Initialize Fastlane Match storage"
+            git -C "$MATCH_REPO_DIR" remote add origin "$MATCH_GIT_URL"
+            git -C "$MATCH_REPO_DIR" push origin main
+          fi
+
+      - name: Generate and save signing assets
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: bundle exec fastlane setup_match

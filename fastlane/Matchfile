@@ -1,5 +1,6 @@
-git_url(ENV.fetch("MATCH_GIT_URL"))
+git_url("https://github.com/NdiEisenhower/Block-Fusion-IOS-match.git")
 storage_mode("git")
 type("appstore")
 app_identifier(["com.eisen.blockrush2k"])
 readonly(true)
+git_branch("main")

@@ -2,7 +2,7 @@ name: Deploy to TestFlight
 
 on:
   push:
-    branches: [ "fast_lane", "main","fix/swift6-storekit-match" ]
+    branches: [ "fast_lane", "main" ]
   workflow_dispatch:
 
 env:
@@ -23,23 +23,46 @@ jobs:
           bundler-cache: true
 
       - name: Prepare Keychain for Signing
-        env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          KEYCHAIN_PATH="$HOME/Library/Keychains/build.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 32)"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+
+      - name: Configure Match repository access
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          if [ -z "$MATCH_GIT_TOKEN" ]; then
+            echo "::error::Add the MATCH_GIT_TOKEN Actions secret with access to the private Match repository."
+            exit 1
+          fi
+          MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$MATCH_GIT_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
+          echo "MATCH_GIT_BASIC_AUTHORIZATION=$MATCH_GIT_BASIC_AUTHORIZATION" >> "$GITHUB_ENV"
+
+      - name: Validate deployment secrets
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: |
+          for name in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_CONTENT MATCH_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Add the $name repository Actions secret before running this workflow."
+              exit 1
+            fi
+          done
 
       - name: Run Fastlane Deployment
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          KEYCHAIN_PATH: /Users/runner/Library/Keychains/build.keychain-db
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: bundle exec fastlane beta
