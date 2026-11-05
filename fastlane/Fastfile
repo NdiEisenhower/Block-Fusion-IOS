@@ -12,36 +12,39 @@ platform :ios do
       in_house: false
     )
 
+    # 1. Generate certificate in the ephemeral runner keychain
     get_certificates(
       api_key: api_key,
-      keychain_path: File.expand_path("~/Library/Keychains/build.keychain-db"),
+      keychain_path: ENV["KEYCHAIN_PATH"],
       force: true
     )
 
+    # 2. Download profile (This will now correctly include Game Center & Apple Sign In)
     get_provisioning_profile(
       api_key: api_key,
       app_identifier: "com.eisen.blockrush2k",
       force: true
     )
 
+    # 3. Bump build number automatically
     increment_build_number(
       build_number: latest_testflight_build_number(api_key: api_key) + 1
     )
 
-# Build and archive Xcode project with explicit manual signing
+    # 4. Force Xcode to use the exact downloaded profile (Manual Signing)
     build_app(
       project: "BlockFusion.xcodeproj",
       scheme: "BlockFusion",
       export_method: "app-store",
+      xcargs: "CODE_SIGN_STYLE=Manual",
       export_options: {
         provisioningProfiles: {
-          # Make sure the bundle ID matches exactly
-          "com.eisen.blockrush2k" => ENV["SIGH_NAME"] || "com.eisen.blockrush2k AppStore"
+          "com.eisen.blockrush2k" => ENV["SIGH_NAME"]
         }
-      },
-      xcargs: "CODE_SIGN_STYLE=Manual"
+      }
     )
 
+    # 5. Upload to TestFlight
     upload_to_testflight(
       api_key: api_key,
       skip_waiting_for_build_processing: true
