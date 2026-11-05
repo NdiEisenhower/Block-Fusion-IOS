@@ -1,3 +1,4 @@
+opt_out_usage
 default_platform(:ios)
 
 platform :ios do
@@ -11,25 +12,32 @@ platform :ios do
       in_house: false
     )
 
-    # Sync provisioning profiles directly via the API Key (no extra git repo needed)
-    get_provisioning_profile(
+    # 1. Generate new distribution certificate + private key in keychain
+    get_certificates(
       api_key: api_key,
-      app_identifier: "com.eisen.blockrush2k"
+      create_if_needed: true
     )
 
-    # Increment build number based on TestFlight
+    # 2. Download or create App Store profile linked to the certificate
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: "com.eisen.blockrush2k",
+      force: true
+    )
+
+    # 3. Bump build number from latest TestFlight version
     increment_build_number(
       build_number: latest_testflight_build_number(api_key: api_key) + 1
     )
 
-    # Build the iOS archive
+    # 4. Compile and archive Xcode project
     build_app(
       project: "BlockFusion.xcodeproj",
       scheme: "BlockFusion",
       export_method: "app-store"
     )
 
-    # Upload to TestFlight
+    # 5. Upload binary directly to TestFlight
     upload_to_testflight(
       api_key: api_key,
       skip_waiting_for_build_processing: true
