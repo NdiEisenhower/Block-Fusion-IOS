@@ -29,7 +29,7 @@ platform :ios do
       project: "BlockFusion.xcodeproj",
       scheme: "BlockFusion",
       export_method: "app-store",
-      xcargs: "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore com.eisen.blockrush2k'",
+      xcargs: 'CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="match AppStore com.eisen.blockrush2k"',
       export_options: {
         provisioningProfiles: {
           "com.eisen.blockrush2k" => "match AppStore com.eisen.blockrush2k"
