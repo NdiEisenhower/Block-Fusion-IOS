@@ -68,10 +68,13 @@ final class StoreKitManager: NSObject {
                 prices[product.id] = product.displayPrice
             }
             
+            let finalMapped = mapped
+            let finalPrices = prices
+            
             await MainActor.run {
-                self.availableProducts = mapped
-                self.formattedPrices = prices
-                self.delegate?.onPricesLoaded(prices: prices)
+                self.availableProducts = finalMapped
+                self.formattedPrices = finalPrices
+                self.delegate?.onPricesLoaded(prices: finalPrices)
             }
             print("🛒 Loaded \(products.count) StoreKit products with localized prices")
         } catch {
@@ -110,8 +113,9 @@ final class StoreKitManager: NSObject {
         }
         
         if !restored.isEmpty {
+            let finalRestored = restored
             await MainActor.run {
-                self.delegate?.onPurchasesRestored(restoredProducts: restored)
+                self.delegate?.onPurchasesRestored(restoredProducts: finalRestored)
             }
         }
     }
