@@ -1,1 +1,13 @@
+# Google AdMob & AdSense
 google.com, pub-4255859216659691, DIRECT, f08c47fec0942fa0
+
+# Huawei Petal Ads (AppGallery)
+acd.op.hicloud.com,2051075251982873216,DIRECT
+adx-dre.op.hicloud.com,2051075251982873216,DIRECT
+adx-drru.op.hicloud.com,2051075251982873216,DIRECT
+adx-dra.op.hicloud.com,2051075251982873216,DIRECT
+adx-drru.op.dbankcloud.ru,2051075251982873216,DIRECT
+mobupps.com,c74d97b01eae257e44aa9d5bade97baf9807,DIRECT
+catapultx.com,141027,DIRECT
+outbrain.com,00290df154099d402e372c48127471b153,DIRECT
+appnexus.com,7597,RESELLER,f5ab79cb980f11d1

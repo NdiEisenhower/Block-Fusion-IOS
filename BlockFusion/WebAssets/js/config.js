@@ -9,13 +9,9 @@ const CONFIG = {
         ios: false      // Ads enabled on Apple iOS
     },
 
-    // App Versioning
-    APP_VERSION: '1.0.0',
-    APP_BUILD: 1,
-
     // Show Ads related UI elements ('auto' evaluates per platform, or explicitly true/false)
     SHOW_ADS_UI: 'auto',
-    ENABLE_MULTI_LANGUAGE: false,
+    ENABLE_MULTI_LANGUAGE: true,
 
     isAdsUiEnabled() {
         if (this.SHOW_ADS_UI === true) return true;
@@ -126,41 +122,99 @@ const CONFIG = {
         },
     },
 
-    // Level goal calculation - scales progressively
+    // Round & Target Progression Configuration (can be updated via Portal Remote Config)
+    ROUNDS: {
+        defaultRepetitions: 3, // How many times a target is repeated before advancing (e.g. 3 or 5)
+        progressionMode: 'sequential', // 'sequential', 'random_after', 'randomized'
+        randomStartLevel: 16,
+        randomPool: [8, 16, 32, 64, 128, 256, 512, 1024, 2048],
+        targetRepetitions: {
+            "8": 3,
+            "16": 3,
+            "32": 3,
+            "64": 3,
+            "128": 5,
+            "256": 5,
+            "512": 5,
+            "1024": 5,
+            "2048": 5,
+            "4096": 5,
+            "8192": 5
+        },
+        specialRounds: []
+    },
+
+    // Check if a specific level is configured as a special challenge round
+    getSpecialRound(worldId, levelNum) {
+        const globalLevel = worldId * 25 + levelNum;
+        const roundsCfg = this.ROUNDS;
+        if (!roundsCfg || !Array.isArray(roundsCfg.specialRounds)) return null;
+        return roundsCfg.specialRounds.find(s => parseInt(s.level) === globalLevel) || null;
+    },
+
+    // Level goal calculation - scales progressively based on repetitions, randomization and special rounds
     getLevelGoal(worldId, levelNum) {
         const globalLevel = worldId * 25 + levelNum;
-        let power;
+        const roundsCfg = this.ROUNDS;
 
-        if (globalLevel <= 5) {
-            power = 3; // 8
-        } else if (globalLevel <= 10) {
-            power = 4; // 16
-        } else if (globalLevel <= 15) {
-            power = 5; // 32
-        } else if (globalLevel <= 20) {
-            power = 6; // 64
-        } else if (globalLevel <= 30) {
-            power = 7; // 128
-        } else if (globalLevel <= 40) {
-            power = 8; // 256
-        } else if (globalLevel <= 50) {
-            power = 9; // 512
-        } else if (globalLevel <= 65) {
-            power = 10; // 1024
-        } else if (globalLevel <= 80) {
-            power = 11; // 2048
-        } else if (globalLevel <= 95) {
-            power = 12; // 4096
-        } else if (globalLevel <= 110) {
-            power = 13; // 8192
-        } else if (globalLevel <= 130) {
-            power = 14; // 16384
-        } else if (globalLevel <= 150) {
-            power = 15; // 32768
-        } else {
-            power = 16; // 65536
+        if (roundsCfg) {
+            // 1. Check for Special Round override on this exact level
+            if (Array.isArray(roundsCfg.specialRounds)) {
+                const special = roundsCfg.specialRounds.find(s => parseInt(s.level) === globalLevel);
+                if (special && special.target) {
+                    return parseInt(special.target);
+                }
+            }
+
+            // 2. Check for Randomized mode
+            const mode = roundsCfg.progressionMode || 'sequential';
+            const randomStart = parseInt(roundsCfg.randomStartLevel) || 16;
+            const isRandom = (mode === 'randomized') || (mode === 'random_after' && globalLevel >= randomStart);
+
+            if (isRandom) {
+                const pool = (Array.isArray(roundsCfg.randomPool) && roundsCfg.randomPool.length > 0)
+                    ? roundsCfg.randomPool.map(Number)
+                    : [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+                // Deterministic pseudo-random seed per level so level goal remains consistent
+                const seed = Math.abs(Math.sin(globalLevel * 997 + 101));
+                const idx = Math.floor(seed * pool.length) % pool.length;
+                return pool[idx] || 64;
+            }
+
+            // 3. Normal Sequential Progression with target repetitions
+            const targets = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536];
+            const defReps = Math.max(1, parseInt(roundsCfg.defaultRepetitions) || 3);
+            const customReps = roundsCfg.targetRepetitions || {};
+
+            let accumulated = 0;
+            for (const t of targets) {
+                const reps = (customReps[t] !== undefined && parseInt(customReps[t]) > 0)
+                    ? parseInt(customReps[t])
+                    : defReps;
+                accumulated += reps;
+                if (globalLevel <= accumulated) {
+                    return t;
+                }
+            }
+            return 65536;
         }
 
+        // Fallback calculation
+        let power;
+        if (globalLevel <= 5) power = 3;
+        else if (globalLevel <= 10) power = 4;
+        else if (globalLevel <= 15) power = 5;
+        else if (globalLevel <= 20) power = 6;
+        else if (globalLevel <= 30) power = 7;
+        else if (globalLevel <= 40) power = 8;
+        else if (globalLevel <= 50) power = 9;
+        else if (globalLevel <= 65) power = 10;
+        else if (globalLevel <= 80) power = 11;
+        else if (globalLevel <= 95) power = 12;
+        else if (globalLevel <= 110) power = 13;
+        else if (globalLevel <= 130) power = 14;
+        else if (globalLevel <= 150) power = 15;
+        else power = 16;
         return Math.pow(2, power);
     },
 

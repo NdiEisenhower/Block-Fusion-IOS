@@ -185,6 +185,9 @@
         }
 
         .input-field {
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
             background: rgba(10, 16, 29, 0.8);
             border: 1px solid var(--border-subtle);
             border-radius: var(--radius-md);
@@ -1829,7 +1832,7 @@
                 <!-- ========================================================
                      TAB 3: LIVE GAME SETTINGS & ADS CONTROL
                      ======================================================== -->
-                <section class="tab-panel" id="panel-live-settings">
+                                <section class="tab-panel" id="panel-live-settings">
                     <div class="config-grid-2">
                         <!-- Ads Master Controller -->
                         <div class="config-card">
@@ -1923,7 +1926,7 @@
                             <div class="config-card-header">
                                 <div>
                                     <h3 class="chart-title">🚨 Broadcasts & Maintenance</h3>
-                                    <p class="chart-sub">Emergency controls and player announcements</p>
+                                    <p class="chart-sub">Emergency controls, maintenance and player announcements</p>
                                 </div>
                             </div>
 
@@ -1933,7 +1936,7 @@
                                     <p>Show in-game language selector in Settings (English, TshiVenda, isiZulu)</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" id="cfg-language-toggle" onchange="PortalConfig.onLanguageToggleChange(this.checked)">
+                                    <input type="checkbox" id="cfg-language-toggle" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -1941,12 +1944,47 @@
                             <div class="toggle-row">
                                 <div class="toggle-info">
                                     <h4>Maintenance Mode</h4>
-                                    <p>Temporarily locks access to web and online sync</p>
+                                    <p>Temporarily locks access for checked platforms below</p>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" id="cfg-maintenance-toggle" onchange="PortalConfig.onMaintenanceToggleChange(this.checked)">
+                                    <input type="checkbox" id="cfg-maintenance-toggle" onchange="PortalConfig.toggleMaintenanceUi()">
                                     <span class="slider"></span>
                                 </label>
+                            </div>
+
+                            <!-- Target Maintenance Platforms Selection -->
+                            <div id="cfg-maintenance-platforms-wrap" style="margin-top: 12px; background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--radius-sm); padding: 14px; transition: all 0.2s ease;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <span style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.5px;">
+                                        Platforms in Maintenance (Ticked = Locked):
+                                    </span>
+                                    <button type="button" class="btn-portal btn-sm btn-outline" style="font-size: 10px; padding: 2px 8px; height: 24px;" onclick="PortalConfig.toggleAllMaintenancePlatforms()">
+                                        Toggle All
+                                    </button>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer; background: rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+                                        <input type="checkbox" id="cfg-maint-web" checked onchange="PortalConfig.updatePlatformBadge(this)">
+                                        <span>🌐 Web Play</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer; background: rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+                                        <input type="checkbox" id="cfg-maint-google" checked onchange="PortalConfig.updatePlatformBadge(this)">
+                                        <span>🟢 Google Play</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer; background: rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+                                        <input type="checkbox" id="cfg-maint-huawei" checked onchange="PortalConfig.updatePlatformBadge(this)">
+                                        <span>🔴 Huawei HMS</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer; background: rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+                                        <input type="checkbox" id="cfg-maint-ios" checked onchange="PortalConfig.updatePlatformBadge(this)">
+                                        <span>🍎 Apple iOS</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; cursor: pointer; background: rgba(255,255,255,0.04); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+                                        <input type="checkbox" id="cfg-maint-tv" checked onchange="PortalConfig.updatePlatformBadge(this)">
+                                        <span>📺 Smart TV</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="input-group" style="margin-top: 10px;">
@@ -2044,7 +2082,142 @@
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                    
+                    <!-- Row 3: Round & Target Progression Studio -->
+                    <div class="config-card" style="margin-top: 20px;" id="card-rounds-progression">
+                        <div class="config-card-header">
+                            <div>
+                                <h3 class="chart-title">🎯 Round & Target Progression Studio</h3>
+                                <p class="chart-sub">Configure how many times each target round repeats (e.g. Target 8 repeated 3 or 5 times), set normal sequential or randomized rounds, and inject special challenge levels.</p>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" class="btn-portal btn-sm btn-outline" onclick="PortalConfig.applyRoundPreset('3-reps')">
+                                    ⚡ 3 Repeats Each
+                                </button>
+                                <button type="button" class="btn-portal btn-sm btn-outline" onclick="PortalConfig.applyRoundPreset('5-reps')">
+                                    🔥 5 Repeats Each
+                                </button>
+                                <button type="button" class="btn-portal btn-sm btn-outline" onclick="PortalConfig.applyRoundPreset('random-late')">
+                                    🎲 Normal Then Random
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Core Progression Settings Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                            <div class="input-group">
+                                <label class="input-label">Default Target Repetitions (Rounds)</label>
+                                <input type="number" id="cfg-rounds-default-reps" class="input-field" min="1" max="50" value="3" oninput="PortalConfig.onDefaultRepsInput(this.value)">
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Number of times a target repeats before advancing (e.g. 3 or 5)</p>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="input-label">Round Progression Mode</label>
+                                <select id="cfg-rounds-mode" class="input-field" onchange="PortalConfig.onProgressionModeChange()">
+                                    <option value="sequential">Normal Sequential Progression (Target repeats in order)</option>
+                                    <option value="random_after">Normal Progression, Then Randomize remaining rounds</option>
+                                    <option value="randomized">Full Random Mode (Random target on all normal rounds)</option>
+                                </select>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Control whether rounds advance normally or randomize</p>
+                            </div>
+
+                            <div class="input-group" id="cfg-rounds-random-start-group" style="display: none;">
+                                <label class="input-label">Randomize From Level #</label>
+                                <input type="number" id="cfg-rounds-random-start" class="input-field" min="2" max="200" value="16" oninput="PortalConfig.updateProgressionPreview()">
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Levels before this follow normal repeats; levels after are randomized</p>
+                            </div>
+                        </div>
+
+                        <!-- Target Repetitions Builder -->
+                        <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0;">Target-Specific Repetitions (How many rounds each target is played)</h4>
+                                    <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Override repeat count per target (e.g. Target 8 = 3 times, Target 16 = 5 times, etc.)</p>
+                                </div>
+                                <button type="button" class="btn-portal btn-sm btn-outline" onclick="PortalConfig.resetTargetRepsToDefault()" style="font-size: 11px;">
+                                    Reset All to Default
+                                </button>
+                            </div>
+
+                            <!-- Target Grid -->
+                            <div id="target-reps-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px;">
+                                <!-- Rendered dynamically by PortalConfig -->
+                            </div>
+                        </div>
+
+                        <!-- Random Pool Selector (Targets included in randomization) -->
+                        <div id="cfg-rounds-random-pool-wrap" style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px;">
+                            <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px 0;">Allowed Targets Pool for Randomized Rounds</h4>
+                            <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 12px 0;">When randomized mode is active, the game selects goals from ticked targets below:</p>
+                            <div id="random-pool-checkboxes" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <!-- Rendered dynamically by PortalConfig -->
+                            </div>
+                        </div>
+
+                        <!-- Special Challenge / Boss Rounds Section -->
+                        <div style="background: rgba(15, 23, 42, 0.45); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <div>
+                                    <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0;">⭐ Special / Challenge Rounds (Specific Level Overrides)</h4>
+                                    <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Inject a custom target at any exact level (e.g. Level 10 has Target 512 as Boss Challenge)</p>
+                                </div>
+                                <button type="button" class="btn-portal btn-sm btn-gold" onclick="PortalConfig.toggleAddSpecialForm(true)" style="font-size: 11px;">
+                                    ➕ Add Special Round
+                                </button>
+                            </div>
+
+                            <!-- Inline Add Special Round Form -->
+                            <div id="add-special-round-form" style="display: none; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 6px; padding: 14px; margin-bottom: 14px;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) auto auto; gap: 10px; align-items: flex-end;">
+                                    <div>
+                                        <label class="input-label" style="font-size: 10px;">Level #</label>
+                                        <input type="number" id="new-special-level" class="input-field" min="1" max="200" value="10" style="padding: 6px 10px; font-size: 12px;">
+                                    </div>
+                                    <div>
+                                        <label class="input-label" style="font-size: 10px;">Special Target Goal</label>
+                                        <select id="new-special-target" class="input-field" style="padding: 6px 10px; font-size: 12px;">
+                                            <option value="64">64</option>
+                                            <option value="128">128</option>
+                                            <option value="256">256</option>
+                                            <option value="512" selected>512</option>
+                                            <option value="1024">1024</option>
+                                            <option value="2048">2048</option>
+                                            <option value="4096">4096</option>
+                                            <option value="8192">8192</option>
+                                        </select>
+                                    </div>
+                                    <div style="grid-column: span 1;">
+                                        <label class="input-label" style="font-size: 10px;">Label / Challenge Name</label>
+                                        <input type="text" id="new-special-label" class="input-field" placeholder="e.g. Boss Challenge" value="Boss Challenge" style="padding: 6px 10px; font-size: 12px;">
+                                    </div>
+                                    <button type="button" class="btn-portal btn-sm btn-gold" onclick="PortalConfig.confirmAddSpecialRound()" style="height: 38px; padding: 0 16px;">
+                                        Add
+                                    </button>
+                                    <button type="button" class="btn-portal btn-sm btn-outline" onclick="PortalConfig.toggleAddSpecialForm(false)" style="height: 38px;">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="special-rounds-list" style="display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Dynamically populated special rounds -->
+                            </div>
+                        </div>
+
+                        <!-- Progression Summary Schedule Bar -->
+                        <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: var(--radius-sm); padding: 12px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <span style="font-size: 14px;">📋</span>
+                                <span style="font-size: 12px; font-weight: 700; color: var(--accent-gold);">Live Round & Level Progression Schedule Preview (World 1, Levels 1–25):</span>
+                            </div>
+                            <div id="cfg-rounds-schedule-preview" style="font-size: 11px; color: #cbd5e1; line-height: 1.7; word-break: break-word; font-family: monospace;">
+                                Calculating schedule...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
                         <button class="btn-portal btn-outline" onclick="PortalConfig.loadLiveSettings()">
                             🔄 Reset to Cloud
                         </button>
@@ -2076,227 +2249,178 @@
 
                         <div class="config-grid-3">
                             <!-- GOOGLE PLAY CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 26px;">🟢</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                    <span style="font-size: 24px;">🟢</span>
                                     <div>
-                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Google Play (Android)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Package: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Google Play (Android)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted);">Package: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
-                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>📦</span>
-                                        <span>Version & Store Release</span>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">AdMob App ID</label>
+                                    <input type="text" id="rc-google-app-id" class="input-field mono" value="ca-app-pub-4541991465223368~4111326402">
+                                </div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
-                                            <input type="text" id="rc-google-version-name" class="input-field mono" value="1.0.5" placeholder="1.0.0">
-                                        </div>
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
-                                            <input type="number" id="rc-google-version-code" class="input-field mono" value="21" placeholder="1">
-                                        </div>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Banner Ad Unit ID</label>
+                                    <input type="text" id="rc-google-banner-id" class="input-field mono" value="ca-app-pub-4541991465223368/5021200371">
+                                </div>
 
-                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
-                                        <div class="toggle-info">
-                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
-                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
-                                        </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="rc-google-force-update" onchange="PortalConfig.onForceUpdateToggleChange('google', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Interstitial Ad Unit ID</label>
+                                    <input type="text" id="rc-google-interstitial-id" class="input-field mono" value="ca-app-pub-4541991465223368/6641883584">
+                                </div>
 
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Store Listing URL</label>
-                                        <input type="text" id="rc-google-store-url" class="input-field" value="https://play.google.com/store/apps/details?id=com.eisen.blockrush2k">
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Rewarded Ad Unit ID</label>
+                                    <input type="text" id="rc-google-rewarded-id" class="input-field mono" value="ca-app-pub-4541991465223368/3339070860">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Latest Version</label>
+                                        <input type="text" id="rc-google-version-name" class="input-field mono" value="1.0.5">
+                                    </div>
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Version Code</label>
+                                        <input type="number" id="rc-google-version-code" class="input-field mono" value="21">
                                     </div>
                                 </div>
 
-                                <!-- AD UNITS & MONETIZATION -->
-                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>💰</span>
-                                        <span>Ad Units & Monetization</span>
+                                <div class="toggle-row" style="margin-bottom: 12px;">
+                                    <div class="toggle-info">
+                                        <h4 style="font-size: 13px;">Force Update Required</h4>
+                                        <p style="font-size: 11px;">Lock outdated app versions</p>
                                     </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="rc-google-force-update">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
 
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AdMob App ID</label>
-                                        <input type="text" id="rc-google-app-id" class="input-field mono" value="ca-app-pub-4541991465223368~4111326402">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Banner Ad Unit ID</label>
-                                        <input type="text" id="rc-google-banner-id" class="input-field mono" value="ca-app-pub-4541991465223368/5021200371">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Interstitial Ad Unit ID</label>
-                                        <input type="text" id="rc-google-interstitial-id" class="input-field mono" value="ca-app-pub-4541991465223368/6641883584">
-                                    </div>
-
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Rewarded Ad Unit ID</label>
-                                        <input type="text" id="rc-google-rewarded-id" class="input-field mono" value="ca-app-pub-4541991465223368/3339070860">
-                                    </div>
+                                <div class="input-group">
+                                    <label class="input-label">Store Listing URL</label>
+                                    <input type="text" id="rc-google-store-url" class="input-field" value="https://play.google.com/store/apps/details?id=com.eisen.blockrush2k">
                                 </div>
                             </div>
 
                             <!-- HUAWEI APPGALLERY CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 26px;">🔴</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                    <span style="font-size: 24px;">🔴</span>
                                     <div>
-                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Huawei AppGallery (HMS)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Package: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Huawei AppGallery (HMS)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted);">Package: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
-                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>📦</span>
-                                        <span>Version & Store Release</span>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Huawei App ID / Client ID</label>
+                                    <input type="text" id="rc-huawei-app-id" class="input-field mono" value="112344795">
+                                </div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
-                                            <input type="text" id="rc-huawei-version-name" class="input-field mono" value="1.0.5" placeholder="1.0.0">
-                                        </div>
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
-                                            <input type="number" id="rc-huawei-version-code" class="input-field mono" value="21" placeholder="1">
-                                        </div>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Huawei Banner Ad Unit ID</label>
+                                    <input type="text" id="rc-huawei-banner-id" class="input-field mono" value="testw6vs28auh3">
+                                </div>
 
-                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
-                                        <div class="toggle-info">
-                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
-                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
-                                        </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="rc-huawei-force-update" onchange="PortalConfig.onForceUpdateToggleChange('huawei', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Huawei Interstitial Ad Unit ID</label>
+                                    <input type="text" id="rc-huawei-interstitial-id" class="input-field mono" value="testb406mwh7sp">
+                                </div>
 
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AppGallery Store URL</label>
-                                        <input type="text" id="rc-huawei-store-url" class="input-field" value="https://appgallery.huawei.com/app/com.eisen.blockrush2k">
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Huawei Rewarded Ad Unit ID</label>
+                                    <input type="text" id="rc-huawei-rewarded-id" class="input-field mono" value="testx990eyhrmw">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Latest Version</label>
+                                        <input type="text" id="rc-huawei-version-name" class="input-field mono" value="1.0.5">
+                                    </div>
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Version Code</label>
+                                        <input type="number" id="rc-huawei-version-code" class="input-field mono" value="21">
                                     </div>
                                 </div>
 
-                                <!-- AD UNITS & MONETIZATION -->
-                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>💰</span>
-                                        <span>Ad Units & Monetization</span>
+                                <div class="toggle-row" style="margin-bottom: 12px;">
+                                    <div class="toggle-info">
+                                        <h4 style="font-size: 13px;">Force Update Required</h4>
+                                        <p style="font-size: 11px;">Lock outdated app versions</p>
                                     </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="rc-huawei-force-update">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
 
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei App ID / Client ID</label>
-                                        <input type="text" id="rc-huawei-app-id" class="input-field mono" value="112344795">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Banner Ad Unit ID</label>
-                                        <input type="text" id="rc-huawei-banner-id" class="input-field mono" value="testw6vs28auh3">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Interstitial Ad Unit ID</label>
-                                        <input type="text" id="rc-huawei-interstitial-id" class="input-field mono" value="testb406mwh7sp">
-                                    </div>
-
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Huawei Rewarded Ad Unit ID</label>
-                                        <input type="text" id="rc-huawei-rewarded-id" class="input-field mono" value="testx990eyhrmw">
-                                    </div>
+                                <div class="input-group">
+                                    <label class="input-label">AppGallery Store URL</label>
+                                    <input type="text" id="rc-huawei-store-url" class="input-field" value="https://appgallery.huawei.com/app/com.eisen.blockrush2k">
                                 </div>
                             </div>
 
                             <!-- APPLE APP STORE (iOS) CONFIG -->
-                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column; gap: 14px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span style="font-size: 26px;">🍎</span>
+                            <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                    <span style="font-size: 24px;">🍎</span>
                                     <div>
-                                        <h4 style="font-size: 15px; font-weight: 800; color: #fff; margin: 0;">Apple App Store (iOS)</h4>
-                                        <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Bundle ID: com.eisen.blockrush2k</p>
+                                        <h4 style="font-size: 16px; font-weight: 800; color: #fff;">Apple App Store (iOS)</h4>
+                                        <p style="font-size: 11px; color: var(--text-muted);">Bundle ID: com.eisen.blockrush2k</p>
                                     </div>
                                 </div>
 
-                                <!-- VERSION & RELEASE CONTROL (PRIMARY) -->
-                                <div style="background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(56, 189, 248, 0.22); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>📦</span>
-                                        <span>Version & Store Release</span>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">AdMob iOS App ID</label>
+                                    <input type="text" id="rc-ios-app-id" class="input-field mono" value="ca-app-pub-4255859216659691~4111326402">
+                                </div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Latest Version</label>
-                                            <input type="text" id="rc-ios-version-name" class="input-field mono" value="1.0.0" placeholder="1.0.0">
-                                        </div>
-                                        <div class="input-group">
-                                            <label class="input-label" style="font-size: 11px; white-space: nowrap; margin-bottom: 4px;">Version Code</label>
-                                            <input type="number" id="rc-ios-version-code" class="input-field mono" value="1" placeholder="1">
-                                        </div>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Banner Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-banner-id" class="input-field mono" value="ca-app-pub-4255859216659691/6387045959">
+                                </div>
 
-                                    <div class="toggle-row" style="margin-bottom: 12px; padding: 6px 0;">
-                                        <div class="toggle-info">
-                                            <h4 style="font-size: 12px; margin: 0;">Force Update Required</h4>
-                                            <p style="font-size: 10px; color: var(--text-muted); margin: 2px 0 0 0;">Lock outdated app versions</p>
-                                        </div>
-                                        <label class="switch">
-                                            <input type="checkbox" id="rc-ios-force-update" onchange="PortalConfig.onForceUpdateToggleChange('ios', this.checked)">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Interstitial Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-interstitial-id" class="input-field mono" value="ca-app-pub-4255859216659691/7221704767">
+                                </div>
 
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">App Store URL</label>
-                                        <input type="text" id="rc-ios-store-url" class="input-field" value="https://apps.apple.com/app/id6470000000">
+                                <div class="input-group" style="margin-bottom: 12px;">
+                                    <label class="input-label">Rewarded Ad Unit ID</label>
+                                    <input type="text" id="rc-ios-rewarded-id" class="input-field mono" value="ca-app-pub-4255859216659691/3713704595">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Latest Version</label>
+                                        <input type="text" id="rc-ios-version-name" class="input-field mono" value="1.0.0">
+                                    </div>
+                                    <div class="input-group" style="min-width: 0;">
+                                        <label class="input-label" style="white-space: nowrap; font-size: 12px;">Version Code</label>
+                                        <input type="number" id="rc-ios-version-code" class="input-field mono" value="1">
                                     </div>
                                 </div>
 
-                                <!-- AD UNITS & MONETIZATION -->
-                                <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
-                                    <div style="font-size: 11px; font-weight: 800; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                                        <span>💰</span>
-                                        <span>Ad Units & Monetization</span>
+                                <div class="toggle-row" style="margin-bottom: 12px;">
+                                    <div class="toggle-info">
+                                        <h4 style="font-size: 13px;">Force Update Required</h4>
+                                        <p style="font-size: 11px;">Lock outdated app versions</p>
                                     </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="rc-ios-force-update">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
 
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">AdMob iOS App ID</label>
-                                        <input type="text" id="rc-ios-app-id" class="input-field mono" value="ca-app-pub-4255859216659691~4111326402">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Banner Ad Unit ID</label>
-                                        <input type="text" id="rc-ios-banner-id" class="input-field mono" value="ca-app-pub-4255859216659691/6387045959">
-                                    </div>
-
-                                    <div class="input-group" style="margin-bottom: 10px;">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Interstitial Ad Unit ID</label>
-                                        <input type="text" id="rc-ios-interstitial-id" class="input-field mono" value="ca-app-pub-4255859216659691/7221704767">
-                                    </div>
-
-                                    <div class="input-group">
-                                        <label class="input-label" style="font-size: 11px; margin-bottom: 4px;">Rewarded Ad Unit ID</label>
-                                        <input type="text" id="rc-ios-rewarded-id" class="input-field mono" value="ca-app-pub-4255859216659691/3713704595">
-                                    </div>
+                                <div class="input-group">
+                                    <label class="input-label">App Store URL</label>
+                                    <input type="text" id="rc-ios-store-url" class="input-field" value="https://apps.apple.com/app/id6470000000">
                                 </div>
                             </div>
-                        </div>
 
                         <!-- iKHOKHA PAYMENT GATEWAY CONFIG (WEB COMMERCE) -->
                             <div style="background: rgba(10, 16, 29, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: var(--radius-md); padding: 20px; grid-column: 1 / -1;">
@@ -4025,47 +4149,9 @@
         // LIVE GAME SETTINGS & ADS CONTROLLER
         // ========================================================
         const PortalConfig = {
-            async onMaintenanceToggleChange(isEnabled) {
-                if (!db) return;
-                try {
-                    const msg = (document.getElementById('cfg-maintenance-msg').value || '').trim() || 'Block Rush 2K is undergoing scheduled maintenance. Please check back shortly!';
-                    await db.ref().update({
-                        'remote_config/general/maintenanceMode': !!isEnabled,
-                        'remote_config/general/maintenanceMessage': msg,
-                        'remote_config/general/updatedAt': firebase.database.ServerValue.TIMESTAMP
-                    });
-                    showToast(`Maintenance mode ${isEnabled ? 'ENABLED 🚧' : 'DISABLED ✅'} live in game!`, isEnabled ? '🚧' : '✅');
-                } catch (e) {
-                    console.warn('Failed to auto-save maintenance toggle:', e);
-                }
-            },
-
-            async onForceUpdateToggleChange(platform, isEnabled) {
-                if (!db) return;
-                try {
-                    const updates = {};
-                    updates[`remote_config/${platform}/forceUpdate`] = !!isEnabled;
-                    updates[`remote_config/${platform}/updatedAt`] = firebase.database.ServerValue.TIMESTAMP;
-                    await db.ref().update(updates);
-                    showToast(`Force Update for ${platform.toUpperCase()} ${isEnabled ? 'ACTIVATED 📦' : 'DEACTIVATED 🔓'}!`, isEnabled ? '📦' : '🔓');
-                } catch (e) {
-                    console.warn('Failed to auto-save force update toggle:', e);
-                }
-            },
-
-            async onLanguageToggleChange(isEnabled) {
-                if (!db) return;
-                try {
-                    await db.ref().update({
-                        'remote_config/general/enableMultiLanguage': !!isEnabled,
-                        'remote_config/general/languageEnabled': !!isEnabled,
-                        'remote_config/general/updatedAt': firebase.database.ServerValue.TIMESTAMP
-                    });
-                    showToast(`Multi-Language selector ${isEnabled ? 'ENABLED 🌐' : 'DISABLED 🔒'} live in game!`, isEnabled ? '🌐' : '🔒');
-                } catch (e) {
-                    console.warn('Failed to auto-save language toggle:', e);
-                }
-            },
+            specialRounds: [],
+            availableTargets: [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192],
+            allRandomTargets: [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096],
 
             async loadLiveSettings() {
                 if (!db) return;
@@ -4074,41 +4160,377 @@
                     const cfg = snap.val() || {};
 
                     const ads = cfg.ads || {};
-                    document.getElementById('cfg-web-ads').checked = !!ads.webAdsEnabled;
-                    document.getElementById('cfg-google-ads').checked = ads.googleAdsEnabled !== undefined ? !!ads.googleAdsEnabled : true;
-                    document.getElementById('cfg-huawei-ads').checked = ads.huaweiAdsEnabled !== undefined ? !!ads.huaweiAdsEnabled : true;
-                    document.getElementById('cfg-tv-ads').checked = ads.enableTvAds !== undefined ? !!ads.enableTvAds : true;
-                    document.getElementById('cfg-ios-ads').checked = ads.iosAdsEnabled !== undefined ? !!ads.iosAdsEnabled : true;
-                    document.getElementById('cfg-banner-in-game').checked = ads.showBannerInGame !== undefined ? !!ads.showBannerInGame : false;
-                    document.getElementById('cfg-interstitial-freq').value = ads.interstitialFrequency || 3;
-                    document.getElementById('cfg-rewarded-coins').value = ads.rewardedAdCoins || 50;
+                    const elWeb = document.getElementById('cfg-web-ads');
+                    if (elWeb) elWeb.checked = !!ads.webAdsEnabled;
+                    const elGoogle = document.getElementById('cfg-google-ads');
+                    if (elGoogle) elGoogle.checked = ads.googleAdsEnabled !== undefined ? !!ads.googleAdsEnabled : true;
+                    const elHuawei = document.getElementById('cfg-huawei-ads');
+                    if (elHuawei) elHuawei.checked = ads.huaweiAdsEnabled !== undefined ? !!ads.huaweiAdsEnabled : true;
+                    const elTv = document.getElementById('cfg-tv-ads');
+                    if (elTv) elTv.checked = ads.enableTvAds !== undefined ? !!ads.enableTvAds : true;
+                    const elIos = document.getElementById('cfg-ios-ads');
+                    if (elIos) elIos.checked = ads.iosAdsEnabled !== undefined ? !!ads.iosAdsEnabled : true;
+                    const elBanner = document.getElementById('cfg-banner-in-game');
+                    if (elBanner) elBanner.checked = ads.showBannerInGame !== undefined ? !!ads.showBannerInGame : false;
+                    const elFreq = document.getElementById('cfg-interstitial-freq');
+                    if (elFreq) elFreq.value = ads.interstitialFrequency || 3;
+                    const elCoins = document.getElementById('cfg-rewarded-coins');
+                    if (elCoins) elCoins.value = ads.rewardedAdCoins || 50;
 
                     const gen = cfg.general || {};
-                    const multiLangVal = gen.enableMultiLanguage !== undefined ? gen.enableMultiLanguage : gen.languageEnabled;
-                    document.getElementById('cfg-language-toggle').checked = multiLangVal !== undefined ? !!multiLangVal : false;
-                    document.getElementById('cfg-maintenance-toggle').checked = !!gen.maintenanceMode;
-                    document.getElementById('cfg-maintenance-msg').value = gen.maintenanceMessage || '';
-                    document.getElementById('cfg-broadcast-toggle').checked = !!gen.broadcastActive;
-                    document.getElementById('cfg-broadcast-text').value = gen.broadcastBanner || '';
-                    document.getElementById('cfg-allowed-countries').value = gen.allowedCountries !== undefined ? gen.allowedCountries : '';
-                    document.getElementById('cfg-blocked-countries').value = gen.blockedCountries !== undefined ? gen.blockedCountries : 'CN,HK,CA';
-                    document.getElementById('cfg-landscape-toggle').checked = !!gen.landscapeEnabled;
-                    document.getElementById('cfg-use-local-game').checked = gen.useLocalGame !== undefined ? !!gen.useLocalGame : true;
+                    const elLang = document.getElementById('cfg-language-toggle');
+                    if (elLang) elLang.checked = gen.enableMultiLanguage !== undefined ? !!gen.enableMultiLanguage : true;
+                    const elMaint = document.getElementById('cfg-maintenance-toggle');
+                    if (elMaint) elMaint.checked = !!gen.maintenanceMode;
+                    const elMaintMsg = document.getElementById('cfg-maintenance-msg');
+                    if (elMaintMsg) elMaintMsg.value = gen.maintenanceMessage || '';
+                    const mp = gen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
+                    const elMWeb = document.getElementById('cfg-maint-web');
+                    if (elMWeb) elMWeb.checked = mp.web !== false;
+                    const elMGoogle = document.getElementById('cfg-maint-google');
+                    if (elMGoogle) elMGoogle.checked = mp.google !== false;
+                    const elMHuawei = document.getElementById('cfg-maint-huawei');
+                    if (elMHuawei) elMHuawei.checked = mp.huawei !== false;
+                    const elMIos = document.getElementById('cfg-maint-ios');
+                    if (elMIos) elMIos.checked = mp.ios !== false;
+                    const elMTv = document.getElementById('cfg-maint-tv');
+                    if (elMTv) elMTv.checked = mp.tv !== false;
+                    this.toggleMaintenanceUi();
+                    const elBrd = document.getElementById('cfg-broadcast-toggle');
+                    if (elBrd) elBrd.checked = !!gen.broadcastActive;
+                    const elBrdTxt = document.getElementById('cfg-broadcast-text');
+                    if (elBrdTxt) elBrdTxt.value = gen.broadcastBanner || '';
+                    const elAllow = document.getElementById('cfg-allowed-countries');
+                    if (elAllow) elAllow.value = gen.allowedCountries !== undefined ? gen.allowedCountries : '';
+                    const elBlock = document.getElementById('cfg-blocked-countries');
+                    if (elBlock) elBlock.value = gen.blockedCountries !== undefined ? gen.blockedCountries : 'CN,HK,CA';
+                    const elLand = document.getElementById('cfg-landscape-toggle');
+                    if (elLand) elLand.checked = !!gen.landscapeEnabled;
+                    const elLocal = document.getElementById('cfg-use-local-game');
+                    if (elLocal) elLocal.checked = gen.useLocalGame !== undefined ? !!gen.useLocalGame : true;
 
                     const eco = cfg.economy || {};
-                    document.getElementById('cfg-starting-coins').value = eco.startingCoins || 500;
+                    const elStartCoins = document.getElementById('cfg-starting-coins');
+                    if (elStartCoins) elStartCoins.value = eco.startingCoins || 500;
 
                     const off = cfg.offline || {};
-                    document.getElementById('cfg-offline-moves').value = off.maxLevels || 5;
+                    const elOffMoves = document.getElementById('cfg-offline-moves');
+                    if (elOffMoves) elOffMoves.value = off.maxLevels || 5;
+
+                    // Rounds & Target Progression
+                    const rnd = cfg.rounds || {};
+                    const defReps = Math.max(1, parseInt(rnd.defaultRepetitions) || 3);
+                    const elDefReps = document.getElementById('cfg-rounds-default-reps');
+                    if (elDefReps) elDefReps.value = defReps;
+
+                    const elMode = document.getElementById('cfg-rounds-mode');
+                    if (elMode) elMode.value = rnd.progressionMode || 'sequential';
+
+                    const elRndStart = document.getElementById('cfg-rounds-random-start');
+                    if (elRndStart) elRndStart.value = rnd.randomStartLevel || 16;
+
+                    this.specialRounds = Array.isArray(rnd.specialRounds) ? [...rnd.specialRounds] : [];
+                    const customReps = rnd.targetRepetitions || { "8": 3, "16": 3, "32": 3, "64": 3, "128": 5, "256": 5, "512": 5, "1024": 5, "2048": 5 };
+                    const randPool = Array.isArray(rnd.randomPool) ? rnd.randomPool : [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+
+                    this.renderTargetReps(customReps, defReps);
+                    this.renderRandomPool(randPool);
+                    this.renderSpecialRounds();
+                    this.onProgressionModeChange();
+                    this.updateProgressionPreview();
                 } catch (e) {
                     console.warn('Load live settings error:', e);
                 }
+            },
+
+            renderTargetReps(customReps, defaultReps) {
+                const container = document.getElementById('target-reps-container');
+                if (!container) return;
+                const def = defaultReps || parseInt(document.getElementById('cfg-rounds-default-reps')?.value) || 3;
+                let html = '';
+                this.availableTargets.forEach(t => {
+                    const reps = (customReps && customReps[t] !== undefined) ? parseInt(customReps[t]) : def;
+                    html += `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px; text-align: center;">
+                            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin-bottom: 4px;">🎯 TARGET ${t}</div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                <input type="number" class="input-field target-rep-input" data-target="${t}" min="1" max="50" value="${reps}" style="padding: 4px; font-size: 13px; text-align: center; width: 55px;" oninput="PortalConfig.updateProgressionPreview()">
+                                <span style="font-size: 10px; color: var(--text-muted);">reps</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            renderRandomPool(pool) {
+                const container = document.getElementById('random-pool-checkboxes');
+                if (!container) return;
+                const activePool = pool ? pool.map(Number) : [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+                let html = '';
+                this.allRandomTargets.forEach(t => {
+                    const checked = activePool.includes(t) ? 'checked' : '';
+                    html += `
+                        <label style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #cbd5e1;">
+                            <input type="checkbox" class="random-pool-check" value="${t}" ${checked} onchange="PortalConfig.updateProgressionPreview()">
+                            <span>🎯 ${t}</span>
+                        </label>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            renderSpecialRounds() {
+                const container = document.getElementById('special-rounds-list');
+                if (!container) return;
+                if (!this.specialRounds || this.specialRounds.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 14px; color: var(--text-muted); font-size: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px dashed rgba(255,255,255,0.1);">
+                            No special rounds configured yet. Click "➕ Add Special Round" above to inject boss or challenge stages!
+                        </div>
+                    `;
+                    return;
+                }
+                // Sort by level
+                this.specialRounds.sort((a, b) => parseInt(a.level) - parseInt(b.level));
+                let html = '';
+                this.specialRounds.forEach((sr, idx) => {
+                    html += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 12px; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="font-weight: 800; color: #fbbf24; font-size: 12px;">⭐ Level ${sr.level}</span>
+                                <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;">🎯 Goal: ${sr.target}</span>
+                                <span style="color: #cbd5e1; font-size: 12px; font-weight: 600;">${sr.label || 'Special Challenge'}</span>
+                            </div>
+                            <button type="button" class="btn-portal btn-sm btn-outline" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); padding: 2px 8px; height: 26px;" onclick="PortalConfig.deleteSpecialRound(${idx})">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            toggleAddSpecialForm(show) {
+                const el = document.getElementById('add-special-round-form');
+                if (el) el.style.display = show ? 'block' : 'none';
+            },
+
+            confirmAddSpecialRound() {
+                const lvlInput = document.getElementById('new-special-level');
+                const tgtSelect = document.getElementById('new-special-target');
+                const lblInput = document.getElementById('new-special-label');
+                const level = parseInt(lvlInput.value);
+                const target = parseInt(tgtSelect.value);
+                const label = lblInput.value.trim() || 'Boss Challenge';
+
+                if (!level || level < 1) {
+                    alert('Please enter a valid level number.');
+                    return;
+                }
+
+                // Replace if already exists for this level or add
+                const existingIdx = this.specialRounds.findIndex(s => parseInt(s.level) === level);
+                if (existingIdx !== -1) {
+                    this.specialRounds[existingIdx] = { level, target, label };
+                } else {
+                    this.specialRounds.push({ level, target, label });
+                }
+
+                this.toggleAddSpecialForm(false);
+                this.renderSpecialRounds();
+                this.updateProgressionPreview();
+                showToast(`⭐ Added Special Round for Level ${level} (Target ${target})!`, '✅');
+            },
+
+            deleteSpecialRound(index) {
+                if (index >= 0 && index < this.specialRounds.length) {
+                    this.specialRounds.splice(index, 1);
+                    this.renderSpecialRounds();
+                    this.updateProgressionPreview();
+                    showToast('Special round removed', '🗑️');
+                }
+            },
+
+            onProgressionModeChange() {
+                const mode = document.getElementById('cfg-rounds-mode')?.value || 'sequential';
+                const groupRandomStart = document.getElementById('cfg-rounds-random-start-group');
+                const wrapRandomPool = document.getElementById('cfg-rounds-random-pool-wrap');
+
+                if (groupRandomStart) {
+                    groupRandomStart.style.display = (mode === 'random_after') ? 'block' : 'none';
+                }
+                if (wrapRandomPool) {
+                    wrapRandomPool.style.opacity = (mode === 'sequential') ? '0.4' : '1';
+                }
+                this.updateProgressionPreview();
+            },
+
+            onDefaultRepsInput(val) {
+                const def = parseInt(val) || 3;
+                // Automatically update inputs that currently match or are empty
+                this.updateProgressionPreview();
+            },
+
+            resetTargetRepsToDefault() {
+                const def = parseInt(document.getElementById('cfg-rounds-default-reps')?.value) || 3;
+                document.querySelectorAll('.target-rep-input').forEach(inp => {
+                    inp.value = def;
+                });
+                this.updateProgressionPreview();
+                showToast(`Reset all target repetitions to ${def} rounds`, '⚡');
+            },
+
+            applyRoundPreset(type) {
+                if (type === '3-reps') {
+                    document.getElementById('cfg-rounds-default-reps').value = 3;
+                    document.getElementById('cfg-rounds-mode').value = 'sequential';
+                    document.querySelectorAll('.target-rep-input').forEach(inp => inp.value = 3);
+                    this.onProgressionModeChange();
+                    showToast('Preset: 3 repeats per target applied!', '⚡');
+                } else if (type === '5-reps') {
+                    document.getElementById('cfg-rounds-default-reps').value = 5;
+                    document.getElementById('cfg-rounds-mode').value = 'sequential';
+                    document.querySelectorAll('.target-rep-input').forEach(inp => inp.value = 5);
+                    this.onProgressionModeChange();
+                    showToast('Preset: 5 repeats per target applied!', '🔥');
+                } else if (type === 'random-late') {
+                    document.getElementById('cfg-rounds-mode').value = 'random_after';
+                    document.getElementById('cfg-rounds-random-start').value = 16;
+                    this.onProgressionModeChange();
+                    showToast('Preset: Normal until L16, then Random applied!', '🎲');
+                }
+                this.updateProgressionPreview();
+            },
+
+            updateProgressionPreview() {
+                const previewEl = document.getElementById('cfg-rounds-schedule-preview');
+                if (!previewEl) return;
+
+                const defReps = Math.max(1, parseInt(document.getElementById('cfg-rounds-default-reps')?.value) || 3);
+                const mode = document.getElementById('cfg-rounds-mode')?.value || 'sequential';
+                const randStart = parseInt(document.getElementById('cfg-rounds-random-start')?.value) || 16;
+
+                // Collect custom reps
+                const customReps = {};
+                document.querySelectorAll('.target-rep-input').forEach(inp => {
+                    const tgt = inp.getAttribute('data-target');
+                    const val = parseInt(inp.value);
+                    if (tgt && val > 0) customReps[tgt] = val;
+                });
+
+                // Collect checked random pool
+                const randPool = [];
+                document.querySelectorAll('.random-pool-check:checked').forEach(chk => {
+                    randPool.push(parseInt(chk.value));
+                });
+                const activePool = randPool.length > 0 ? randPool : [8, 16, 32, 64, 128, 256, 512, 1024, 2048];
+
+                // Simulate levels 1..25
+                const schedule = [];
+                for (let lvl = 1; lvl <= 25; lvl++) {
+                    // Check special
+                    const sp = this.specialRounds.find(s => parseInt(s.level) === lvl);
+                    if (sp) {
+                        schedule.push({ level: lvl, target: sp.target, isSpecial: true, label: sp.label });
+                        continue;
+                    }
+                    if (mode === 'randomized' || (mode === 'random_after' && lvl >= randStart)) {
+                        const seed = Math.abs(Math.sin(lvl * 997 + 101));
+                        const idx = Math.floor(seed * activePool.length) % activePool.length;
+                        schedule.push({ level: lvl, target: activePool[idx], isRandom: true });
+                        continue;
+                    }
+                    // Sequential
+                    let accumulated = 0;
+                    let foundTarget = 2048;
+                    for (const t of this.availableTargets) {
+                        const reps = customReps[t] || defReps;
+                        accumulated += reps;
+                        if (lvl <= accumulated) {
+                            foundTarget = t;
+                            break;
+                        }
+                    }
+                    schedule.push({ level: lvl, target: foundTarget, isNormal: true });
+                }
+
+                // Group consecutive levels with identical targets
+                const groups = [];
+                let curGroup = null;
+                schedule.forEach(item => {
+                    if (item.isSpecial) {
+                        if (curGroup) { groups.push(curGroup); curGroup = null; }
+                        groups.push({ start: item.level, end: item.level, target: item.target, isSpecial: true, label: item.label });
+                    } else if (item.isRandom) {
+                        if (curGroup && curGroup.isRandom) {
+                            curGroup.end = item.level;
+                        } else {
+                            if (curGroup) groups.push(curGroup);
+                            curGroup = { start: item.level, end: item.level, isRandom: true };
+                        }
+                    } else {
+                        if (curGroup && curGroup.isNormal && curGroup.target === item.target) {
+                            curGroup.end = item.level;
+                        } else {
+                            if (curGroup) groups.push(curGroup);
+                            curGroup = { start: item.level, end: item.level, target: item.target, isNormal: true };
+                        }
+                    }
+                });
+                if (curGroup) groups.push(curGroup);
+
+                // Format summary
+                const formatted = groups.map(g => {
+                    const range = (g.start === g.end) ? `Level ${g.start}` : `Levels ${g.start}–${g.end}`;
+                    const count = (g.end - g.start + 1);
+                    if (g.isSpecial) {
+                        return `<span style="color:#fbbf24;font-weight:bold;">★ ${range}: ${g.label || 'Special'} (Target ${g.target})</span>`;
+                    }
+                    if (g.isRandom) {
+                        return `<span style="color:#a78bfa;">🎲 ${range}: Randomized from pool [${activePool.join(', ')}] (${count} rounds)</span>`;
+                    }
+                    return `<span style="color:#38bdf8;">• ${range}: Target ${g.target} (${count} rounds)</span>`;
+                });
+
+                previewEl.innerHTML = formatted.join(' &nbsp;|&nbsp; ');
+            },
+
+            toggleMaintenanceUi() {
+                const isEnabled = document.getElementById('cfg-maintenance-toggle').checked;
+                const wrap = document.getElementById('cfg-maintenance-platforms-wrap');
+                if (wrap) {
+                    wrap.style.opacity = isEnabled ? '1' : '0.4';
+                    wrap.style.pointerEvents = isEnabled ? 'auto' : 'none';
+                }
+            },
+
+            toggleAllMaintenancePlatforms() {
+                const ids = ['cfg-maint-web', 'cfg-maint-google', 'cfg-maint-huawei', 'cfg-maint-ios', 'cfg-maint-tv'];
+                const anyUnchecked = ids.some(id => !document.getElementById(id).checked);
+                ids.forEach(id => {
+                    document.getElementById(id).checked = anyUnchecked;
+                });
             },
 
             async saveLiveSettings() {
                 if (!db) return;
                 showToast('Deploying live app settings...', '🚀');
                 try {
+                    // Gather custom repetitions
+                    const customReps = {};
+                    document.querySelectorAll('.target-rep-input').forEach(inp => {
+                        const tgt = inp.getAttribute('data-target');
+                        const val = parseInt(inp.value);
+                        if (tgt && val > 0) customReps[tgt] = val;
+                    });
+
+                    // Gather random pool
+                    const randPool = [];
+                    document.querySelectorAll('.random-pool-check:checked').forEach(chk => {
+                        randPool.push(parseInt(chk.value));
+                    });
+
                     const updates = {
                         'remote_config/ads/webAdsEnabled': document.getElementById('cfg-web-ads').checked,
                         'remote_config/ads/googleAdsEnabled': document.getElementById('cfg-google-ads').checked,
@@ -4119,9 +4541,15 @@
                         'remote_config/ads/interstitialFrequency': parseInt(document.getElementById('cfg-interstitial-freq').value) || 3,
                         'remote_config/ads/rewardedAdCoins': parseInt(document.getElementById('cfg-rewarded-coins').value) || 50,
                         'remote_config/general/enableMultiLanguage': document.getElementById('cfg-language-toggle').checked,
-                        'remote_config/general/languageEnabled': document.getElementById('cfg-language-toggle').checked,
                         'remote_config/general/maintenanceMode': document.getElementById('cfg-maintenance-toggle').checked,
                         'remote_config/general/maintenanceMessage': document.getElementById('cfg-maintenance-msg').value.trim(),
+                        'remote_config/general/maintenancePlatforms': {
+                            web: document.getElementById('cfg-maint-web').checked,
+                            google: document.getElementById('cfg-maint-google').checked,
+                            huawei: document.getElementById('cfg-maint-huawei').checked,
+                            ios: document.getElementById('cfg-maint-ios').checked,
+                            tv: document.getElementById('cfg-maint-tv').checked
+                        },
                         'remote_config/general/broadcastActive': document.getElementById('cfg-broadcast-toggle').checked,
                         'remote_config/general/broadcastBanner': document.getElementById('cfg-broadcast-text').value.trim(),
                         'remote_config/general/allowedCountries': document.getElementById('cfg-allowed-countries').value.trim().toUpperCase(),
@@ -4130,6 +4558,15 @@
                         'remote_config/general/useLocalGame': document.getElementById('cfg-use-local-game').checked,
                         'remote_config/economy/startingCoins': parseInt(document.getElementById('cfg-starting-coins').value) || 500,
                         'remote_config/offline/maxLevels': parseInt(document.getElementById('cfg-offline-moves').value) || 5,
+
+                        // Rounds & Target Progression
+                        'remote_config/rounds/defaultRepetitions': parseInt(document.getElementById('cfg-rounds-default-reps').value) || 3,
+                        'remote_config/rounds/progressionMode': document.getElementById('cfg-rounds-mode').value,
+                        'remote_config/rounds/randomStartLevel': parseInt(document.getElementById('cfg-rounds-random-start').value) || 16,
+                        'remote_config/rounds/targetRepetitions': customReps,
+                        'remote_config/rounds/randomPool': randPool.length > 0 ? randPool : [8, 16, 32, 64, 128, 256, 512, 1024, 2048],
+                        'remote_config/rounds/specialRounds': this.specialRounds || [],
+
                         'remote_config/general/updatedAt': firebase.database.ServerValue.TIMESTAMP
                     };
 
@@ -4140,12 +4577,12 @@
                         await db.ref('audit_logs').push({
                             action: 'DEPLOY_LIVE_SETTINGS',
                             actor: PortalStore.currentUser ? PortalStore.currentUser.email : 'Master Admin (Passcode)',
-                            details: `Updated Ads, Geo-locking (${document.getElementById('cfg-allowed-countries').value}), and App configuration`,
+                            details: `Updated Ads, Rounds (${document.getElementById('cfg-rounds-default-reps').value} reps, mode ${document.getElementById('cfg-rounds-mode').value}), and App configuration`,
                             timestamp: firebase.database.ServerValue.TIMESTAMP
                         });
                     } catch (err) { }
 
-                    showToast('🎉 Live App & Ads settings deployed successfully!', '✅');
+                    showToast('🎉 Live App, Ads & Round Progression settings deployed successfully!', '✅');
                 } catch (e) {
                     alert('Failed to deploy settings: ' + e.message);
                 }

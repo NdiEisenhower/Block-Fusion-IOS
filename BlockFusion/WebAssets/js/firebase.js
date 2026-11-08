@@ -179,28 +179,57 @@ class FirebaseService {
 
     // ===== REMOTE CONFIG SYNC =====
     static async fetchRemoteConfig() {
-        if (!this.db) return null;
+        let config = null;
+
+        // 1. Fetch Firebase Remote Config SDK parameters if available
         try {
-            const snap = await this.db.ref('remote_config').once('value');
-            const config = snap.val();
-            if (config) {
-                console.log('☁️ Remote config loaded from cloud');
-                this.applyRemoteConfig(config);
-            }
-
-            // Realtime listener for live remote configuration changes
-            this.db.ref('remote_config').on('value', (s) => {
-                const fresh = s.val();
-                if (fresh) {
-                    this.applyRemoteConfig(fresh);
+            if (typeof firebase !== 'undefined' && typeof firebase.remoteConfig === 'function') {
+                const rc = firebase.remoteConfig();
+                rc.settings = { minimumFetchIntervalMillis: 3600000 };
+                await rc.fetchAndActivate();
+                const allParams = rc.getAll();
+                const rcObj = {};
+                for (const key in allParams) {
+                    try {
+                        rcObj[key] = JSON.parse(allParams[key].asString());
+                    } catch (e) {
+                        rcObj[key] = allParams[key].asString();
+                    }
                 }
-            });
-
-            return config;
+                if (Object.keys(rcObj).length > 0) {
+                    console.log('☁️ Remote config loaded from Firebase Remote Config SDK', rcObj);
+                    config = rcObj;
+                    this.applyRemoteConfig(config);
+                }
+            }
         } catch (e) {
-            console.warn('Could not fetch remote config:', e.message);
+            console.warn('Firebase Remote Config SDK fetch error:', e.message);
         }
-        return null;
+
+        // 2. Fetch / Listen on Firebase Realtime Database 'remote_config' node
+        if (this.db) {
+            try {
+                const snap = await this.db.ref('remote_config').once('value');
+                const rtdbConfig = snap.val();
+                if (rtdbConfig) {
+                    console.log('☁️ Remote config loaded from Realtime Database');
+                    config = Object.assign({}, config || {}, rtdbConfig);
+                    this.applyRemoteConfig(config);
+                }
+
+                // Realtime listener for live remote configuration changes
+                this.db.ref('remote_config').on('value', (s) => {
+                    const fresh = s.val();
+                    if (fresh) {
+                        this.applyRemoteConfig(fresh);
+                    }
+                });
+            } catch (e) {
+                console.warn('Could not fetch Realtime DB remote config:', e.message);
+            }
+        }
+
+        return config;
     }
 
     static applyRemoteConfig(config) {
@@ -210,18 +239,23 @@ class FirebaseService {
         if (config.ads) {
             const ads = config.ads;
             if (typeof CONFIG.DISABLED_ADS === 'object') {
-                CONFIG.DISABLED_ADS.web = !ads.webAdsEnabled;
-                CONFIG.DISABLED_ADS.google = !ads.googleAdsEnabled;
-                CONFIG.DISABLED_ADS.huawei = !ads.huaweiAdsEnabled;
-                CONFIG.DISABLED_ADS.ios = ads.iosAdsEnabled !== undefined ? !ads.iosAdsEnabled : false;
+                if (ads.webAdsEnabled !== undefined) CONFIG.DISABLED_ADS.web = !ads.webAdsEnabled;
+                if (ads.googleAdsEnabled !== undefined) CONFIG.DISABLED_ADS.google = !ads.googleAdsEnabled;
+                if (ads.huaweiAdsEnabled !== undefined) CONFIG.DISABLED_ADS.huawei = !ads.huaweiAdsEnabled;
+                if (ads.iosAdsEnabled !== undefined) CONFIG.DISABLED_ADS.ios = !ads.iosAdsEnabled;
             }
             if (typeof AdService !== 'undefined') {
+                if (ads.googleAdsEnabled !== undefined) {
+                    if (ads.googleAdsEnabled) AdService.enableAdsForPlatform('google');
+                    else AdService.disableAdsForPlatform('google');
+                }
+                if (ads.huaweiAdsEnabled !== undefined) {
+                    if (ads.huaweiAdsEnabled) AdService.enableAdsForPlatform('huawei');
+                    else AdService.disableAdsForPlatform('huawei');
+                }
                 if (ads.iosAdsEnabled !== undefined) {
-                    if (ads.iosAdsEnabled) {
-                        AdService.enableAdsForPlatform('ios');
-                    } else {
-                        AdService.disableAdsForPlatform('ios');
-                    }
+                    if (ads.iosAdsEnabled) AdService.enableAdsForPlatform('ios');
+                    else AdService.disableAdsForPlatform('ios');
                 }
             }
             if (CONFIG.ADS) {
@@ -234,8 +268,50 @@ class FirebaseService {
             }
 
             // Android TV Ads toggle
-            if (ads.enableTvAds !== undefined && typeof Android !== 'undefined' && typeof Android.setTvAdsEnabled === 'function') {
-                Android.setTvAdsEnabled(!!ads.enableTvAds);
+            if (ads.enableTvAds !== undefined && typeof window.Android !== 'undefined' && typeof window.Android.setTvAdsEnabled === 'function') {
+                window.Android.setTvAdsEnabled(!!ads.enableTvAds);
+            }
+        }
+
+        // 1a. Google / AdMob Remote Config
+        if (config.google || config.admob) {
+            const googleConfig = config.google || config.admob;
+            const bId = googleConfig.bannerAdUnitId || googleConfig.bannerId || googleConfig.banner || (AdService.config && AdService.config.admob ? AdService.config.admob.banner : "");
+            const iId = googleConfig.interstitialAdUnitId || googleConfig.interId || googleConfig.interstitial || (AdService.config && AdService.config.admob ? AdService.config.admob.interstitial : "");
+            const rId = googleConfig.rewardedAdUnitId || googleConfig.rewardedId || googleConfig.rewarded || (AdService.config && AdService.config.admob ? AdService.config.admob.rewarded : "");
+
+            if (typeof AdService !== 'undefined' && AdService.config) {
+                if (!AdService.config.admob) AdService.config.admob = {};
+                if (bId) AdService.config.admob.banner = bId;
+                if (iId) AdService.config.admob.interstitial = iId;
+                if (rId) AdService.config.admob.rewarded = rId;
+            }
+
+            const isHuaweiDevice = typeof window.Android !== 'undefined' && (window.Android.isHuawei || window.Android.isHMS);
+            if (!isHuaweiDevice && typeof window.Android !== 'undefined' && typeof window.Android.initAds === 'function') {
+                window.Android.initAds(bId, iId, rId);
+            }
+        }
+
+        // 1b. Huawei Remote Config
+        if (config.huawei) {
+            const huaweiConfig = config.huawei;
+            const bId = huaweiConfig.bannerAdUnitId || huaweiConfig.bannerId || huaweiConfig.banner || (AdService.config && AdService.config.huawei ? AdService.config.huawei.banner : "");
+            const iId = huaweiConfig.interstitialAdUnitId || huaweiConfig.interId || huaweiConfig.interstitial || (AdService.config && AdService.config.huawei ? AdService.config.huawei.interstitial : "");
+            const rId = huaweiConfig.rewardedAdUnitId || huaweiConfig.rewardedId || huaweiConfig.rewarded || (AdService.config && AdService.config.huawei ? AdService.config.huawei.rewarded : "");
+
+            if (typeof AdService !== 'undefined' && AdService.config) {
+                if (!AdService.config.huawei) AdService.config.huawei = {};
+                if (bId) AdService.config.huawei.banner = bId;
+                if (iId) AdService.config.huawei.interstitial = iId;
+                if (rId) AdService.config.huawei.rewarded = rId;
+            }
+
+            const isHuaweiPlatform = (typeof AdService !== 'undefined' && AdService.platform === 'huawei') ||
+                                     (typeof window.Android !== 'undefined' && (window.Android.isHuawei || window.Android.isHMS || (typeof window.Android.getFlavor === 'function' && window.Android.getFlavor() === 'huawei')));
+
+            if (isHuaweiPlatform && typeof window.Android !== 'undefined' && typeof window.Android.initAds === 'function') {
+                window.Android.initAds(bId, iId, rId);
             }
         }
 
@@ -261,8 +337,29 @@ class FirebaseService {
                 window.Android.initAds(bId, iId, rId);
             }
 
-            // Universal Force Update check
-            FirebaseService.checkForceUpdate(config);
+            // Force update modal for iOS
+            if (isIosPlatform && iosConfig.forceUpdate && iosConfig.versionCode) {
+                const currentIosVersionCode = 1;
+                if (currentIosVersionCode < (parseInt(iosConfig.versionCode) || 1)) {
+                    const storeUrl = iosConfig.storeUrl || 'https://apps.apple.com/app/id6470000000';
+                    if (typeof PopupManager !== 'undefined' && PopupManager.show) {
+                        PopupManager.show({
+                            icon: '🍎',
+                            title: 'Update Required',
+                            subtitle: `Version ${iosConfig.versionName || 'New'} Available`,
+                            customContent: `<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
+                                A new version of Block Rush 2K is available on the App Store with performance updates and new stages. Please update to continue!
+                            </div>`,
+                            confirmText: 'Update on App Store',
+                            showCancel: false,
+                            showClose: false,
+                            onConfirm: () => {
+                                window.location.href = storeUrl;
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         // 2. General, Geo-Locking & Native App Settings
@@ -270,12 +367,8 @@ class FirebaseService {
             const gen = config.general;
 
             // Multi-Language master toggle from remote config
-            const isLangConfigured = gen.enableMultiLanguage !== undefined 
-                ? gen.enableMultiLanguage 
-                : gen.languageEnabled;
-
-            if (isLangConfigured !== undefined) {
-                const isLangOn = !!isLangConfigured;
+            if (gen.enableMultiLanguage !== undefined) {
+                const isLangOn = !!gen.enableMultiLanguage;
                 if (typeof CONFIG !== 'undefined') {
                     CONFIG.ENABLE_MULTI_LANGUAGE = isLangOn;
                 }
@@ -283,16 +376,6 @@ class FirebaseService {
                     I18N.enabled = isLangOn;
                     if (!isLangOn && I18N.currentLang !== 'en') {
                         I18N.setLanguage('en');
-                    }
-                }
-                // If language picker modal is currently visible on screen, close it immediately!
-                if (!isLangOn && typeof PopupManager !== 'undefined') {
-                    const popupEl = document.getElementById('popup-overlay');
-                    if (popupEl && popupEl.classList.contains('active')) {
-                        const titleEl = popupEl.querySelector('.popup-title');
-                        if (titleEl && titleEl.textContent && titleEl.textContent.includes('Language')) {
-                            PopupManager.close('cancel');
-                        }
                     }
                 }
                 if (typeof Navigation !== 'undefined' && document.getElementById('screen-settings')?.classList.contains('active')) {
@@ -315,13 +398,13 @@ class FirebaseService {
                 Android.setLandscapeEnabled(!!gen.landscapeEnabled);
             }
 
-            // Maintenance mode (per-platform selector or global)
+            // Maintenance mode (per-platform selector)
             if (gen.maintenanceMode) {
                 const currentPlatform = this.getDetectedPlatform();
-                const targetPlatforms = gen.maintenancePlatforms || null;
+                const targetPlatforms = gen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
                 
-                // Active if no platform restrictions are specified, or current platform is targeted
-                const isUnderMaintenance = !targetPlatforms || targetPlatforms[currentPlatform] === true || (targetPlatforms.all && targetPlatforms[currentPlatform] !== false);
+                // Active if the current platform is specifically targeted
+                const isUnderMaintenance = targetPlatforms[currentPlatform] === true || (targetPlatforms.all && targetPlatforms[currentPlatform] !== false);
 
                 if (isUnderMaintenance) {
                     const msg = gen.maintenanceMessage || 'Block Rush 2K is undergoing temporary maintenance. Please check back shortly!';
@@ -343,15 +426,14 @@ class FirebaseService {
                             showConfirm: true,
                             showCancel: false,
                             showClose: false,
-                            dismissible: false,
                             confirmText: '🔄 Refresh & Check Status',
                             confirmType: 'gold',
                             onConfirm: async () => {
                                 if (typeof FirebaseService !== 'undefined') {
                                     const fresh = await FirebaseService.fetchRemoteConfig();
                                     const freshGen = (fresh && fresh.general) ? fresh.general : {};
-                                    const freshPlatforms = freshGen.maintenancePlatforms || null;
-                                    const stillMaintained = freshGen.maintenanceMode && (!freshPlatforms || freshPlatforms[currentPlatform] === true || (freshPlatforms.all && freshPlatforms[currentPlatform] !== false));
+                                    const freshPlatforms = freshGen.maintenancePlatforms || { web: true, google: true, huawei: true, ios: true, tv: true };
+                                    const stillMaintained = freshGen.maintenanceMode && (freshPlatforms[currentPlatform] === true || (freshPlatforms.all && freshPlatforms[currentPlatform] !== false));
                                     
                                     if (!stillMaintained) {
                                         if (PopupManager.close) PopupManager.close('confirm');
@@ -364,11 +446,30 @@ class FirebaseService {
                         });
                     }
                 } else {
-                    this.dismissMaintenanceModalIfOpen();
+                    // Platform not in maintenance -> dismiss modal if open
+                    if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+                        const overlay = document.getElementById('popup-overlay');
+                        if (overlay && overlay.classList.contains('active')) {
+                            const titleEl = overlay.querySelector('.popup-title');
+                            if (titleEl && titleEl.textContent.includes('Maintenance')) {
+                                PopupManager.close('cancel');
+                            }
+                        }
+                    }
                 }
             } else {
-                this.dismissMaintenanceModalIfOpen();
+                // Maintenance disabled globally -> dismiss modal if open
+                if (typeof PopupManager !== 'undefined' && PopupManager.close) {
+                    const overlay = document.getElementById('popup-overlay');
+                    if (overlay && overlay.classList.contains('active')) {
+                        const titleEl = overlay.querySelector('.popup-title');
+                        if (titleEl && titleEl.textContent.includes('Maintenance')) {
+                            PopupManager.close('cancel');
+                        }
+                    }
+                }
             }
+
             // Global announcement banner
             if (gen.broadcastActive && gen.broadcastBanner) {
                 let existingBanner = document.getElementById('global-broadcast-banner');
@@ -397,92 +498,6 @@ class FirebaseService {
         if (config.offline && typeof CONFIG.OFFLINE === 'object') {
             if (config.offline.maxLevels) {
                 CONFIG.OFFLINE.MAX_LEVELS = config.offline.maxLevels;
-            }
-        }
-    }
-
-    // ===== SYSTEM-WIDE FORCE UPDATE CHECKER =====
-    static checkForceUpdate(config) {
-        if (!config) return false;
-
-        const currentPlatform = this.getDetectedPlatform();
-        let targetConfig = null;
-        let defaultStoreUrl = '';
-        let platformLabel = 'App';
-
-        if (currentPlatform === 'ios' && config.ios) {
-            targetConfig = config.ios;
-            defaultStoreUrl = 'https://apps.apple.com/app/id6470000000';
-            platformLabel = 'Apple App Store';
-        } else if (currentPlatform === 'google' && config.google) {
-            targetConfig = config.google;
-            defaultStoreUrl = 'https://play.google.com/store/apps/details?id=com.eisen.blockrush2k';
-            platformLabel = 'Google Play Store';
-        } else if (currentPlatform === 'huawei' && config.huawei) {
-            targetConfig = config.huawei;
-            defaultStoreUrl = 'https://appgallery.huawei.com/app/com.eisen.blockrush2k';
-            platformLabel = 'Huawei AppGallery';
-        }
-
-        if (!targetConfig) return false;
-
-        const currentBuild = (typeof CONFIG !== 'undefined' && CONFIG.APP_BUILD) ? CONFIG.APP_BUILD : 1;
-        const remoteVersionCode = parseInt(targetConfig.versionCode) || 1;
-        const isForceUpdateRequired = !!targetConfig.forceUpdate && (currentBuild < remoteVersionCode);
-
-        if (isForceUpdateRequired) {
-            const storeUrl = targetConfig.storeUrl || defaultStoreUrl;
-            const newVersionName = targetConfig.versionName || `Build ${remoteVersionCode}`;
-
-            if (typeof PopupManager !== 'undefined' && PopupManager.show) {
-                PopupManager.show({
-                    icon: currentPlatform === 'ios' ? '🍎' : '🚀',
-                    title: 'Update Required',
-                    subtitle: `Version ${newVersionName} Available`,
-                    customContent: `
-                        <div style="text-align:center;padding:12px;color:#cbd5e1;font-size:14px;line-height:1.6;">
-                            <div style="background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);border-radius:10px;padding:10px;margin-bottom:12px;color:#38bdf8;font-size:13px;font-weight:600;">
-                                📦 New Version Required
-                            </div>
-                            <p style="margin:0 0 10px 0;">A new version of Block Rush 2K is available on ${platformLabel}. Please update to continue playing.</p>
-                            <div style="font-size:11px;color:#94a3b8;">Current Build: ${currentBuild} &bull; Required Build: ${remoteVersionCode}</div>
-                        </div>
-                    `,
-                    confirmText: `Update on ${platformLabel}`,
-                    confirmType: 'primary',
-                    showConfirm: true,
-                    showCancel: false,
-                    showClose: false,
-                    dismissible: false,
-                    onConfirm: () => {
-                        window.location.href = storeUrl;
-                    }
-                });
-            }
-            return true;
-        } else {
-            // Dismiss force update popup if it was open and update is no longer required
-            if (typeof PopupManager !== 'undefined' && PopupManager.close) {
-                const overlay = document.getElementById('popup-overlay');
-                if (overlay && overlay.classList.contains('active')) {
-                    const titleEl = overlay.querySelector('.popup-title');
-                    if (titleEl && titleEl.textContent && titleEl.textContent.includes('Update Required')) {
-                        PopupManager.close('cancel');
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    static dismissMaintenanceModalIfOpen() {
-        if (typeof PopupManager !== 'undefined' && PopupManager.close) {
-            const overlay = document.getElementById('popup-overlay');
-            if (overlay && overlay.classList.contains('active')) {
-                const titleEl = overlay.querySelector('.popup-title');
-                if (titleEl && titleEl.textContent && titleEl.textContent.includes('Maintenance')) {
-                    PopupManager.close('cancel');
-                }
             }
         }
     }
@@ -778,77 +793,6 @@ class FirebaseService {
         } catch (error) {
             this.logCrash('google_redirect_error', error.code);
             return { success: false, error: error.message };
-        }
-    }
-
-
-    // ===== APPLE SIGN IN (NATIVE iOS + WEB OAUTH) =====
-    static async signInWithApple() {
-        if (!this.initialized) return { success: false, error: 'Not initialized' };
-
-        // 1. If running inside native iOS app and socialBridge is available:
-        if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.socialBridge) {
-            return new Promise((resolve) => {
-                window._appleSignInResolve = resolve;
-                try {
-                    window.webkit.messageHandlers.socialBridge.postMessage({ action: 'performAppleSignIn' });
-                } catch (e) {
-                    console.warn('Native Apple Sign In bridge error, falling back to Web OAuth:', e);
-                    this._signInWithAppleWeb().then(resolve);
-                }
-            });
-        }
-
-        // 2. Web browser / Simulator OAuth flow
-        return this._signInWithAppleWeb();
-    }
-
-    static async _signInWithAppleWeb() {
-        if (!this.initialized) return { success: false, error: 'Not initialized' };
-        try {
-            this.logEvent('login_attempt', { method: 'apple' });
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            provider.addScope('email');
-            provider.addScope('name');
-
-            const result = await this.auth.signInWithPopup(provider);
-            this.currentUser = result.user;
-            this.logEvent('login_success', { method: 'apple' });
-            return { success: true, user: result.user };
-        } catch (error) {
-            let msg = 'Apple Sign-in failed';
-            if (error.code === 'auth/popup-closed-by-user') msg = 'Cancelled';
-            if (error.code === 'auth/popup-blocked') msg = 'Pop-up blocked';
-            this.logCrash('apple_signin_error', error.code);
-            return { success: false, error: msg };
-        }
-    }
-
-    static async completeAppleSignInWithCredential(idToken, rawNonce, email, fullName) {
-        if (!this.initialized) return { success: false, error: 'Not initialized' };
-        try {
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            const credential = provider.credential({
-                idToken: idToken,
-                rawNonce: rawNonce
-            });
-            const result = await this.auth.signInWithCredential(credential);
-            this.currentUser = result.user;
-
-            if (fullName && (fullName.givenName || fullName.familyName)) {
-                const displayName = `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim();
-                if (displayName && (!this.currentUser.displayName || this.currentUser.displayName === 'Player')) {
-                    try {
-                        await this.currentUser.updateProfile({ displayName: displayName });
-                    } catch (e) { }
-                }
-            }
-            this.logEvent('login_success', { method: 'apple_native' });
-            return { success: true, user: result.user };
-        } catch (error) {
-            console.error('Apple credential error:', error);
-            this.logCrash('apple_credential_error', error.code || error.message);
-            return { success: false, error: error.message || 'Credential verification failed' };
         }
     }
 

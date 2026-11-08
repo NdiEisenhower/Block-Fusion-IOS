@@ -2,13 +2,12 @@
 // Supports English (en), TshiVenda (ve), and isiZulu (zu) with dynamic extensibility
 
 class I18N {
-    static enabled = false;
     static currentLang = 'en';
 
     static languages = [
         { code: 'en', name: 'English', flag: '🇬🇧', enabled: true },
-        { code: 've', name: 'TshiVenda', flag: '🇿🇦', enabled: false },
-        { code: 'zu', name: 'isiZulu', flag: '🇿🇦', enabled: false }
+        { code: 've', name: 'TshiVenda', flag: '🇿🇦', enabled: true },
+        { code: 'zu', name: 'isiZulu', flag: '🇿🇦', enabled: true }
     ];
 
     static translations = {
@@ -410,12 +409,8 @@ class I18N {
     };
 
     static getAvailableLanguages() {
-        const isMasterEnabled = this.enabled !== false && (typeof CONFIG === 'undefined' || CONFIG.ENABLE_MULTI_LANGUAGE !== false);
-        if (!isMasterEnabled) {
-            return [{ code: 'en', name: 'English', flag: '🇬🇧', enabled: true }];
-        }
         const list = Array.isArray(this.languages) ? this.languages : [];
-        const active = list.filter(l => l && l.enabled !== false && l.enabled !== 'false' && l.enabled !== 0 && l.enabled !== '0');
+        const active = list.filter(l => l && l.enabled !== false);
         // Guarantee English is always present as base fallback
         if (!active.some(l => l.code === 'en')) {
             const enObj = list.find(l => l.code === 'en') || { code: 'en', name: 'English', flag: '🇬🇧', enabled: true };
@@ -426,11 +421,9 @@ class I18N {
 
     static isLanguageEnabled(langCode) {
         if (!langCode || langCode === 'en') return true;
-        const isMasterEnabled = this.enabled !== false && (typeof CONFIG === 'undefined' || CONFIG.ENABLE_MULTI_LANGUAGE !== false);
-        if (!isMasterEnabled) return false;
         const list = Array.isArray(this.languages) ? this.languages : [];
         const found = list.find(l => l.code === langCode);
-        return !!(found && found.enabled !== false && found.enabled !== 'false' && found.enabled !== 0 && found.enabled !== '0');
+        return !found || found.enabled !== false;
     }
 
     static init() {

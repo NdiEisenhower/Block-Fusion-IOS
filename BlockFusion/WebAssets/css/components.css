@@ -1,3 +1,11 @@
+/* Hide download app elements when running in native app */
+body.is-native-app .download-only-web,
+.is-native-app .download-only-web,
+.is-native-app a[href*="download"],
+.is-native-app button[onclick*="download"] {
+    display: none !important;
+}
+
 /* ===== BUTTONS ===== */
 .btn {
     display: inline-flex;

@@ -26,8 +26,13 @@ class Navigation {
                 App.updatePlayerDisplay();
                 App.updateOfflineIndicator();
                 App.updateLoginButtonVisibility();
-                // Completely remove download elements on app side
-                document.querySelectorAll('a[href*="download"], button[onclick*="download"], .store-web-notice').forEach(el => el.remove());
+                if (typeof window !== 'undefined' && (window.Android || typeof Android !== 'undefined' || document.body.classList.contains('is-native-app'))) {
+                    document.body.classList.add('is-native-app');
+                    document.querySelectorAll('.download-only-web, a[href*="download"], button[onclick*="download"]').forEach(el => {
+                        el.style.display = 'none';
+                        el.style.setProperty('display', 'none', 'important');
+                    });
+                }
                 break;
             case 'world-select':
                 this.renderWorldSelect();
@@ -264,13 +269,7 @@ class Navigation {
 
     static showLanguagePickerModal() {
         if (typeof I18N === 'undefined') return;
-        const isMultiLangEnabled = (typeof CONFIG !== 'undefined' && CONFIG.ENABLE_MULTI_LANGUAGE !== undefined)
-            ? !!CONFIG.ENABLE_MULTI_LANGUAGE
-            : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : false);
         const availableLangs = I18N.getAvailableLanguages();
-        if (!isMultiLangEnabled || availableLangs.length <= 1) {
-            return;
-        }
         const currentCode = I18N.currentLang;
 
         const listHtml = `
@@ -380,36 +379,19 @@ class Navigation {
             </button>
         </div>
 
-        ${(() => {
-            const availableLangs = (typeof I18N !== 'undefined' && typeof I18N.getAvailableLanguages === 'function')
-                ? I18N.getAvailableLanguages()
-                : [];
-            const isMultiLangEnabled = (typeof CONFIG !== 'undefined' && CONFIG.ENABLE_MULTI_LANGUAGE !== undefined)
-                ? !!CONFIG.ENABLE_MULTI_LANGUAGE
-                : ((typeof I18N !== 'undefined' && I18N.enabled !== undefined) ? I18N.enabled : false);
-
-            // Hide the entire language section if master switch is OFF or if only English is active
-            if (!isMultiLangEnabled || availableLangs.length <= 1) {
-                return '';
-            }
-
-            const activeLangObj = availableLangs.find(l => l.code === I18N.currentLang) || availableLangs[0] || { name: 'English', code: 'en', flag: '🇬🇧' };
-            return `
-            <h3 style="margin:10px 0 4px;color:var(--gold);">🌐 Language / Luambo / Ulimi</h3>
-            <div class="store-item" onclick="Navigation.showLanguagePickerModal()" style="cursor:pointer;">
-                <div class="item-icon" style="font-size:24px;">
-                    ${activeLangObj.flag || '🌐'}
-                </div>
-                <div class="item-info">
-                    <div class="item-name">${activeLangObj.name} (${activeLangObj.code.toUpperCase()})</div>
-                    <div class="item-desc">Tap to change language</div>
-                </div>
-                <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); Navigation.showLanguagePickerModal();">
-                    <span>🌐</span> Change
-                </button>
+        <h3 style="margin:10px 0 4px;color:var(--gold);">🌐 Language / Luambo / Ulimi</h3>
+        <div class="store-item" onclick="Navigation.showLanguagePickerModal()" style="cursor:pointer;">
+            <div class="item-icon" style="font-size:24px;">
+                ${(typeof I18N !== 'undefined' && I18N.languages && I18N.languages.find(l => l.code === I18N.currentLang)) ? (I18N.languages.find(l => l.code === I18N.currentLang).flag || '🌐') : '🌐'}
             </div>
-            `;
-        })()}
+            <div class="item-info">
+                <div class="item-name">${(typeof I18N !== 'undefined' && I18N.languages && I18N.languages.find(l => l.code === I18N.currentLang)) ? I18N.languages.find(l => l.code === I18N.currentLang).name : 'English'} (${((typeof I18N !== 'undefined') ? I18N.currentLang : 'en').toUpperCase()})</div>
+                <div class="item-desc">Tap to change language</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); Navigation.showLanguagePickerModal();">
+                <span>🌐</span> Change
+            </button>
+        </div>
         
         <h3 style="margin:10px 0 4px;color:var(--gold);">📖 Tutorial</h3>
         <div class="store-item">
@@ -507,8 +489,7 @@ class Navigation {
                 <div class="item-name" style="font-size:15px;word-break:break-word;">${displayName}</div>
                 <div class="item-desc" style="word-break:break-word;">${email}</div>
                 <div style="font-size:11px;color:var(--text-muted);margin-top:1px;">
-                    ${App.state.loginProvider === 'apple' ? ' Apple Account' :
-                    App.state.loginProvider === 'google' ? '🔵 Google Account' :
+                    ${App.state.loginProvider === 'google' ? '🔵 Google Account' :
                     App.state.loginProvider === 'anonymous' ? '👤 Anonymous' :
                         '✉️ Email Account'}
                 </div>
@@ -559,20 +540,10 @@ class Navigation {
             <a href="delete-data.html" target="_blank" class="btn btn-sm btn-danger" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;background:rgba(233,69,96,0.18);border:1px solid rgba(233,69,96,0.4);color:#FF8BA7;">Request</a>
         </div>`;
 
-        // Device & Platform Info Footer
-        const detectedPlat = (typeof FirebaseService !== 'undefined' && FirebaseService.getDetectedPlatform) ? FirebaseService.getDetectedPlatform() : 'web';
-        const isIos = detectedPlat === 'ios';
-
         html += `
         <h3 style="margin:12px 0 4px;color:#e94560;">⚠️ Danger Zone</h3>
-        <button class="btn btn-outline btn-block" style="color:#e94560;border-color:#e94560;margin-bottom:16px;"
-            onclick="App.resetAllProgress()">🗑️ Reset All Progress</button>
-
-        <div style="text-align:center;padding:16px 0 24px;border-top:1px solid rgba(255,255,255,0.06);margin-top:10px;">
-            <div style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;">
-                Version 1.0.0
-            </div>
-        </div>`;
+        <button class="btn btn-outline btn-block" style="color:#e94560;border-color:#e94560;margin-bottom:12px;"
+            onclick="App.resetAllProgress()">🗑️ Reset All Progress</button>`;
 
         container.innerHTML = html;
 
@@ -955,5 +926,16 @@ class Navigation {
         }
     }
 }
+
+// Immediately hide web download elements on native app load
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window !== 'undefined' && (window.Android || typeof Android !== 'undefined')) {
+        document.body.classList.add('is-native-app');
+        document.querySelectorAll('.download-only-web, a[href*="download"], button[onclick*="download"]').forEach(el => {
+            el.style.display = 'none';
+            el.style.setProperty('display', 'none', 'important');
+        });
+    }
+});
 
 window.Navigation = Navigation;
