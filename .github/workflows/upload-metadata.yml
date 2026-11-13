@@ -1,0 +1,43 @@
+name: Upload App Store Metadata
+
+on:
+  push:
+    branches: [ "fast_lane", "main" ]
+    paths:
+      - 'fastlane/metadata/**'
+      - '.github/workflows/upload-metadata.yml'
+  workflow_dispatch:
+
+jobs:
+  upload-metadata:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Validate App Store Connect Secrets
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+        run: |
+          for name in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_KEY_CONTENT; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Add the $name repository Actions secret before running this workflow."
+              exit 1
+            fi
+          done
+
+      - name: Upload Metadata via Fastlane Deliver
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+        run: bundle exec fastlane upload_metadata

@@ -1,0 +1,1 @@
+block rush,number puzzle,grid merge,brain quest,logic game,tactical puzzle,daily challenges
