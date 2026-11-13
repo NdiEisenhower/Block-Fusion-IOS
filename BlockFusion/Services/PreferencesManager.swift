@@ -97,5 +97,15 @@ final class PreferencesManager {
         get { defaults.string(forKey: Keys.customQaUrl) }
         set { defaults.set(newValue, forKey: Keys.customQaUrl) }
     }
+    
+    var soundEnabled: Bool {
+        get { defaults.bool(forKey: Keys.soundEnabled) }
+        set { defaults.set(newValue, forKey: Keys.soundEnabled) }
+    }
+    
+    var hapticsEnabled: Bool {
+        get { defaults.bool(forKey: Keys.hapticsEnabled) }
+        set { defaults.set(newValue, forKey: Keys.hapticsEnabled) }
+    }
 }
 

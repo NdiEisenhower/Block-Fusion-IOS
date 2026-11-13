@@ -10,7 +10,6 @@ All generated graphics are organized in `F:\Projects\Apps\iOS Apps\Block-Fusion-
 * **Where to upload**: Click **"Upload"** in the dotted rectangle under **"Header and Search Results"**.
 * *(Note: This header asset is optional for search discovery, but highly recommended for featuring!)*
 
-
 ---
 
 ## 2. App Previews and Screenshots (Tab 2)
@@ -21,7 +20,7 @@ Click the tab **"App Previews and Screenshots"** right next to "Header and Searc
 * **Resolution**: 1290 x 2796 px (iPhone 16 Pro Max, 15 Pro Max, 14 Pro Max)
 * **Files**:
   1. `01_home_screen.png` — Main Menu, Daily Challenges & Leaderboard access
-  2. `02_gameplay_2048.png` — Classic 2048 puzzle merging board with powerups
+  2. `02_gameplay_2048.png` — Tactical grid puzzle merging with powerups
   3. `03_dynamic_worlds.png` — Multi-World Adventure (Forest, Desert, Volcano, Galaxy)
   4. `04_level_progression.png` — Adventure level roadmap & star ratings
   5. `05_daily_challenges.png` — Daily challenges with streak rewards
@@ -40,7 +39,7 @@ Click the tab **"App Previews and Screenshots"** right next to "Header and Searc
 
 ---
 
-## 3. Product Page Metadata (Copy & Paste)
+## 3. Product Page Metadata (Guideline 4.3 Compliant)
 
 ### App Name
 ```text
@@ -49,35 +48,35 @@ Block Rush 2K
 
 ### Subtitle (Max 30 characters)
 ```text
-Classic 2048 Block Puzzle
+Tactical Number Puzzle Quest
 ```
 
 ### Promotional Text (Max 170 characters)
 ```text
-Merge blocks, explore vibrant themed worlds, conquer daily puzzle challenges, and climb global leaderboards in Block Rush 2K!
+Embark on a tactical number puzzle quest! Explore 8 themed worlds, solve daily brain teasers, and compete on Game Center leaderboards in Block Rush 2K.
 ```
 
 ### Keywords (Max 100 characters, comma-separated)
 ```text
-2048,block puzzle,merge blocks,brain game,number puzzle,logic game,casual,relaxing,block rush
+block rush,number puzzle,grid merge,brain quest,logic game,tactical puzzle,daily challenges
 ```
 
 ### Description
 ```text
-Welcome to Block Rush 2K — the ultimate next-generation 2048 number merging puzzle game!
+Welcome to Block Rush 2K — a reimagined, tactical number puzzle adventure designed exclusively for iOS!
 
-Slide, merge, and match numbers to build massive combos and reach the legendary 2048 tile and beyond. Experience smooth animations, responsive haptic feedback, and vibrant themed environments designed for puzzle lovers of all skill levels.
+Test your logic, plan strategic moves, and merge matching numbers on an interactive grid to conquer hundreds of brain-teasing levels. With native iOS haptic feedback, fluid animations, and a rich multi-world campaign, Block Rush 2K elevates number merging into a complete puzzle quest.
 
-FEATURES:
-• Classic 2048 Mechanics: Intuitive swipe controls with crisp visuals and responsive tactile feedback.
-• Adventure Worlds: Journey across diverse themes including Forest, Desert, Snow, Volcano, Galaxy, Neon, and Wood.
-• Powerful Boosters: Use Undo, Tile Swap, Tile Remove, and Board Shuffle when you need tactical assistance.
-• Daily Challenges: Fresh brain teasers every single day with bonus coin rewards and streak tracking.
-• Global & Friends Leaderboards: Compete with players worldwide and track your highest achievements via Game Center.
-• Sign in with Apple: Seamless 1-tap cloud sync across all your iOS devices.
-• Full Offline Play: Enjoy seamless gameplay anywhere, anytime — no active internet connection required!
+UNIQUE FEATURES:
+• Multi-World Campaign: Journey across 8 diverse handcrafted environments including Forest, Desert, Snow, Volcano, Galaxy, Neon, Wood, and Mythic.
+• Tactical Powerups: Overcome tricky board states using strategic boosters — Undo mistaken moves, Swap adjacent tiles, Remove blocking numbers, or Shuffle the entire grid.
+• Daily Brain Quests: Tackle unique daily puzzle configurations every morning, earn special rewards, and build your milestone streak.
+• Native Game Center Integration: Compete on global leaderboards and unlock Game Center achievements with real-time score reporting.
+• Native iOS Experience: Built with dedicated native navigation, high refresh rate ProMotion display support, and tactile Taptic Engine feedback for every swipe and merge.
+• Sign in with Apple: Enjoy seamless one-tap cloud sync across all your iOS devices.
+• 100% Offline Play: Play anywhere, anytime without an internet connection.
 
-Challenge your mind, train your brain, and set new high scores in Block Rush 2K today!
+Train your mind, challenge your friends, and discover the thrill of Block Rush 2K!
 ```
 
 ---
@@ -88,13 +87,12 @@ Challenge your mind, train your brain, and set new high scores in Block Rush 2K 
 * **Marketing URL**: `https://blockrush2k.kharitambe.co.za`
 * **Privacy Policy URL**: `https://blockrush2k.kharitambe.co.za/privacy.html`
 * **Primary Category**: Games > Puzzle
-* **Secondary Category**: Games > Casual
+* **Secondary Category**: Games > Strategy
 * **Content Rights**: Does this app contain third-party content? -> **No**
 * **Age Rating**: Click "Set Up Age Rating" -> All categories "None / Infrequent" -> Rating: **4+** (Suitable for all ages).
 
 ---
 
-## 5. App Review Information
-* **Sign-in required**: No (Guests can play fully; Sign in with Apple/Google is optional).
-* **Notes**: "All features including offline play, powerups, daily challenges, and StoreKit 2 in-app purchases can be tested in Sandbox mode."
-
+## 5. App Review Information & Appeal Response
+* **Sign-in required**: No (Guests can play fully; Sign in with Apple is optional).
+* **Notes**: "All features including offline play, tactical powerups, daily challenges, Game Center leaderboards, and StoreKit 2 in-app purchases can be tested in Sandbox mode."

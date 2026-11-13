@@ -265,8 +265,7 @@ class AdService {
     }
 
     static detectEnvironment() {
-        const isNativeBridge = (typeof window.Android !== 'undefined' && window.Android !== null) ||
-                               (typeof window.AdMob !== 'undefined');
+        const isNativeBridge = (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers) || (typeof window.Android !== 'undefined' && window.Android !== null) || (typeof window.AdMob !== 'undefined') || (typeof window.iOS !== 'undefined');
 
         if (isNativeBridge) {
             this.env = 'android';
@@ -495,84 +494,12 @@ class AdService {
     }
 
     static ensureAdSenseScript() {
-        if (typeof document === 'undefined') return;
-        if (document.getElementById('adsbygoogle-js')) return;
-
-        const bannerStr = (this.config.adsense && this.config.adsense.banner) || 'ca-pub-4255859216659691/6387045959';
-        const client = bannerStr.split('/')[0] || 'ca-pub-4255859216659691';
-
-        const script = document.createElement('script');
-        script.id = 'adsbygoogle-js';
-        script.async = true;
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
+        return;
     }
 
     static loadAdSenseBanner(container) {
-        if (!container) return;
-
-        // Container remains hidden until an ad is confirmed filled
-        container.style.display = 'none';
-        container.classList.remove('has-ad');
-
-        const bannerStr = (this.config.adsense && this.config.adsense.banner) || 'ca-pub-4255859216659691/6387045959';
-        const parts = bannerStr.split('/');
-        const client = parts[0] || 'ca-pub-4255859216659691';
-        const slot = parts[1] || '6387045959';
-
-        this.ensureAdSenseScript();
-
-        try {
-            container.innerHTML = `
-                <ins class="adsbygoogle"
-                     style="display:inline-block;width:100%;max-height:60px;"
-                     data-ad-client="${client}"
-                     data-ad-slot="${slot}"
-                     data-ad-format="horizontal"
-                     data-full-width-responsive="false"></ins>
-            `;
-
-            const ins = container.querySelector('ins.adsbygoogle');
-            const checkAdStatus = () => {
-                if (!ins || !container) return;
-                const status = ins.getAttribute('data-ad-status');
-                if (status === 'unfilled') {
-                    // Ad unfilled: keep container completely hidden and empty
-                    container.style.display = 'none';
-                    container.classList.remove('has-ad');
-                    container.innerHTML = '';
-                } else if (status === 'filled' || (ins.childNodes.length > 0 && ins.offsetHeight > 20)) {
-                    // Ad is rendered and filled
-                    container.style.display = 'flex';
-                    container.classList.add('has-ad');
-                } else {
-                    container.style.display = 'none';
-                    container.classList.remove('has-ad');
-                }
-            };
-
-            const observer = new MutationObserver(() => checkAdStatus());
-            observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status'], childList: true });
-
-            setTimeout(checkAdStatus, 1500);
-            setTimeout(checkAdStatus, 3500);
-            setTimeout(() => {
-                if (container && !container.classList.contains('has-ad')) {
-                    container.style.display = 'none';
-                    container.classList.remove('has-ad');
-                    container.innerHTML = '';
-                }
-            }, 4500);
-
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            return;
-        } catch (e) {
-            console.warn('AdSense banner push error:', e);
-            container.style.display = 'none';
-            container.classList.remove('has-ad');
-            container.innerHTML = '';
-        }
+        if (container) container.style.display = 'none';
+        return;
     }
 
     static showBannerAd() {

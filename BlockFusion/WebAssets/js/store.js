@@ -10,10 +10,7 @@ class Store {
     }
 
     static isNativeBillingAvailable() {
-        return (typeof window.Android !== 'undefined' && typeof window.Android.launchPurchase === 'function') ||
-               (typeof window.Billing !== 'undefined' && typeof window.Billing.launchPurchase === 'function') ||
-               (typeof window.iOS !== 'undefined') ||
-               (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.billingBridge);
+        return true;
     }
 
     static renderStoreContent() {
@@ -36,22 +33,7 @@ class Store {
                 </div>
             `;
 
-            // If on website without native billing bridge, show clear paywall/app guidance notice
-            if (!isNative) {
-                html += `
-                <div class="store-web-notice" style="background:linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(30,41,59,0.95) 100%);border:1px solid rgba(245,158,11,0.35);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 14px rgba(0,0,0,0.3);">
-                    <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-                        <span style="font-size:24px;flex-shrink:0;">📲</span>
-                        <div style="font-size:12px;color:#fde68a;line-height:1.4;">
-                            <strong style="color:#fff;">Available on Mobile App:</strong> Coin packs and real-money purchases are currently available inside the official Block Rush 2K Mobile App. Download to buy &amp; your balance syncs right back here!
-                        </div>
-                    </div>
-                    <a href="/download" class="btn btn-gold" style="font-size:12px;font-weight:900;padding:6px 14px;border-radius:10px;text-decoration:none;white-space:nowrap;width:auto;height:36px;flex-shrink:0;">
-                        Get App
-                    </a>
-                </div>
-                `;
-            }
+            
 
             // Coin Packs Section
             html += `
@@ -267,117 +249,26 @@ class Store {
     // Unified Purchase Launch
     static isPurchasing = false;
 
-    static purchaseItem(productId) {
+        static purchaseItem(productId) {
         if (Store.isPurchasing) {
-            console.log('🛒 Purchase already in progress, ignoring duplicate tap');
+            console.log('🛒 Purchase already in progress');
             return;
         }
-
         console.log('🛒 Purchase requested for:', productId);
         Store.isPurchasing = true;
         setTimeout(() => { Store.isPurchasing = false; }, 45000);
 
-        // Check if running on Android TV where remote payments are not supported
-        if (typeof Billing !== 'undefined' && typeof Billing.isTvDevice === 'function' && Billing.isTvDevice()) {
-            Store.isPurchasing = false;
-            Store.showTvPurchaseModal(productId);
-            return;
-        }
-
-        // Check if running on iOS with WebKit MessageHandler
         if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.billingBridge) {
             window.webkit.messageHandlers.billingBridge.postMessage({ action: 'launchPurchase', productId: productId });
             return;
         }
-
-        // Check if running on Android with Native Billing Bridge
-        if (typeof Android !== 'undefined' && typeof Android.launchPurchase === 'function') {
-            Android.launchPurchase(productId);
-            return;
-        }
-
         if (typeof Billing !== 'undefined' && typeof Billing.launchPurchase === 'function') {
             Billing.launchPurchase(productId);
             return;
         }
-
-        // Web restriction: Website has no paywall yet. Direct user to mobile app download hub.
-        Store.isPurchasing = false;
-        Store.showWebPurchaseRestrictionModal(productId);
-    }
-
-    static showWebPurchaseRestrictionModal(productId) {
-        const prices = (typeof App !== 'undefined' && App.googlePlayPrices) ? App.googlePlayPrices : {};
-        const coinPacks = (typeof CONFIG !== 'undefined' && CONFIG.STORE_ITEMS && CONFIG.STORE_ITEMS.coinPacks) ? CONFIG.STORE_ITEMS.coinPacks : [];
-        const pack = coinPacks.find(p => p.id === productId);
-        const itemName = pack ? `${pack.name} (+${(pack.coins || 0).toLocaleString()} Coins)` : 'Coin Pack / Store Item';
-
-        if (typeof PopupManager !== 'undefined' && PopupManager.show) {
-            PopupManager.show({
-                icon: '💰',
-                title: 'Purchases on Mobile App',
-                subtitle: 'Web paywall is currently being updated',
-                details: [
-                    { label: 'Item', value: itemName },
-                    { label: 'Platform', value: 'Block Rush 2K Mobile App' },
-                    { label: 'Available Stores', value: 'Huawei AppGallery & App Stores' },
-                    { label: 'Cloud Sync', value: 'Instant sync across all your devices' }
-                ],
-                customContent: `
-                    <div style="padding: 10px 0; font-size: 13px; color: #cbd5e1; line-height: 1.6; text-align: center;">
-                        Direct coin checkout is temporarily available exclusively inside the official <strong>Block Rush 2K Mobile App</strong> while our web paywall is being prepared.<br><br>
-                        Download or open the app on your mobile device to complete your purchase, and all your coins, stars, and levels will automatically sync here!
-                    </div>
-                `,
-                confirmText: '📲 Get Mobile App',
-                onConfirm: () => {
-                    window.location.href = '/download';
-                },
-                cancelText: 'Continue Playing',
-                showCancel: true
-            });
-        } else {
-            alert('Coin purchases are currently available on the official Block Rush 2K mobile app. Please download the app to buy items!');
-            window.location.href = '/download';
-        }
-    }
-
-    static showTvPurchaseModal(productId) {
-        const prices = (typeof App !== 'undefined' && App.googlePlayPrices) ? App.googlePlayPrices : {};
-        const coinPacks = (typeof CONFIG !== 'undefined' && CONFIG.STORE_ITEMS && CONFIG.STORE_ITEMS.coinPacks) ? CONFIG.STORE_ITEMS.coinPacks : [];
-        const pack = coinPacks.find(p => p.id === productId);
-        const itemName = pack ? `${pack.name} (+${(pack.coins || 0).toLocaleString()} Coins)` : 'Coin Pack / Store Item';
-
-        if (typeof PopupManager !== 'undefined' && PopupManager.show) {
-            PopupManager.show({
-                icon: '📺📱',
-                title: 'Android TV Purchase Notice',
-                subtitle: 'Complete purchase on your mobile phone',
-                details: [
-                    { label: 'Item', value: itemName },
-                    { label: 'Platform', value: 'Google Play on Phone' },
-                    { label: 'Cloud Sync', value: 'Auto-syncs to your TV instantly' }
-                ],
-                customContent: `
-                    <div style="padding: 10px 0; font-size: 13px; color: #cbd5e1; line-height: 1.6; text-align: center;">
-                        <div style="margin: 5px auto 15px auto; background: #fff; padding: 10px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=0&data=https://blockrush2k.kharitambe.co.za/download" width="130" height="130" alt="QR Code" style="display:block;">
-                        </div>
-                        <div style="font-size: 14px; font-weight: bold; color: #F7C948; margin-bottom: 16px; letter-spacing: 0.5px;">Scan to download mobile app</div>
-
-                        Direct in-app purchases are not supported via remote control on Android TV.<br><br>
-                        <strong>How to buy on your phone:</strong><br>
-                        1. Log into your <strong>Block Rush 2K</strong> account on your smartphone.<br>
-                        2. Purchase <strong>${itemName}</strong> securely in the mobile app.<br>
-                        3. Your coins, stars, and theme unlocks will automatically and instantly sync to this TV!
-                    </div>
-                `,
-                confirmText: 'Got It',
-                onConfirm: () => {},
-                showCancel: false
-            });
-        } else {
-            alert('Direct in-app purchases are not supported via remote control on Android TV. Please log into the mobile app on your phone to complete your purchase—your items will automatically sync to your TV via cloud save!');
+        if (typeof Android !== 'undefined' && typeof Android.launchPurchase === 'function') {
+            Android.launchPurchase(productId);
+            return;
         }
     }
 

@@ -6,6 +6,7 @@ protocol ScriptBridgeDelegate: AnyObject {
     func openShareSheet(text: String, url: URL?)
     func openStoreReview()
     func exitApp()
+    func didChangeScreen(to screen: String)
 }
 
 /// Dispatches native commands between JavaScript and iOS
@@ -156,6 +157,10 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             delegate?.openStoreReview()
         case "exitApp":
             delegate?.exitApp()
+        case "screenChanged":
+            if let screen = body["screen"] as? String {
+                delegate?.didChangeScreen(to: screen)
+            }
         default:
             break
         }

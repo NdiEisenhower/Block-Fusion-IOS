@@ -1,12 +1,22 @@
 import Foundation
 
-/// JavaScript injection script that establishes complete compatibility with the Android bridge
+/// JavaScript injection script that establishes native bridges and styling for iOS
 enum NativeBridgeScript {
     static let scriptContent: String = """
     (function() {
-        console.log('⚡ Initializing iOS Native Bridges (Android, Billing, Social, iOS)...');
+        console.log('⚡ Initializing iOS Native Bridges...');
         
-        // Enforce iOS Safe Area padding to protect against notch & Dynamic Island
+        // Mark document as native iOS app
+        document.documentElement.classList.add('is-native-ios', 'is-native-app');
+        if (document.body) {
+            document.body.classList.add('is-native-ios', 'is-native-app');
+        } else {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (document.body) document.body.classList.add('is-native-ios', 'is-native-app');
+            });
+        }
+        
+        // Enforce iOS Safe Area padding and remove web artifacts
         try {
             var safeStyle = document.getElementById('ios-safe-area-rules');
             if (!safeStyle) {
@@ -14,22 +24,25 @@ enum NativeBridgeScript {
                 safeStyle.id = 'ios-safe-area-rules';
                 safeStyle.textContent = `
                     :root {
-                        --safe-area-top: max(env(safe-area-inset-top, 0px), 60px);
-                        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 34px);
+                        --safe-area-top: max(env(safe-area-inset-top, 0px), 48px);
+                        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
                     }
                     #app {
-                        padding-top: max(env(safe-area-inset-top, 0px), 60px) !important;
-                        padding-bottom: max(env(safe-area-inset-bottom, 0px), 34px) !important;
+                        padding-top: max(env(safe-area-inset-top, 0px), 48px) !important;
+                        padding-bottom: 74px !important; /* reserve room for native bottom bar */
                         box-sizing: border-box !important;
                     }
-                    /* Remove all download UI on iOS app side */
+                    /* Remove all web download / smart tv / web notice artifacts */
                     a[href*="download"],
                     a[href*="/tv"],
                     button[onclick*="download"],
+                    .download-only-web,
                     .web-only-download,
                     .store-web-notice,
                     .download-card,
-                    .download-grid {
+                    .download-grid,
+                    #adsbygoogle-js,
+                    .adsbygoogle {
                         display: none !important;
                     }
                 `;
@@ -65,7 +78,95 @@ enum NativeBridgeScript {
         }
 
         // ==========================================
-        // 1. Android Bridge (AdMob + Billing fallback)
+        // 1. Core Native App Bridge
+        // ==========================================
+        window.iOS = {
+            vibrate: function(type) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium' }); },
+            share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
+            showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); },
+            signInWithApple: function() { postToNative('socialBridge', 'performAppleSignIn'); },
+            notifyScreenChanged: function(screen) { postToNative('appBridge', 'screenChanged', { screen: screen }); }
+        };
+
+        // Apple Authentication Bridge
+        window.AppleAuth = {
+            signIn: function() { postToNative('socialBridge', 'performAppleSignIn'); },
+            isAvailable: true
+        };
+
+        // Game Center Bridge
+        window.GameCenter = {
+            submitScore: function(score, leaderboardId) {
+                postToNative('gameCenterBridge', 'submitScore', { score: score, leaderboardId: leaderboardId || 'main_leaderboard' });
+            },
+            reportAchievement: function(id, percent) {
+                postToNative('gameCenterBridge', 'reportAchievement', { id: id, percent: percent || 100.0 });
+            },
+            showDashboard: function() {
+                postToNative('gameCenterBridge', 'showDashboard');
+            }
+        };
+
+        // ==========================================
+        // 2. Billing Bridge (StoreKit 2)
+        // ==========================================
+        window.Billing = {
+            launchPurchase: function(productId) {
+                postToNative('billingBridge', 'launchPurchase', { productId: productId });
+            },
+            restorePurchases: function() {
+                postToNative('billingBridge', 'restorePurchases');
+            },
+            isPaymentSupported: function() {
+                return true;
+            },
+            getProductPrices: function() {
+                return JSON.stringify(window._cachedPrices || {});
+            },
+            isBillingAvailable: function() {
+                return true;
+            },
+            isThemePackOwned: function() {
+                return !!window._isThemePackOwned;
+            },
+            isAdsRemoved: function() {
+                return !!window._isAdsRemoved;
+            },
+            getPurchasedProducts: function() {
+                return JSON.stringify(window._purchasedProducts || []);
+            },
+            setActiveTheme: function(themeId) {
+                window._activeTheme = themeId;
+                postToNative('billingBridge', 'setActiveTheme', { themeId: themeId });
+            },
+            getActiveTheme: function() {
+                return window._activeTheme || 'numbers';
+            },
+            isTvDevice: function() {
+                return false;
+            }
+        };
+
+        // ==========================================
+        // 3. Social Bridge (Native Share Sheet)
+        // ==========================================
+        window.Social = {
+            shareReferralCode: function(code, shareUrl) {
+                postToNative('socialBridge', 'shareReferralCode', { code: code, shareUrl: shareUrl });
+            },
+            sendFriendRequest: function(uid) {
+                console.log('Social friend request:', uid);
+            },
+            acceptFriendRequest: function(uid) {
+                console.log('Social accept request:', uid);
+            },
+            getFriendsList: function() {
+                if (window.onFriendsListLoaded) window.onFriendsListLoaded([]);
+            }
+        };
+
+        // ==========================================
+        // 4. Backward Compatibility Shim (for legacy game scripts)
         // ==========================================
         window.Android = {
             initAds: function(bannerId, interId, rewardedId) {
@@ -131,7 +232,7 @@ enum NativeBridgeScript {
                 postToNative('adBridge', 'logEvent', { name: eventName, params: paramsJson });
             },
             getPlatform: function() {
-                return 'ios'; // Direct iOS platform identity
+                return 'ios';
             },
             getFlavor: function() {
                 return 'appstore';
@@ -144,91 +245,6 @@ enum NativeBridgeScript {
             },
             ping: function() {
                 return 'pong';
-            }
-        };
-
-        // ==========================================
-        // 2. Billing Bridge (StoreKit 2)
-        // ==========================================
-        window.Billing = {
-            launchPurchase: function(productId) {
-                postToNative('billingBridge', 'launchPurchase', { productId: productId });
-            },
-            restorePurchases: function() {
-                postToNative('billingBridge', 'restorePurchases');
-            },
-            isPaymentSupported: function() {
-                return true;
-            },
-            getProductPrices: function() {
-                return JSON.stringify(window._cachedPrices || {});
-            },
-            isBillingAvailable: function() {
-                return true;
-            },
-            isThemePackOwned: function() {
-                return !!window._isThemePackOwned;
-            },
-            isAdsRemoved: function() {
-                return !!window._isAdsRemoved;
-            },
-            getPurchasedProducts: function() {
-                return JSON.stringify(window._purchasedProducts || []);
-            },
-            setActiveTheme: function(themeId) {
-                window._activeTheme = themeId;
-                postToNative('billingBridge', 'setActiveTheme', { themeId: themeId });
-            },
-            getActiveTheme: function() {
-                return window._activeTheme || 'numbers';
-            },
-            isTvDevice: function() {
-                return false;
-            }
-        };
-
-        // ==========================================
-        // 3. Social Bridge (Native Share Sheet)
-        // ==========================================
-        window.Social = {
-            shareReferralCode: function(code, shareUrl) {
-                postToNative('socialBridge', 'shareReferralCode', { code: code, shareUrl: shareUrl });
-            },
-            sendFriendRequest: function(uid) {
-                console.log('Social friend request:', uid);
-            },
-            acceptFriendRequest: function(uid) {
-                console.log('Social accept request:', uid);
-            },
-            getFriendsList: function() {
-                if (window.onFriendsListLoaded) window.onFriendsListLoaded([]);
-            }
-        };
-
-        // Direct iOS namespace
-        window.iOS = {
-            vibrate: function(type) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium' }); },
-            share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
-            showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); }
-            signInWithApple: function() { postToNative('socialBridge', 'performAppleSignIn'); },
-        };
-
-        // Game Center Bridge
-        // Apple Authentication Bridge
-        window.AppleAuth = {
-            signIn: function() { postToNative('socialBridge', 'performAppleSignIn'); },
-            isAvailable: true
-        };
-
-        window.GameCenter = {
-            submitScore: function(score, leaderboardId) {
-                postToNative('gameCenterBridge', 'submitScore', { score: score, leaderboardId: leaderboardId || 'main_leaderboard' });
-            },
-            reportAchievement: function(id, percent) {
-                postToNative('gameCenterBridge', 'reportAchievement', { id: id, percent: percent || 100.0 });
-            },
-            showDashboard: function() {
-                postToNative('gameCenterBridge', 'showDashboard');
             }
         };
 

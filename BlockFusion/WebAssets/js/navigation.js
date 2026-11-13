@@ -3,6 +3,7 @@ class Navigation {
     static async navigateTo(screenId) {
         try { SoundManager.click(); } catch (e) { }
 
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { window.iOS.notifyScreenChanged(screenId); } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) { window.webkit.messageHandlers.appBridge.postMessage({ action: 'screenChanged', screen: screenId }); }
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const target = document.getElementById('screen-' + screenId);
         if (target) {

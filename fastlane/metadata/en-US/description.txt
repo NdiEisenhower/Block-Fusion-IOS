@@ -1,0 +1,14 @@
+Welcome to Block Rush 2K — a reimagined, tactical number puzzle adventure designed exclusively for iOS!
+
+Test your logic, plan strategic moves, and merge matching numbers on an interactive grid to conquer hundreds of brain-teasing levels. With native iOS haptic feedback, fluid animations, and a rich multi-world campaign, Block Rush 2K elevates number merging into a complete puzzle quest.
+
+UNIQUE FEATURES:
+• Multi-World Campaign: Journey across 8 diverse handcrafted environments including Forest, Desert, Snow, Volcano, Galaxy, Neon, Wood, and Mythic.
+• Tactical Powerups: Overcome tricky board states using strategic boosters — Undo mistaken moves, Swap adjacent tiles, Remove blocking numbers, or Shuffle the entire grid.
+• Daily Brain Quests: Tackle unique daily puzzle configurations every morning, earn special rewards, and build your milestone streak.
+• Native Game Center Integration: Compete on global leaderboards and unlock Game Center achievements with real-time score reporting.
+• Native iOS Experience: Built with dedicated native navigation, high refresh rate ProMotion display support, and tactile Taptic Engine feedback for every swipe and merge.
+• Sign in with Apple: Enjoy seamless one-tap cloud sync across all your iOS devices.
+• 100% Offline Play: Play anywhere, anytime without an internet connection.
+
+Train your mind, challenge your friends, and discover the thrill of Block Rush 2K!
