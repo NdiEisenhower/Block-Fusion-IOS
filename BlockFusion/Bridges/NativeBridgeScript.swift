@@ -97,18 +97,39 @@ enum NativeBridgeScript {
         window.onAppleSignInSuccess = async function(idToken, rawNonce, email, fullName) {
             try {
                 if (typeof FirebaseService !== 'undefined') {
-                    const res = await FirebaseService.signInWithApple(idToken, rawNonce, email, fullName);
+                    const res = (typeof FirebaseService.completeAppleSignInWithCredential === 'function')
+                        ? await FirebaseService.completeAppleSignInWithCredential(idToken, rawNonce, email, fullName)
+                        : await FirebaseService.signInWithApple(idToken, rawNonce, email, fullName);
                     if (res && res.success) {
-                        if (typeof App !== 'undefined') {
+                        if (typeof App !== 'undefined' && App.handleSuccessfulLogin) {
+                            App.handleSuccessfulLogin(res.user, 'apple');
+                            App.showToast('✅ Signed in with Apple!');
+                        } else if (typeof App !== 'undefined' && App.onLoginSuccess) {
                             App.onLoginSuccess(res.user);
                             App.showToast('✅ Signed in with Apple!');
                         }
                     } else {
-                        if (typeof App !== 'undefined') App.showToast('❌ Apple Sign In failed: ' + (res ? res.error : 'unknown'));
+                        if (typeof App !== 'undefined' && App.showToast) App.showToast('❌ Apple Sign In failed: ' + (res ? res.error : 'unknown'));
+                    }
+                    if (typeof window._appleSignInResolve === 'function') {
+                        window._appleSignInResolve(res);
+                        window._appleSignInResolve = null;
                     }
                 }
             } catch (e) {
                 console.error('onAppleSignInSuccess error:', e);
+            }
+        };
+
+        window.onAppleSignInError = function(errorMsg) {
+            if (errorMsg !== 'Cancelled') {
+                if (typeof App !== 'undefined' && App.showToast) {
+                    App.showToast('⚠️ Apple Sign In: ' + errorMsg);
+                }
+            }
+            if (typeof window._appleSignInResolve === 'function') {
+                window._appleSignInResolve({ success: false, error: errorMsg });
+                window._appleSignInResolve = null;
             }
         };
 

@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Block Rush 2K - iOS Test Harness & Bridge Simulator</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #090d16;
@@ -56,8 +62,20 @@
             padding: 0 12px;
             box-shadow: 0 0 4px rgba(255, 255, 255, 0.05);
         }
-        .island-camera { width: 10px; height: 10px; border-radius: 50%; background: #111; }
-        .island-sensor { width: 12px; height: 12px; border-radius: 50%; background: #0c1829; }
+
+        .island-camera {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #111;
+        }
+
+        .island-sensor {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #0c1829;
+        }
 
         /* Home Indicator Bar */
         .home-bar {
@@ -99,7 +117,11 @@
             font-weight: 700;
             letter-spacing: 0.5px;
         }
-        .sim-banner.active { display: flex; }
+
+        .sim-banner.active {
+            display: flex;
+        }
+
         .sim-banner .ad-badge {
             background: #f59e0b;
             color: #000;
@@ -123,18 +145,23 @@
             padding: 30px;
             text-align: center;
         }
-        .sim-ad-overlay.active { display: flex; }
+
+        .sim-ad-overlay.active {
+            display: flex;
+        }
+
         .ad-timer {
             font-size: 48px;
             font-weight: 900;
             color: #f59e0b;
             margin: 15px 0;
         }
+
         .ad-close-btn {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: #fff;
             border: none;
             border-radius: 50%;
@@ -155,11 +182,15 @@
             border-top-right-radius: 24px;
             padding: 24px 20px 36px;
             z-index: 250;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
             transform: translateY(100%);
             transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .storekit-modal.active { transform: translateY(0); }
+
+        .storekit-modal.active {
+            transform: translateY(0);
+        }
+
         .storekit-apple-logo {
             font-size: 20px;
             color: #fff;
@@ -169,9 +200,27 @@
             gap: 6px;
             font-weight: 600;
         }
-        .storekit-product-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #fff; }
-        .storekit-product-price { font-size: 22px; font-weight: 800; color: #38bdf8; margin-bottom: 16px; }
-        .storekit-actions { display: flex; gap: 10px; margin-top: 15px; }
+
+        .storekit-product-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .storekit-product-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 16px;
+        }
+
+        .storekit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
         .btn-sk {
             flex: 1;
             padding: 12px;
@@ -181,8 +230,16 @@
             border: none;
             cursor: pointer;
         }
-        .btn-sk-pay { background: #0071e3; color: #fff; }
-        .btn-sk-cancel { background: #2c2c2e; color: #98989d; }
+
+        .btn-sk-pay {
+            background: #0071e3;
+            color: #fff;
+        }
+
+        .btn-sk-cancel {
+            background: #2c2c2e;
+            color: #98989d;
+        }
 
         /* Inspector Right Panel */
         .inspector-pane {
@@ -201,8 +258,22 @@
             align-items: center;
             justify-content: space-between;
         }
-        .inspector-header h2 { font-size: 16px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+
+        .inspector-header h2 {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
 
         .inspector-body {
             flex: 1;
@@ -219,6 +290,7 @@
             border-radius: 12px;
             padding: 14px;
         }
+
         .hud-card-title {
             font-size: 12px;
             font-weight: 800;
@@ -231,7 +303,12 @@
             justify-content: space-between;
         }
 
-        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
         .hud-btn {
             background: #334155;
             color: #e2e8f0;
@@ -243,10 +320,25 @@
             cursor: pointer;
             transition: all 0.15s;
         }
-        .hud-btn:hover { background: #475569; }
-        .hud-btn.primary { background: #2563eb; color: #fff; }
-        .hud-btn.success { background: #059669; color: #fff; }
-        .hud-btn.danger { background: #dc2626; color: #fff; }
+
+        .hud-btn:hover {
+            background: #475569;
+        }
+
+        .hud-btn.primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .hud-btn.success {
+            background: #059669;
+            color: #fff;
+        }
+
+        .hud-btn.danger {
+            background: #dc2626;
+            color: #fff;
+        }
 
         /* Console Log */
         .console-box {
@@ -262,12 +354,40 @@
             display: flex;
             flex-direction: column-reverse;
         }
-        .log-entry { margin-bottom: 4px; line-height: 1.4; word-break: break-all; }
-        .log-tag { font-weight: bold; border-radius: 3px; padding: 1px 4px; margin-right: 4px; font-size: 10px; }
-        .tag-bridge { background: #0284c7; color: #fff; }
-        .tag-iap { background: #16a34a; color: #fff; }
-        .tag-ad { background: #d97706; color: #fff; }
-        .tag-haptic { background: #9333ea; color: #fff; }
+
+        .log-entry {
+            margin-bottom: 4px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .log-tag {
+            font-weight: bold;
+            border-radius: 3px;
+            padding: 1px 4px;
+            margin-right: 4px;
+            font-size: 10px;
+        }
+
+        .tag-bridge {
+            background: #0284c7;
+            color: #fff;
+        }
+
+        .tag-iap {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .tag-ad {
+            background: #d97706;
+            color: #fff;
+        }
+
+        .tag-haptic {
+            background: #9333ea;
+            color: #fff;
+        }
 
         /* Haptic flash animation */
         .haptic-indicator {
@@ -278,12 +398,14 @@
             background: #475569;
             transition: background 0.1s;
         }
+
         .haptic-indicator.pulse {
             background: #ec4899;
             box-shadow: 0 0 10px #ec4899;
         }
     </style>
 </head>
+
 <body>
 
     <!-- Phone Simulator -->
@@ -306,7 +428,8 @@
                 <button class="ad-close-btn" id="ad-close-btn" onclick="closeSimAd()" style="display:none;">✕</button>
                 <div style="font-size: 24px; font-weight: 800; color: #fff;" id="ad-title">AdMob Interstitial</div>
                 <div class="ad-timer" id="ad-timer">3</div>
-                <div style="color: #94a3b8; font-size: 13px;" id="ad-subtitle">Simulating full-screen native ad presentation</div>
+                <div style="color: #94a3b8; font-size: 13px;" id="ad-subtitle">Simulating full-screen native ad
+                    presentation</div>
             </div>
 
             <!-- StoreKit Apple Pay Sheet Modal -->
@@ -314,7 +437,8 @@
                 <div class="storekit-apple-logo"> StoreKit 2</div>
                 <div class="storekit-product-title" id="sk-title">Item Name</div>
                 <div class="storekit-product-price" id="sk-price">R 14.99</div>
-                <div style="font-size: 12px; color: #94a3b8;" id="sk-desc">Double click side button to confirm In-App Purchase</div>
+                <div style="font-size: 12px; color: #94a3b8;" id="sk-desc">Double click side button to confirm In-App
+                    Purchase</div>
                 <div class="storekit-actions">
                     <button class="btn-sk btn-sk-cancel" onclick="cancelStoreKitPurchase()">Cancel</button>
                     <button class="btn-sk btn-sk-pay" onclick="confirmStoreKitPurchase()">Pay / Buy</button>
@@ -333,6 +457,18 @@
         </div>
 
         <div class="inspector-body">
+            <!-- Device Preset Selector -->
+            <div class="hud-card">
+                <div class="hud-card-title">
+                    <span>📱 Device Form Factor</span>
+                </div>
+                <div class="btn-row">
+                    <button class="hud-btn primary" onclick="setDevice('iphone8')">iPhone 8 / SE (Compact 4.7")</button>
+                    <button class="hud-btn" onclick="setDevice('iphone16pro')">iPhone 16 Pro (6.1")</button>
+                    <button class="hud-btn" onclick="setDevice('iphone16promax')">iPhone 16 Pro Max (6.9")</button>
+                </div>
+            </div>
+
             <!-- Bridge Status Card -->
             <div class="hud-card">
                 <div class="hud-card-title">
@@ -390,7 +526,8 @@
             <div class="hud-card" style="flex: 1; display: flex; flex-direction: column;">
                 <div class="hud-card-title">
                     <span>Live Bridge Logs</span>
-                    <button class="hud-btn" style="padding: 2px 8px; font-size: 10px;" onclick="clearLogs()">Clear</button>
+                    <button class="hud-btn" style="padding: 2px 8px; font-size: 10px;"
+                        onclick="clearLogs()">Clear</button>
                 </div>
                 <div class="console-box" id="console-box"></div>
             </div>
@@ -398,6 +535,37 @@
     </div>
 
     <script>
+        function setDevice(device) {
+            const frame = document.querySelector('.phone-frame');
+            const island = document.querySelector('.dynamic-island');
+            const homeBar = document.querySelector('.home-bar');
+            if (device === 'iphone8') {
+                frame.style.width = '375px';
+                frame.style.height = '667px';
+                frame.style.borderRadius = '32px';
+                frame.style.borderWidth = '10px';
+                island.style.display = 'none';
+                homeBar.style.display = 'none';
+                log('Device', 'bridge', 'Switched frame to iPhone 8 / SE (375 × 667)');
+            } else if (device === 'iphone16promax') {
+                frame.style.width = '440px';
+                frame.style.height = '956px';
+                frame.style.borderRadius = '58px';
+                frame.style.borderWidth = '12px';
+                island.style.display = 'flex';
+                homeBar.style.display = 'block';
+                log('Device', 'bridge', 'Switched frame to iPhone 16 Pro Max (440 × 956)');
+            } else {
+                frame.style.width = '393px';
+                frame.style.height = '852px';
+                frame.style.borderRadius = '54px';
+                frame.style.borderWidth = '12px';
+                island.style.display = 'flex';
+                homeBar.style.display = 'block';
+                log('Device', 'bridge', 'Switched frame to iPhone 16 Pro (393 × 852)');
+            }
+        }
+
         const PRICES = {
             'coins_pack_3000': 'R 14.99',
             'coins_pack_5000': 'R 22.99',
@@ -477,7 +645,7 @@
                             `;
                         }
                     }
-                } catch(e) {
+                } catch (e) {
                     console.warn('Safe area injection error:', e);
                 }
 
@@ -492,7 +660,7 @@
                 win.webkit = {
                     messageHandlers: {
                         adBridge: {
-                            postMessage: function(msg) {
+                            postMessage: function (msg) {
                                 log('AdMob', 'ad', `Bridge Call [adBridge]: ${msg.action} (${JSON.stringify(msg)})`);
                                 if (msg.action === 'initAds') {
                                     setTimeout(() => { if (win.onAdBridgeReady) win.onAdBridgeReady(); }, 300);
@@ -508,7 +676,7 @@
                             }
                         },
                         billingBridge: {
-                            postMessage: function(msg) {
+                            postMessage: function (msg) {
                                 log('StoreKit', 'iap', `Bridge Call [billingBridge]: ${msg.action} (${JSON.stringify(msg)})`);
                                 if (msg.action === 'launchPurchase') {
                                     triggerStoreKitSheet(msg.productId);
@@ -518,12 +686,12 @@
                             }
                         },
                         hapticBridge: {
-                            postMessage: function(msg) {
+                            postMessage: function (msg) {
                                 pulseHaptic();
                             }
                         },
                         socialBridge: {
-                            postMessage: function(msg) {
+                            postMessage: function (msg) {
                                 if (msg.action === 'performAppleSignIn') {
                                     log('Auth', 'auth', ' Native Sign in with Apple dialog presented (AuthenticationServices)');
                                     pulseHaptic();
@@ -540,10 +708,16 @@
                             }
                         },
                         appBridge: {
-                            postMessage: function(msg) {
+                            postMessage: function (msg) {
                                 log('App', 'bridge', `App Command: ${msg.action}`);
                                 if (msg.action === 'openStoreReview') {
                                     alert('⭐ [SKStoreReviewController]\nEnjoying Block Rush 2K? Tap to leave an App Store rating!');
+                                } else if (msg.action === 'showLogin') {
+                                    log('Auth', 'auth', '🔑 Native Auth View Controller presented');
+                                } else if (msg.action === 'showDailyReward') {
+                                    log('Daily', 'daily', '📅 Native Daily Reward View Controller presented');
+                                } else if (msg.action === 'screenChanged') {
+                                    log('Nav', 'nav', `📱 Native screen changed: ${msg.screen}`);
                                 }
                             }
                         }
@@ -745,7 +919,7 @@
         function closeSimAd() {
             document.getElementById('ad-overlay').classList.remove('active');
         }
-    
+
         let currentVariant = 'qa';
         function toggleVariant() {
             currentVariant = currentVariant === 'qa' ? 'prod' : 'qa';
@@ -772,7 +946,7 @@
             }
         }
 
-</script>
+    </script>
 </body>
-</html>
 
+</html>

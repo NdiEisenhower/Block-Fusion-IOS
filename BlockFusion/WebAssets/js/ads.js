@@ -21,9 +21,9 @@ class AdService {
         },
         // Huawei Production Ad Unit IDs
         huawei: {
-            banner: 'j6jq1ihvcy',
-            interstitial: 'x0vj83nysr',
-            rewarded: 'l89s206qf0'
+            banner: 'i2dw803y3g',
+            interstitial: 'e7rwu7lont',
+            rewarded: 'v6gkwusiol'
         },
         // Huawei Test Ad Unit IDs (Used in Debug mode)
         huaweiTest: {
@@ -31,11 +31,16 @@ class AdService {
             interstitial: 'testb4znbuh3n2',
             rewarded: 'testx9dtjwj8hp'
         },
-        // AdSense IDs (for Web)
+        // AdSense & H5 Game Ads IDs (for Web)
         adsense: {
             banner: 'ca-pub-4255859216659691/6387045959',
             interstitial: 'ca-pub-4255859216659691/7221704767',
             rewarded: 'ca-pub-4255859216659691/3713704595'
+        },
+        h5: {
+            client: 'ca-pub-4255859216659691',
+            testMode: true,
+            frequencyHint: '30s'
         },
         // Platform-specific ads disabling configuration:
         // Controls which platforms have ads disabled (e.g. for store review processes)
@@ -45,7 +50,6 @@ class AdService {
         disabledPlatforms: {
             huawei: false,  // Ads enabled on Huawei platform
             google: false,  // Ads enabled on Google platform
-            ios: false,     // Ads enabled on iOS platform
             web: false      // Ads enabled on Web platform
         },
         // Configurable interstitial frequency (number of rounds/game plays before showing ad)
@@ -115,18 +119,6 @@ class AdService {
             const f = window.BUILD_FLAVOR.toLowerCase();
             if (f.includes('huawei')) return 'huawei';
             if (f.includes('google')) return 'google';
-        }
-
-        if (typeof window.iOS !== 'undefined' && typeof window.iOS.hideBannerAd === 'function') {
-            window.iOS.hideBannerAd();
-            this.androidBannerShown = false;
-            console.log('✅ iOS native banner hidden');
-            return;
-        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
-            window.webkit.messageHandlers.adBridge.postMessage({ action: 'hideBannerAd' });
-            this.androidBannerShown = false;
-            console.log('✅ iOS webkit native banner hidden');
-            return;
         }
 
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
@@ -297,7 +289,10 @@ class AdService {
     }
 
     static detectEnvironment() {
-        const isNativeBridge = (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers) || (typeof window.Android !== 'undefined' && window.Android !== null) || (typeof window.AdMob !== 'undefined') || (typeof window.iOS !== 'undefined');
+        const isNativeBridge = (typeof window.Android !== 'undefined' && window.Android !== null) ||
+                               (typeof window.iOS !== 'undefined') ||
+                               (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) ||
+                               (typeof window.AdMob !== 'undefined');
 
         if (isNativeBridge) {
             this.env = 'android';
@@ -415,18 +410,18 @@ class AdService {
     // ============================================================
     static loadAndroidBanner() {
         if (!this.adsEnabled) return;
-        console.log('📱 Loading Android native banner...');
+        console.log('📱 Loading Android/iOS native banner...');
 
         // Show native iOS banner via bridge
         if (typeof window.iOS !== 'undefined' && typeof window.iOS.showBannerAd === 'function') {
             const ids = this.getAdUnitIds();
-            window.iOS.showBannerAd(ids.banner || );
+            window.iOS.showBannerAd(ids.banner || "");
             this.androidBannerShown = true;
             console.log('✅ iOS native banner shown');
             return;
         } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
             const ids = this.getAdUnitIds();
-            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showBannerAd', bannerId: ids.banner ||  });
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showBannerAd', bannerId: ids.banner || "" });
             this.androidBannerShown = true;
             console.log('✅ iOS webkit native banner shown');
             return;
@@ -480,7 +475,21 @@ class AdService {
     }
 
     static hideAndroidBanner() {
-        console.log('📱 Hiding Android native banner...');
+        console.log('📱 Hiding Android/iOS native banner...');
+
+        // Hide native iOS banner via bridge
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.hideBannerAd === 'function') {
+            window.iOS.hideBannerAd();
+            this.androidBannerShown = false;
+            console.log('✅ iOS native banner hidden');
+            return;
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'hideBannerAd' });
+            this.androidBannerShown = false;
+            console.log('✅ iOS webkit native banner hidden');
+            return;
+        }
+
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
             try {
                 if (typeof window.Android.hideBannerAd === 'function') {
@@ -510,11 +519,35 @@ class AdService {
     }
 
     // ============================================================
-    // WEB (AdSense) BANNER
+    // WEB (Google H5 Games Ads API)
     // ============================================================
     static initAdSense() {
-        console.log('🌐 Initializing AdSense for Web...');
-        // Keep HTML banner for web
+        console.log('🌐 Initializing Google H5 Game Ads API for Web...');
+
+        // Ensure Ad Placement API functions exist on window
+        window.adsbygoogle = window.adsbygoogle || [];
+        if (typeof window.adBreak !== 'function') {
+            window.adBreak = window.adConfig = function (o) {
+                (window.adsbygoogle = window.adsbygoogle || []).push(o);
+            };
+        }
+
+        // Configure H5 game ad placement settings
+        try {
+            if (typeof window.adConfig === 'function') {
+                window.adConfig({
+                    preloadAdBreaks: 'on',
+                    sound: (typeof SoundManager !== 'undefined' && SoundManager.enabled) ? 'on' : 'off',
+                    onReady: () => {
+                        console.log('✅ Google H5 Games Ads API ready');
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('Google H5 adConfig error:', e);
+        }
+
+        this.ensureAdSenseScript();
         this.loadBannerAd();
         this.loadInterstitialAd();
         this.loadRewardedAd();
@@ -540,13 +573,103 @@ class AdService {
         this.loadAdSenseBanner(container);
     }
 
+    static isH5TestMode() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('testAds') === 'false' || urlParams.get('h5Test') === 'false') {
+                return false;
+            }
+            if (urlParams.get('testAds') === 'true' || urlParams.get('h5Test') === 'true') {
+                return true;
+            }
+        } catch (e) { }
+
+        return this.config.h5 ? !!this.config.h5.testMode : true;
+    }
+
     static ensureAdSenseScript() {
-        return;
+        if (typeof document === 'undefined') return;
+        if (document.getElementById('adsbygoogle-js')) return;
+
+        const bannerStr = (this.config.adsense && this.config.adsense.banner) || 'ca-pub-4255859216659691/6387045959';
+        const client = (this.config.h5 && this.config.h5.client) || bannerStr.split('/')[0] || 'ca-pub-4255859216659691';
+
+        const script = document.createElement('script');
+        script.id = 'adsbygoogle-js';
+        script.async = true;
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+        script.crossOrigin = 'anonymous';
+        script.setAttribute('data-ad-frequency-hint', (this.config.h5 && this.config.h5.frequencyHint) || '30s');
+        if (this.isH5TestMode()) {
+            script.setAttribute('data-adbreak-test', 'on');
+        }
+        document.head.appendChild(script);
     }
 
     static loadAdSenseBanner(container) {
-        if (container) container.style.display = 'none';
-        return;
+        if (!container) return;
+
+        // Container remains hidden until an ad is confirmed filled
+        container.style.display = 'none';
+        container.classList.remove('has-ad');
+
+        const bannerStr = (this.config.adsense && this.config.adsense.banner) || 'ca-pub-4255859216659691/6387045959';
+        const parts = bannerStr.split('/');
+        const client = parts[0] || 'ca-pub-4255859216659691';
+        const slot = parts[1] || '6387045959';
+
+        this.ensureAdSenseScript();
+
+        try {
+            container.innerHTML = `
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:100%;max-height:60px;"
+                     data-ad-client="${client}"
+                     data-ad-slot="${slot}"
+                     data-ad-format="horizontal"
+                     data-full-width-responsive="false"></ins>
+            `;
+
+            const ins = container.querySelector('ins.adsbygoogle');
+            const checkAdStatus = () => {
+                if (!ins || !container) return;
+                const status = ins.getAttribute('data-ad-status');
+                if (status === 'unfilled') {
+                    // Ad unfilled: keep container completely hidden and empty
+                    container.style.display = 'none';
+                    container.classList.remove('has-ad');
+                    container.innerHTML = '';
+                } else if (status === 'filled' || (ins.childNodes.length > 0 && ins.offsetHeight > 20)) {
+                    // Ad is rendered and filled
+                    container.style.display = 'flex';
+                    container.classList.add('has-ad');
+                } else {
+                    container.style.display = 'none';
+                    container.classList.remove('has-ad');
+                }
+            };
+
+            const observer = new MutationObserver(() => checkAdStatus());
+            observer.observe(ins, { attributes: true, attributeFilter: ['data-ad-status'], childList: true });
+
+            setTimeout(checkAdStatus, 1500);
+            setTimeout(checkAdStatus, 3500);
+            setTimeout(() => {
+                if (container && !container.classList.contains('has-ad')) {
+                    container.style.display = 'none';
+                    container.classList.remove('has-ad');
+                    container.innerHTML = '';
+                }
+            }, 4500);
+
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            return;
+        } catch (e) {
+            console.warn('AdSense banner push error:', e);
+            container.style.display = 'none';
+            container.classList.remove('has-ad');
+            container.innerHTML = '';
+        }
     }
 
     static showBannerAd() {
@@ -598,37 +721,43 @@ class AdService {
         }
     }
 
-    static showInterstitialAd(force = false) {
-        if (!this.isAdEnabled()) return;
+    static showInterstitialAd(force = false, callback = null, name = 'next_level') {
+        if (!this.isAdEnabled()) {
+            if (callback) callback();
+            return;
+        }
 
         const frequency = (typeof CONFIG !== 'undefined' && CONFIG.ADS && CONFIG.ADS.INTERSTITIAL_GAME_COUNT_FREQUENCY)
-                            || this.config.interstitialFrequency
-                            || 3;
+            || this.config.interstitialFrequency
+            || 3;
 
         if (!force) {
             this.gamePlayCount++;
-            if (this.gamePlayCount < frequency) return;
+            if (this.gamePlayCount < frequency) {
+                if (callback) callback();
+                return;
+            }
         }
 
         this.gamePlayCount = 0;
         this.lastInterstitialTime = Date.now();
 
         if (this.env === 'android') {
-            this.showAdMobInterstitial();
+            this.showAdMobInterstitial(callback);
         } else {
-            this.showAdSenseInterstitial();
+            this.showAdSenseInterstitial(name, callback);
         }
     }
 
-    static showAdMobInterstitial() {
+    static showAdMobInterstitial(callback = null) {
         if (typeof window.iOS !== 'undefined' && typeof window.iOS.showInterstitialAd === 'function') {
             const ids = this.getAdUnitIds();
-            window.iOS.showInterstitialAd(ids.interstitial || );
+            window.iOS.showInterstitialAd(ids.interstitial || "");
             console.log('📺 iOS native interstitial shown');
             return;
         } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
             const ids = this.getAdUnitIds();
-            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showInterstitialAd', interId: ids.interstitial ||  });
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showInterstitialAd', interId: ids.interstitial || "" });
             console.log('📺 iOS webkit interstitial shown');
             return;
         }
@@ -636,6 +765,7 @@ class AdService {
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
             try {
                 if (typeof window.Android.showInterstitialAd === 'function') {
+                    window._interstitialCallback = callback;
                     const ids = this.getAdUnitIds();
                     window.Android.showInterstitialAd(ids.interstitial || "");
                     console.log('📱 Native interstitial shown');
@@ -650,16 +780,84 @@ class AdService {
             App.showToast('📺 Loading ad...');
             setTimeout(() => {
                 App.showToast('📺 Ad completed');
+                if (callback) callback();
             }, 2000);
+        } else if (callback) {
+            callback();
         }
     }
 
-    static showAdSenseInterstitial() {
+    static showAdSenseInterstitial(name = 'next_level', callback = null) {
+        console.log(`🌐 Requesting H5 interstitial ad break: [${name}]`);
+
+        // Check if Google Ad Placement API (adBreak) is available
+        if (typeof window.adBreak === 'function') {
+            let adFinished = false;
+            let wasSoundEnabled = (typeof SoundManager !== 'undefined') ? SoundManager.enabled : true;
+
+            const safeCallback = () => {
+                if (adFinished) return;
+                adFinished = true;
+                if (callback) callback();
+            };
+
+            // Safety timeout in case adBreak stalls or is silently dropped
+            const safetyTimer = setTimeout(() => {
+                console.warn('⚠️ H5 interstitial safety timeout reached');
+                safeCallback();
+            }, 8000);
+
+            try {
+                window.adBreak({
+                    type: 'next',
+                    name: name,
+                    beforeAd: () => {
+                        console.log('📺 H5 Interstitial: beforeAd - pausing game audio');
+                        if (typeof SoundManager !== 'undefined') {
+                            wasSoundEnabled = SoundManager.enabled;
+                            SoundManager.enabled = false;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'running') {
+                                SoundManager.audioCtx.suspend?.();
+                            }
+                        }
+                    },
+                    afterAd: () => {
+                        console.log('📺 H5 Interstitial: afterAd - resuming game audio');
+                        if (typeof SoundManager !== 'undefined') {
+                            SoundManager.enabled = wasSoundEnabled;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'suspended') {
+                                SoundManager.audioCtx.resume?.();
+                            }
+                        }
+                    },
+                    adBreakDone: (placementInfo) => {
+                        console.log('📺 H5 Interstitial adBreakDone:', placementInfo);
+                        clearTimeout(safetyTimer);
+                        if (typeof SoundManager !== 'undefined') {
+                            SoundManager.enabled = wasSoundEnabled;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'suspended') {
+                                SoundManager.audioCtx.resume?.();
+                            }
+                        }
+                        safeCallback();
+                    }
+                });
+                return;
+            } catch (e) {
+                console.warn('adBreak interstitial call error:', e);
+                clearTimeout(safetyTimer);
+            }
+        }
+
+        // Fallback simulation when adBreak is not loaded or offline
         if (typeof App !== 'undefined') {
             App.showToast('📺 Loading ad...');
             setTimeout(() => {
                 App.showToast('📺 Ad completed');
-            }, 2000);
+                if (callback) callback();
+            }, 1200);
+        } else if (callback) {
+            callback();
         }
     }
 
@@ -668,10 +866,10 @@ class AdService {
     // ============================================================
     static loadRewardedAd() {
         if (!this.adsEnabled || !this.isInitialized) return;
-        console.log('🎁 Rewarded ad loaded');
+        console.log('🎁 Rewarded ad ready');
     }
 
-    static showRewardedAd(callback) {
+    static showRewardedAd(callback, name = 'rewarded_item') {
         if (!this.adsEnabled || !this.isInitialized) {
             if (callback) callback(true);
             return;
@@ -680,7 +878,7 @@ class AdService {
         if (this.env === 'android') {
             this.showAdMobRewarded(callback);
         } else {
-            this.showAdSenseRewarded(callback);
+            this.showAdSenseRewarded(callback, name);
         }
     }
 
@@ -688,12 +886,12 @@ class AdService {
         if (typeof window.iOS !== 'undefined' && typeof window.iOS.showRewardedAd === 'function') {
             window._rewardCallback = callback;
             const ids = this.getAdUnitIds();
-            window.iOS.showRewardedAd(ids.rewarded || );
+            window.iOS.showRewardedAd(ids.rewarded || "");
             return;
         } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
             window._rewardCallback = callback;
             const ids = this.getAdUnitIds();
-            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showRewardedAd', rewardedId: ids.rewarded ||  });
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showRewardedAd', rewardedId: ids.rewarded || "" });
             return;
         }
 
@@ -719,23 +917,123 @@ class AdService {
         }, 2000);
     }
 
-    static showAdSenseRewarded(callback) {
+    static showAdSenseRewarded(callback, name = 'rewarded_item') {
+        console.log(`🎁 Requesting H5 rewarded ad break: [${name}]`);
+
+        // Check if Google Ad Placement API (adBreak) is available
+        if (typeof window.adBreak === 'function') {
+            let rewardGranted = false;
+            let adHandled = false;
+            let wasSoundEnabled = (typeof SoundManager !== 'undefined') ? SoundManager.enabled : true;
+
+            const safeCallback = (result) => {
+                if (adHandled) return;
+                adHandled = true;
+                if (callback) callback(result);
+            };
+
+            // Safety timeout in case adBreak stalls or network fails
+            const safetyTimer = setTimeout(() => {
+                console.warn('⚠️ H5 Rewarded ad safety timeout reached');
+                safeCallback(false);
+            }, 12000);
+
+            try {
+                window.adBreak({
+                    type: 'reward',
+                    name: name,
+                    beforeAd: () => {
+                        console.log('🎁 H5 Rewarded: beforeAd - pausing game audio');
+                        if (typeof SoundManager !== 'undefined') {
+                            wasSoundEnabled = SoundManager.enabled;
+                            SoundManager.enabled = false;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'running') {
+                                SoundManager.audioCtx.suspend?.();
+                            }
+                        }
+                    },
+                    afterAd: () => {
+                        console.log('🎁 H5 Rewarded: afterAd - resuming game audio');
+                        if (typeof SoundManager !== 'undefined') {
+                            SoundManager.enabled = wasSoundEnabled;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'suspended') {
+                                SoundManager.audioCtx.resume?.();
+                            }
+                        }
+                    },
+                    beforeReward: (showAdFn) => {
+                        console.log('🎁 H5 Rewarded: beforeReward called, executing showAdFn()');
+                        showAdFn();
+                    },
+                    adRewarded: () => {
+                        console.log('✅ H5 Rewarded: user earned reward (adRewarded)');
+                        rewardGranted = true;
+                    },
+                    adViewed: () => {
+                        console.log('✅ H5 Rewarded: user earned reward (adViewed)');
+                        rewardGranted = true;
+                    },
+                    adDismissed: () => {
+                        console.log('❌ H5 Rewarded: user dismissed ad before completion');
+                        rewardGranted = false;
+                    },
+                    adBreakDone: (placementInfo) => {
+                        console.log('🎁 H5 Rewarded adBreakDone:', placementInfo);
+                        clearTimeout(safetyTimer);
+                        if (typeof SoundManager !== 'undefined') {
+                            SoundManager.enabled = wasSoundEnabled;
+                            if (SoundManager.audioCtx && SoundManager.audioCtx.state === 'suspended') {
+                                SoundManager.audioCtx.resume?.();
+                            }
+                        }
+                        safeCallback(rewardGranted);
+                    }
+                });
+                return;
+            } catch (e) {
+                console.warn('adBreak reward call error:', e);
+                clearTimeout(safetyTimer);
+            }
+        }
+
+        // Fallback simulation when adBreak is not loaded or offline
         if (typeof App !== 'undefined') {
             App.showToast('📺 Watching ad...');
         }
         setTimeout(() => {
-            console.log('✅ Reward earned (fallback)');
+            console.log('✅ Reward earned (web fallback)');
             if (callback) callback(true);
-        }, 2000);
+        }, 1500);
     }
 
     // ============================================================
     // REWARD SYSTEM
     // ============================================================
-    static rewardUser(type, callback) {
+    static showDoubleRewardAd(reward, callback = null) {
+        const doubledAmount = (reward || 0) * 2;
+        this.showRewardedAd((success) => {
+            if (success) {
+                if (typeof App !== 'undefined' && App.state) {
+                    App.state.coins = (App.state.coins || 0) + doubledAmount;
+                    App.state.totalAdsWatched = (App.state.totalAdsWatched || 0) + 1;
+                    App.saveState();
+                    App.updateAllCoinDisplays();
+                    try { SoundManager.coin(); } catch (e) { }
+                    App.showToast(`💰 Double reward! +${doubledAmount} coins`);
+                }
+                if (callback) callback(true);
+            } else {
+                if (callback) callback(false);
+            }
+        }, 'reward_double_coins');
+    }
+
+    static rewardUser(type, callback = null) {
         if (typeof App !== 'undefined') {
             App.showToast('🎁 Watching ad...');
         }
+
+        const placementName = `reward_${type || 'item'}`;
 
         this.showRewardedAd((success) => {
             if (success) {
@@ -751,10 +1049,12 @@ class AdService {
                         }
                         break;
                     case 'extra_move':
+                    case 'extra_moves':
                         if (typeof App !== 'undefined' && App.currentGame) {
                             App.currentGame.spawnTile();
                             App.currentGame.spawnTile();
                             GameUI.renderBoard(App.currentGame);
+                            GameUI.updateGameUI(App.currentGame);
                             App.showToast('🎁 Extra tiles spawned!');
                         }
                         break;
@@ -785,11 +1085,11 @@ class AdService {
                 if (callback) callback(true);
             } else {
                 if (typeof App !== 'undefined') {
-                    App.showToast('❌ Ad failed to load, try again');
+                    App.showToast('❌ Ad skipped or failed to load');
                 }
                 if (callback) callback(false);
             }
-        });
+        }, placementName);
     }
 
     // ============================================================

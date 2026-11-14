@@ -27,11 +27,8 @@ final class MainViewController: UIViewController {
     
     private func updateSafeAreaInsets() {
         let isGame = (currentScreen == "game")
-        // webView.topAnchor is already constrained beneath topBar (which collapses to safeAreaLayoutGuide.topAnchor in game mode).
-        // Adding another safeAreaInsets.top (~59px on Island devices) caused a huge dead gap.
-        // We use 4pt in game mode for minimal clearance, and 0pt elsewhere.
-        let top: CGFloat = isGame ? 4.0 : 0.0
-        let bottom: CGFloat = isGame ? (view.safeAreaInsets.bottom > 0 ? max(view.safeAreaInsets.bottom, 6.0) : 0.0) : 0.0
+        let top = isGame ? max(view.safeAreaInsets.top, 8.0) : 0.0
+        let bottom = isGame ? (view.safeAreaInsets.bottom > 0 ? max(view.safeAreaInsets.bottom, 6.0) : 0.0) : 0.0
         let js = """
         (function() {
             var el = document.getElementById('ios-safe-area-rules');
@@ -66,6 +63,11 @@ final class MainViewController: UIViewController {
         setupTopBar()
         setupBottomBar()
         setupWebView()
+        
+        // Ensure navigation bars stay on top of the web view in the Z-order hierarchy
+        view.bringSubviewToFront(bottomBar)
+        view.bringSubviewToFront(topBar)
+        
         setupManagers()
         loadGame()
     }
@@ -76,27 +78,67 @@ final class MainViewController: UIViewController {
         view.bringSubviewToFront(bottomBar)
     }
     
+    // MARK: - Native Modals
+    func presentNativeAuth(onSuccess: (() -> Void)? = nil) {
+        let authVC = NativeAuthViewController()
+        authVC.scriptBridge = scriptBridge
+        authVC.onAuthSuccess = onSuccess
+        let nav = UINavigationController(rootViewController: authVC)
+        nav.modalPresentationStyle = .pageSheet
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(nav, animated: true)
+    }
+    
+    func presentDailyReward() {
+        let dailyVC = NativeDailyRewardViewController()
+        dailyVC.scriptBridge = scriptBridge
+        let nav = UINavigationController(rootViewController: dailyVC)
+        nav.modalPresentationStyle = .pageSheet
+        if let sheet = nav.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(nav, animated: true)
+    }
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
-    // MARK: - View Setup
+    override var prefersStatusBarHidden: Bool {
+        return false
+    }
+    
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return false
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+    
+    // MARK: - Setup UI
     private func setupTopBar() {
         topBar = NativeTopBar()
         topBar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(topBar)
         
+        topBar.setAudioEnabled(preferences.soundEnabled)
+        
         topBar.onGameCenterTapped = { [weak self] in
-            HapticManager.shared.selection()
+            HapticManager.shared.impact(style: .medium)
             GameKitManager.shared.showGameCenterDashboard()
         }
         
         topBar.onAudioTapped = { [weak self] in
-            HapticManager.shared.selection()
             guard let self = self else { return }
-            let enabled = !self.preferences.soundEnabled
-            self.preferences.soundEnabled = enabled
-            self.topBar.setAudioEnabled(enabled)
+            self.preferences.soundEnabled.toggle()
+            self.topBar.setAudioEnabled(self.preferences.soundEnabled)
+            HapticManager.shared.impact(style: .light)
+            let enabled = self.preferences.soundEnabled ? "true" : "false"
             self.scriptBridge.evaluateJavaScript("""
             if (typeof SoundManager !== 'undefined') {
                 SoundManager.enabled = \(enabled);
@@ -106,7 +148,15 @@ final class MainViewController: UIViewController {
         
         topBar.onSettingsTapped = { [weak self] in
             HapticManager.shared.selection()
-            self?.navigateToScreen("settings")
+            self?.scriptBridge.evaluateJavaScript("""
+            (function() {
+                try {
+                    if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                        Navigation.navigateTo('settings');
+                    }
+                } catch(e) {}
+            })();
+            """)
         }
         
         topBarHeightConstraint = topBar.heightAnchor.constraint(equalToConstant: 44)
@@ -127,30 +177,26 @@ final class MainViewController: UIViewController {
             guard let self = self else { return }
             HapticManager.shared.selection()
             print("🔘 Native bottom bar tab selected: \(tab.id) -> \(tab.targetScreen)")
-            
-            if tab.id == "daily" {
-                self.showDailyReward()
-                return
-            }
-            
-            if tab.id == "ranks" {
-                // Check if user is signed in
-                self.scriptBridge.evaluateJavaScript("""
-                (function() {
-                    return !!(typeof FirebaseService !== 'undefined' && FirebaseService.currentUser && !FirebaseService.currentUser.isAnonymous);
-                })();
-                """) { [weak self] result, _ in
-                    let isSignedIn = (result as? Bool) ?? false
-                    if !isSignedIn {
-                        self?.showLogin()
+            let js = """
+            (function() {
+                try {
+                    if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                        Navigation.navigateTo('\(tab.targetScreen)');
+                    } else if (typeof window.Navigation !== 'undefined') {
+                        window.Navigation.navigateTo('\(tab.targetScreen)');
                     } else {
-                        self?.navigateToScreen("leaderboard")
+                        var target = document.getElementById('screen-\(tab.targetScreen)');
+                        if (target) {
+                            document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+                            target.classList.add('active');
+                        }
                     }
+                } catch(e) {
+                    console.error('Tab navigation error:', e);
                 }
-                return
-            }
-            
-            self.navigateToScreen(tab.targetScreen)
+            })();
+            """
+            self.scriptBridge.evaluateJavaScript(js)
         }
         
         bottomBarHeightConstraint = bottomBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -58)
@@ -165,6 +211,7 @@ final class MainViewController: UIViewController {
     private func setupWebView() {
         let contentController = WKUserContentController()
         
+        // Inject native bridge at document start
         let userScript = WKUserScript(
             source: NativeBridgeScript.scriptContent,
             injectionTime: .atDocumentStart,
@@ -172,6 +219,7 @@ final class MainViewController: UIViewController {
         )
         contentController.addUserScript(userScript)
         
+        // Register message handlers
         contentController.add(scriptBridge, name: "adBridge")
         contentController.add(scriptBridge, name: "billingBridge")
         contentController.add(scriptBridge, name: "hapticBridge")
@@ -183,12 +231,16 @@ final class MainViewController: UIViewController {
         config.userContentController = contentController
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
-        config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        config.defaultWebpagePreferences.allowsContentJavaScript = true
         
         webView = WKWebView(frame: .zero, configuration: config)
-        webView.navigationDelegate = self
-        webView.isOpaque = false
         webView.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
+        webView.isOpaque = true
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
+        
+        // Game UI feel: disable scroll bounce
+        webView.scrollView.isScrollEnabled = false
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         
@@ -198,6 +250,7 @@ final class MainViewController: UIViewController {
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         
+        // Web view sits comfortably between top navigation bar and bottom navigation bar
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -209,7 +262,6 @@ final class MainViewController: UIViewController {
     private func setupManagers() {
         AdMobManager.shared.presentingViewController = self
         AdMobManager.shared.delegate = self
-        AdMobManager.shared.initialize()
         
         GameKitManager.shared.presentingViewController = self
         GameKitManager.shared.authenticateLocalPlayer()
@@ -222,6 +274,7 @@ final class MainViewController: UIViewController {
     // MARK: - Game Loading
     private func loadGame() {
         if preferences.useLocalAssets {
+            // Check bundled WebAssets
             if let indexUrl = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "WebAssets") {
                 let assetsDir = indexUrl.deletingLastPathComponent()
                 print("📦 Loading local bundled game assets from: \(indexUrl.path)")
@@ -235,154 +288,131 @@ final class MainViewController: UIViewController {
             }
         }
         
+        // Online fallback
         let targetString = preferences.customQaUrl ?? Self.remoteGameUrl
         if let url = URL(string: targetString) {
-            print("🌐 Loading game from URL: \(url.absoluteString)")
-            var request = URLRequest(url: url)
-            request.cachePolicy = .returnCacheDataElseLoad
+            print("🌐 Loading remote game URL: \(url.absoluteString)")
+            let request = URLRequest(url: url)
             webView.load(request)
         }
     }
     
+    // MARK: - Deep Links
     func handleDeepLink(_ url: URL) {
-        let host = url.host?.lowercased() ?? ""
-        print("🔗 Deep link received: \(url.absoluteString)")
-        if host == "leaderboard" || host == "ranks" {
-            navigateToScreen("leaderboard")
-        } else if host == "daily" {
-            showDailyReward()
-        } else if host == "store" || host == "shop" {
-            navigateToScreen("store")
+        let route = url.host ?? url.path.replacingOccurrences(of: "/", with: "")
+        let target: String
+        switch route {
+        case "store": target = "store"
+        case "leaderboard": target = "leaderboard"
+        case "daily": target = "daily"
+        case "achievements": target = "achievements"
+        case "settings": target = "settings"
+        case "world": target = "world-select"
+        default: target = "home"
         }
-    }
-    
-    private func navigateToScreen(_ screenId: String) {
-        let js = """
-        (function() {
-            try {
-                if (typeof Navigation !== 'undefined' && Navigation.navigateTo) {
-                    Navigation.navigateTo('\(screenId)');
-                } else if (typeof window.Navigation !== 'undefined') {
-                    window.Navigation.navigateTo('\(screenId)');
-                } else {
-                    var target = document.getElementById('screen-\(screenId)');
-                    if (target) {
-                        document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-                        target.classList.add('active');
-                    }
-                }
-            } catch(e) {
-                console.error('Tab navigation error:', e);
-            }
-        })();
-        """
-        scriptBridge.evaluateJavaScript(js)
+        
+        bottomBar.selectTab(forScreen: target)
+        
+        scriptBridge.evaluateJavaScript("""
+        if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+            Navigation.navigateTo('\(target)');
+        }
+        """)
     }
 }
 
 // MARK: - WKNavigationDelegate
-extension MainViewController: WKNavigationDelegate {
+extension MainViewController: WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("✅ Web content finished loading")
+        print("✅ Game web view finished loading")
+        
+        // Update Safe Area Insets dynamically
         updateSafeAreaInsets()
-        let sound = preferences.soundEnabled
-        topBar.setAudioEnabled(sound)
-    }
-    
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        print("❌ Web view failed loading: \(error.localizedDescription)")
+        
+        // Notify cached prices to JS
+        if #available(iOS 15.0, *) {
+            let prices = StoreKitManager.shared.formattedPrices
+            if !prices.isEmpty {
+                scriptBridge.notifyPricesLoaded(prices: prices)
+            }
+        }
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        if let url = navigationAction.request.url {
-            let scheme = url.scheme?.lowercased() ?? ""
-            if scheme == "tel" || scheme == "mailto" || scheme == "sms" {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                decisionHandler(.cancel)
-                return
-            }
+        guard let url = navigationAction.request.url else {
+            decisionHandler(.cancel)
+            return
         }
-        decisionHandler(.allow)
+        
+        // Local files, scheme handlers, internal domain, or blank pages
+        if url.isFileURL ||
+           url.host == "blockrush2k.kharitambe.co.za" ||
+           url.scheme == "local" ||
+           url.absoluteString.hasPrefix("https://games-7b902") ||
+           url.absoluteString == "about:blank" {
+            decisionHandler(.allow)
+            return
+        }
+        
+        // Allow subframe requests (e.g., ad iframes or embedded media) inside the web view
+        if let targetFrame = navigationAction.targetFrame, !targetFrame.isMainFrame {
+            decisionHandler(.allow)
+            return
+        }
+        
+        // External links in main frame: ONLY open Safari if user explicitly tapped a link
+        if navigationAction.navigationType == .linkActivated {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // Cancel automatic external redirects/navigation in main frame without opening Safari
+        decisionHandler(.cancel)
     }
 }
 
-// MARK: - StoreKit Delegate
+// MARK: - StoreKitEventListener
 extension MainViewController: StoreKitEventListener {
     func onPurchaseStarted(productId: String) {
-        print("🛒 Purchase started for: \(productId)")
+        scriptBridge.notifyPurchaseStarted(productId: productId)
     }
     
     func onPurchaseSuccess(productId: String, orderId: String) {
-        HapticManager.shared.notification(type: .success)
-        scriptBridge.evaluateJavaScript("""
-        (function() {
-            if (typeof window._purchasedProducts !== 'undefined') {
-                window._purchasedProducts.push('\(productId)');
-            }
-            if ('\(productId)'.indexOf('remove_ads') !== -1) {
-                window._isAdsRemoved = true;
-            }
-            if ('\(productId)'.indexOf('themes') !== -1) {
-                window._isThemePackOwned = true;
-            }
-            if (typeof Store !== 'undefined' && typeof Store.handlePurchaseSuccess === 'function') {
-                Store.handlePurchaseSuccess('\(productId)');
-            }
-        })();
-        """)
+        scriptBridge.notifyPurchaseSuccess(productId: productId, orderId: orderId)
     }
     
     func onPurchaseFailed(errorMessage: String) {
-        HapticManager.shared.notification(type: .error)
-        scriptBridge.evaluateJavaScript("""
-        if (typeof App !== 'undefined' && typeof App.showToast === 'function') {
-            App.showToast('Purchase canceled or failed: \(errorMessage)');
-        }
-        """)
+        scriptBridge.notifyPurchaseFailed(errorMessage: errorMessage)
     }
     
     func onPurchasesRestored(restoredProducts: [String]) {
-        HapticManager.shared.notification(type: .success)
-        scriptBridge.evaluateJavaScript("""
-        if (typeof App !== 'undefined' && typeof App.showToast === 'function') {
-            App.showToast('✅ Purchases successfully restored!');
-        }
-        """)
+        scriptBridge.notifyPurchasesRestored(products: restoredProducts)
     }
     
     func onPricesLoaded(prices: [String: String]) {
-        if let data = try? JSONSerialization.data(withJSONObject: prices),
-           let json = String(data: data, encoding: .utf8) {
-            scriptBridge.evaluateJavaScript("window._cachedPrices = \(json);")
-        }
+        scriptBridge.notifyPricesLoaded(prices: prices)
     }
 }
 
 // MARK: - AdMobEventListener
 extension MainViewController: AdMobEventListener {
     func onAdBridgeReady() {
-        print("⚡ AdMob Bridge ready for presentation")
+        scriptBridge.notifyAdBridgeReady()
     }
     
     func onRewardedAdCompleted(success: Bool) {
-        HapticManager.shared.notification(type: success ? .success : .warning)
-        scriptBridge.evaluateJavaScript("""
-        if (typeof window._rewardCallback === 'function') {
-            window._rewardCallback(\(success));
-            window._rewardCallback = null;
-        }
-        """)
+        scriptBridge.notifyRewardedCompleted(success: success)
     }
     
     func onInterstitialFailed() {
-        print("⚠️ Native interstitial failed to present")
+        scriptBridge.notifyInterstitialFailed()
     }
     
     func onBannerVisibilityChanged(visible: Bool, height: CGFloat) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.currentBannerHeight = visible ? height : 0
-            self.view.bringSubviewToFront(self.bottomBar)
             self.updateSafeAreaInsets()
         }
     }
@@ -424,11 +454,10 @@ extension MainViewController: ScriptBridgeDelegate {
             if !isGame {
                 self.bottomBar.isHidden = false
                 self.topBar.isHidden = false
-                self.view.bringSubviewToFront(self.bottomBar)
-                AdMobManager.shared.hideBannerAd()
             }
             self.bottomBar.isUserInteractionEnabled = !isGame
             
+            // On gameplay screen, smoothly collapse the top and bottom bars so board & undo button have full height
             UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseInOut], animations: {
                 self.topBar.alpha = isGame ? 0.0 : 1.0
                 self.topBarHeightConstraint.constant = isGame ? 0 : 44
@@ -441,8 +470,6 @@ extension MainViewController: ScriptBridgeDelegate {
                 if isGame {
                     self.bottomBar.isHidden = true
                     self.topBar.isHidden = true
-                } else {
-                    self.view.bringSubviewToFront(self.bottomBar)
                 }
             })
             
@@ -455,49 +482,13 @@ extension MainViewController: ScriptBridgeDelegate {
     
     func showLogin() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let authVC = NativeAuthViewController()
-            authVC.scriptBridge = self.scriptBridge
-            authVC.onAuthSuccess = { [weak self] in
-                self?.navigateToScreen("leaderboard")
-            }
-            let nav = UINavigationController(rootViewController: authVC)
-            nav.modalPresentationStyle = .formSheet
-            if #available(iOS 15.0, *) {
-                if let sheet = nav.sheetPresentationController {
-                    sheet.detents = [.large()]
-                    sheet.prefersGrabberVisible = true
-                }
-            }
-            self.present(nav, animated: true)
+            self?.presentNativeAuth()
         }
     }
     
     func showDailyReward() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            let dailyVC = NativeDailyRewardViewController()
-            dailyVC.scriptBridge = self.scriptBridge
-            dailyVC.onClaimReward = { [weak self] amount in
-                self?.scriptBridge.evaluateJavaScript("""
-                (function() {
-                    try {
-                        if (typeof App !== 'undefined') {
-                            if (App.addCoins) App.addCoins(\(amount));
-                            App.state.dailyChallengeDone = true;
-                            if (App.saveState) App.saveState();
-                            if (App.updateAllCoinDisplays) App.updateAllCoinDisplays();
-                            if (App.showToast) App.showToast('🎉 Claimed +\(amount) Daily Coins!');
-                        }
-                    } catch(e) {
-                        console.error('Daily reward claim sync error:', e);
-                    }
-                })();
-                """)
-            }
-            dailyVC.modalPresentationStyle = .overFullScreen
-            dailyVC.modalTransitionStyle = .crossDissolve
-            self.present(dailyVC, animated: true)
+            self?.presentDailyReward()
         }
     }
 }
@@ -843,21 +834,34 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
-    private let segmentedControl = UISegmentedControl(items: ["Sign In", "Create Account"])
+    private let headerIcon = UILabel()
+    private let titleLabel = UILabel()
+    private let subtitleLabel = UILabel()
+    private let offlineBanner = UIView()
+    private let offlineLabel = UILabel()
+    
     private var appleSignInButton: ASAuthorizationAppleIDButton!
+    private let googleSignInButton = UIButton(type: .system)
+    private let anonymousSignInButton = UIButton(type: .system)
     
-    // Register-specific fields
-    private let nameContainer = UIView()
-    private let nameTextField = UITextField()
+    private let segmentedControl = UISegmentedControl(items: ["Sign In", "Register"])
     
-    // Common fields
+    // Sign Up Fields
+    private let nameStack = UIStackView()
+    private let firstNameContainer = UIView()
+    private let firstNameTextField = UITextField()
+    private let lastNameContainer = UIView()
+    private let lastNameTextField = UITextField()
+    private let displayNameContainer = UIView()
+    private let displayNameTextField = UITextField()
+    
+    // Common Fields
     private let emailContainer = UIView()
     private let emailTextField = UITextField()
-    
     private let passwordContainer = UIView()
     private let passwordTextField = UITextField()
     
-    // Register-specific confirm password
+    // Sign Up Confirm Password
     private let confirmPasswordContainer = UIView()
     private let confirmPasswordTextField = UITextField()
     
@@ -866,12 +870,17 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     private let forgotPasswordButton = UIButton(type: .system)
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     
+    // Guest & Back Buttons
+    private let guestButton = UIButton(type: .system)
+    private let backButton = UIButton(type: .system)
+    
     private var isSignUpMode: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupKeyboardObservers()
+        fetchOfflineStatus()
     }
     
     deinit {
@@ -888,40 +897,69 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         navigationController?.navigationBar.barStyle = .black
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.alwaysBounceVertical = true
-        scrollView.keyboardDismissMode = .interactive
+        scrollView.keyboardDismissMode = .onDrag
         view.addSubview(scrollView)
         
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        contentView.addGestureRecognizer(tapGesture)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
         
         // Header
-        let iconLabel = UILabel()
-        iconLabel.text = "🎮"
-        iconLabel.font = UIFont.systemFont(ofSize: 44)
-        iconLabel.textAlignment = .center
-        iconLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(iconLabel)
+        headerIcon.text = "👑"
+        headerIcon.font = UIFont.systemFont(ofSize: 42)
+        headerIcon.textAlignment = .center
+        headerIcon.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(headerIcon)
         
-        let headerLabel = UILabel()
-        headerLabel.text = "Block Rush 2K"
-        headerLabel.font = UIFont.systemFont(ofSize: 22, weight: .black)
-        headerLabel.textColor = .white
-        headerLabel.textAlignment = .center
-        headerLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(headerLabel)
+        titleLabel.text = "Welcome to Block Rush 2K"
+        titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        titleLabel.textColor = .white
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(titleLabel)
         
-        let subheaderLabel = UILabel()
-        subheaderLabel.text = "Sign in to sync your score and climb the leaderboard!"
-        subheaderLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        subheaderLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
-        subheaderLabel.textAlignment = .center
-        subheaderLabel.numberOfLines = 0
-        subheaderLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(subheaderLabel)
+        subtitleLabel.text = "Sign in or create an account to save your progress"
+        subtitleLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        subtitleLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.numberOfLines = 2
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(subtitleLabel)
+        
+        // Offline Banner
+        offlineBanner.backgroundColor = UIColor(white: 1.0, alpha: 0.06)
+        offlineBanner.layer.cornerRadius = 10
+        offlineBanner.layer.borderWidth = 1
+        offlineBanner.layer.borderColor = UIColor(white: 1.0, alpha: 0.1).cgColor
+        offlineBanner.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(offlineBanner)
+        
+        offlineLabel.text = "📱 Offline Mode: Sign in for unlimited cloud play & rewards"
+        offlineLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        offlineLabel.textColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        offlineLabel.textAlignment = .center
+        offlineLabel.numberOfLines = 2
+        offlineLabel.translatesAutoresizingMaskIntoConstraints = false
+        offlineBanner.addSubview(offlineLabel)
+        
+        NSLayoutConstraint.activate([
+            offlineLabel.topAnchor.constraint(equalTo: offlineBanner.topAnchor, constant: 8),
+            offlineLabel.bottomAnchor.constraint(equalTo: offlineBanner.bottomAnchor, constant: -8),
+            offlineLabel.leadingAnchor.constraint(equalTo: offlineBanner.leadingAnchor, constant: 12),
+            offlineLabel.trailingAnchor.constraint(equalTo: offlineBanner.trailingAnchor, constant: -12)
+        ])
         
         // Apple Sign In Button
         appleSignInButton = ASAuthorizationAppleIDButton(type: .signIn, style: .white)
@@ -929,6 +967,29 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         appleSignInButton.addTarget(self, action: #selector(appleSignInTapped), for: .touchUpInside)
         appleSignInButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(appleSignInButton)
+        
+        // Google Sign In Button
+        googleSignInButton.backgroundColor = UIColor(red: 66/255, green: 133/255, blue: 244/255, alpha: 1.0)
+        googleSignInButton.setTitle("G  Sign in with Google", for: .normal)
+        googleSignInButton.setTitleColor(.white, for: .normal)
+        googleSignInButton.titleLabel?.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+        googleSignInButton.layer.cornerRadius = 12
+        googleSignInButton.layer.masksToBounds = true
+        googleSignInButton.addTarget(self, action: #selector(googleSignInTapped), for: .touchUpInside)
+        googleSignInButton.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(googleSignInButton)
+        
+        // Continue Anonymously Button
+        anonymousSignInButton.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
+        anonymousSignInButton.setTitle("👤  Continue Anonymously", for: .normal)
+        anonymousSignInButton.setTitleColor(.white, for: .normal)
+        anonymousSignInButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        anonymousSignInButton.layer.cornerRadius = 12
+        anonymousSignInButton.layer.borderWidth = 1
+        anonymousSignInButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.12).cgColor
+        anonymousSignInButton.addTarget(self, action: #selector(anonymousSignInTapped), for: .touchUpInside)
+        anonymousSignInButton.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(anonymousSignInButton)
         
         // Divider
         let dividerContainer = UIStackView()
@@ -964,104 +1025,135 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(segmentedControl)
         
-        // Fields Stack (Generous 16pt spacing)
+        // Fields Stack
         let fieldsStack = UIStackView()
         fieldsStack.axis = .vertical
-        fieldsStack.spacing = 16
+        fieldsStack.spacing = 14
         fieldsStack.alignment = .fill
         fieldsStack.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(fieldsStack)
         
-        configureField(container: nameContainer, textField: nameTextField, labelText: "PLAYER NAME", placeholder: "e.g. MasterBlocker", icon: "person.fill", isSecure: false)
+        // First & Last Name side-by-side for Register mode
+        nameStack.axis = .horizontal
+        nameStack.spacing = 10
+        nameStack.distribution = .fillEqually
+        nameStack.translatesAutoresizingMaskIntoConstraints = false
+        
+        configureField(container: firstNameContainer, textField: firstNameTextField, labelText: "FIRST NAME", placeholder: "First name", icon: "person.fill", isSecure: false)
+        firstNameTextField.autocapitalizationType = .words
+        configureField(container: lastNameContainer, textField: lastNameTextField, labelText: "LAST NAME", placeholder: "Last name", icon: "person.fill", isSecure: false)
+        lastNameTextField.autocapitalizationType = .words
+        
+        nameStack.addArrangedSubview(firstNameContainer)
+        nameStack.addArrangedSubview(lastNameContainer)
+        nameStack.isHidden = true
+        fieldsStack.addArrangedSubview(nameStack)
+        
+        configureField(container: displayNameContainer, textField: displayNameTextField, labelText: "DISPLAY NAME (OPTIONAL)", placeholder: "e.g. MasterBlocker", icon: "sparkles", isSecure: false)
+        displayNameContainer.isHidden = true
+        fieldsStack.addArrangedSubview(displayNameContainer)
+        
         configureField(container: emailContainer, textField: emailTextField, labelText: "EMAIL ADDRESS", placeholder: "player@example.com", icon: "envelope.fill", isSecure: false)
         emailTextField.keyboardType = .emailAddress
         emailTextField.autocapitalizationType = .none
         emailTextField.autocorrectionType = .no
+        fieldsStack.addArrangedSubview(emailContainer)
         
         configureField(container: passwordContainer, textField: passwordTextField, labelText: "PASSWORD", placeholder: "At least 6 characters", icon: "lock.fill", isSecure: true)
-        configureField(container: confirmPasswordContainer, textField: confirmPasswordTextField, labelText: "CONFIRM PASSWORD", placeholder: "Repeat your password", icon: "lock.shield.fill", isSecure: true)
-        
-        nameContainer.isHidden = true
-        confirmPasswordContainer.isHidden = true
-        
-        fieldsStack.addArrangedSubview(nameContainer)
-        fieldsStack.addArrangedSubview(emailContainer)
         fieldsStack.addArrangedSubview(passwordContainer)
+        
+        configureField(container: confirmPasswordContainer, textField: confirmPasswordTextField, labelText: "CONFIRM PASSWORD", placeholder: "Repeat your password", icon: "lock.shield.fill", isSecure: true)
+        confirmPasswordContainer.isHidden = true
         fieldsStack.addArrangedSubview(confirmPasswordContainer)
         
-        // Error label
-        errorLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        errorLabel.textColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 1.0)
-        errorLabel.textAlignment = .center
-        errorLabel.numberOfLines = 0
-        errorLabel.isHidden = true
-        fieldsStack.addArrangedSubview(errorLabel)
-        
-        // Action Button
-        actionButton.setTitle("Sign In", for: .normal)
-        actionButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        actionButton.setTitleColor(.white, for: .normal)
-        actionButton.backgroundColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
-        actionButton.layer.cornerRadius = 14
-        actionButton.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
-        actionButton.translatesAutoresizingMaskIntoConstraints = false
-        actionButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        fieldsStack.addArrangedSubview(actionButton)
-        
         // Forgot Password Button
-        forgotPasswordButton.setTitle("Forgot Password?", for: .normal)
+        forgotPasswordButton.setTitle("Forgot password?", for: .normal)
         forgotPasswordButton.setTitleColor(UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0), for: .normal)
         forgotPasswordButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
         forgotPasswordButton.addTarget(self, action: #selector(forgotPasswordTapped), for: .touchUpInside)
         fieldsStack.addArrangedSubview(forgotPasswordButton)
         
-        // Loading Spinner
-        activityIndicator.color = .white
+        // Error Label
+        errorLabel.textColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 1.0)
+        errorLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        errorLabel.numberOfLines = 0
+        errorLabel.textAlignment = .center
+        errorLabel.isHidden = true
+        fieldsStack.addArrangedSubview(errorLabel)
+        
+        // Action Button
+        actionButton.backgroundColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
+        actionButton.setTitle("Sign In", for: .normal)
+        actionButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        actionButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        actionButton.layer.cornerRadius = 14
+        actionButton.layer.masksToBounds = true
+        actionButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        actionButton.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
+        fieldsStack.addArrangedSubview(actionButton)
+        
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.color = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         actionButton.addSubview(activityIndicator)
         
+        // Guest & Back Buttons
+        guestButton.setTitle("Continue as Guest", for: .normal)
+        guestButton.setTitleColor(UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0), for: .normal)
+        guestButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        guestButton.addTarget(self, action: #selector(guestTapped), for: .touchUpInside)
+        fieldsStack.addArrangedSubview(guestButton)
+        
+        backButton.setTitle("← Back to Game", for: .normal)
+        backButton.setTitleColor(UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1.0), for: .normal)
+        backButton.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        backButton.addTarget(self, action: #selector(backToGameTapped), for: .touchUpInside)
+        fieldsStack.addArrangedSubview(backButton)
+        
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            headerIcon.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 18),
+            headerIcon.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            titleLabel.topAnchor.constraint(equalTo: headerIcon.bottomAnchor, constant: 6),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            iconLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-            iconLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            subtitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
+            subtitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
             
-            headerLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 6),
-            headerLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            headerLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            offlineBanner.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 14),
+            offlineBanner.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            offlineBanner.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
-            subheaderLabel.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 4),
-            subheaderLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            subheaderLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            
-            appleSignInButton.topAnchor.constraint(equalTo: subheaderLabel.bottomAnchor, constant: 20),
-            appleSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            appleSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            appleSignInButton.topAnchor.constraint(equalTo: offlineBanner.bottomAnchor, constant: 14),
+            appleSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            appleSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             appleSignInButton.heightAnchor.constraint(equalToConstant: 48),
             
-            dividerContainer.topAnchor.constraint(equalTo: appleSignInButton.bottomAnchor, constant: 20),
-            dividerContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            dividerContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            googleSignInButton.topAnchor.constraint(equalTo: appleSignInButton.bottomAnchor, constant: 10),
+            googleSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            googleSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            googleSignInButton.heightAnchor.constraint(equalToConstant: 46),
             
-            segmentedControl.topAnchor.constraint(equalTo: dividerContainer.bottomAnchor, constant: 16),
-            segmentedControl.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            segmentedControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
+            anonymousSignInButton.topAnchor.constraint(equalTo: googleSignInButton.bottomAnchor, constant: 10),
+            anonymousSignInButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            anonymousSignInButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            anonymousSignInButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            dividerContainer.topAnchor.constraint(equalTo: anonymousSignInButton.bottomAnchor, constant: 16),
+            dividerContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            dividerContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            segmentedControl.topAnchor.constraint(equalTo: dividerContainer.bottomAnchor, constant: 14),
+            segmentedControl.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            segmentedControl.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             segmentedControl.heightAnchor.constraint(equalToConstant: 38),
             
-            fieldsStack.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 20),
-            fieldsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
-            fieldsStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
-            fieldsStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -40),
+            fieldsStack.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 18),
+            fieldsStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            fieldsStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            fieldsStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32),
             
             activityIndicator.centerYAnchor.constraint(equalTo: actionButton.centerYAnchor),
             activityIndicator.trailingAnchor.constraint(equalTo: actionButton.trailingAnchor, constant: -16)
@@ -1078,86 +1170,119 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         label.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(label)
         
-        let fieldBox = UIView()
-        fieldBox.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
-        fieldBox.layer.cornerRadius = 12
-        fieldBox.layer.borderWidth = 1
-        fieldBox.layer.borderColor = UIColor(white: 1.0, alpha: 0.1).cgColor
-        fieldBox.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(fieldBox)
+        let inputWrapper = UIView()
+        inputWrapper.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
+        inputWrapper.layer.cornerRadius = 10
+        inputWrapper.layer.borderWidth = 1.5
+        inputWrapper.layer.borderColor = UIColor(white: 1.0, alpha: 0.1).cgColor
+        inputWrapper.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(inputWrapper)
         
         let iconView = UIImageView(image: UIImage(systemName: icon))
-        iconView.tintColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        iconView.tintColor = UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1.0)
         iconView.contentMode = .scaleAspectFit
         iconView.translatesAutoresizingMaskIntoConstraints = false
-        fieldBox.addSubview(iconView)
+        inputWrapper.addSubview(iconView)
         
         textField.placeholder = placeholder
-        textField.textColor = .white
-        textField.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-        textField.isSecureTextEntry = isSecure
         textField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [.foregroundColor: UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1.0)])
+        textField.textColor = .white
+        textField.font = UIFont.systemFont(ofSize: 15)
+        textField.isSecureTextEntry = isSecure
         textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
-        fieldBox.addSubview(textField)
+        inputWrapper.addSubview(textField)
         
         NSLayoutConstraint.activate([
             label.topAnchor.constraint(equalTo: container.topAnchor),
             label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 4),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             
-            fieldBox.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 6),
-            fieldBox.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            fieldBox.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            fieldBox.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            fieldBox.heightAnchor.constraint(equalToConstant: 48),
+            inputWrapper.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 6),
+            inputWrapper.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            inputWrapper.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            inputWrapper.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            inputWrapper.heightAnchor.constraint(equalToConstant: 44),
             
-            iconView.leadingAnchor.constraint(equalTo: fieldBox.leadingAnchor, constant: 14),
-            iconView.centerYAnchor.constraint(equalTo: fieldBox.centerYAnchor),
-            iconView.widthAnchor.constraint(equalToConstant: 20),
-            iconView.heightAnchor.constraint(equalToConstant: 20),
+            iconView.leadingAnchor.constraint(equalTo: inputWrapper.leadingAnchor, constant: 12),
+            iconView.centerYAnchor.constraint(equalTo: inputWrapper.centerYAnchor),
+            iconView.widthAnchor.constraint(equalToConstant: 18),
+            iconView.heightAnchor.constraint(equalToConstant: 18),
             
-            textField.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 12),
-            textField.trailingAnchor.constraint(equalTo: fieldBox.trailingAnchor, constant: -14),
-            textField.topAnchor.constraint(equalTo: fieldBox.topAnchor),
-            textField.bottomAnchor.constraint(equalTo: fieldBox.bottomAnchor)
+            textField.leadingAnchor.constraint(equalTo: iconView.trailingAnchor, constant: 10),
+            textField.trailingAnchor.constraint(equalTo: inputWrapper.trailingAnchor, constant: -12),
+            textField.centerYAnchor.constraint(equalTo: inputWrapper.centerYAnchor),
+            textField.heightAnchor.constraint(equalTo: inputWrapper.heightAnchor)
         ])
     }
     
-    private func setupKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    @objc private func keyboardWillShow(_ notification: Notification) {
-        if let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            scrollView.contentInset.bottom = frame.height + 20
-            scrollView.verticalScrollIndicatorInsets.bottom = frame.height
+    private func fetchOfflineStatus() {
+        scriptBridge?.evaluateJavaScript("""
+        (function() {
+            var max = (typeof CONFIG !== 'undefined' && CONFIG.OFFLINE) ? (CONFIG.OFFLINE.MAX_LEVELS || 5) : 5;
+            var played = (typeof App !== 'undefined' && App.state) ? (App.state.offlineLevelsPlayed || 0) : 0;
+            return JSON.stringify({ max: max, remaining: Math.max(0, max - played) });
+        })();
+        """) { [weak self] (result, _) in
+            if let str = result as? String,
+               let data = str.data(using: .utf8),
+               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let remaining = dict["remaining"] as? Int,
+               let max = dict["max"] as? Int {
+                DispatchQueue.main.async {
+                    self?.offlineLabel.text = "📱 Offline Mode: \(remaining) of \(max) moves remaining"
+                    if remaining <= 2 {
+                        self?.offlineBanner.layer.borderColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 0.6).cgColor
+                        self?.offlineLabel.textColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 1.0)
+                    }
+                }
+            }
         }
     }
     
-    @objc private func keyboardWillHide(_ notification: Notification) {
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ note: Notification) {
+        guard let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        scrollView.contentInset.bottom = frame.height + 20
+        scrollView.verticalScrollIndicatorInsets.bottom = frame.height + 20
+    }
+    
+    @objc private func keyboardWillHide(_ note: Notification) {
         scrollView.contentInset.bottom = 0
         scrollView.verticalScrollIndicatorInsets.bottom = 0
     }
     
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
+    @objc private func closeTapped() {
+        dismissKeyboard()
+        dismiss(animated: true)
     }
     
-    @objc private func closeTapped() {
-        dismiss(animated: true, completion: nil)
+    @objc private func backToGameTapped() {
+        dismissKeyboard()
+        scriptBridge?.evaluateJavaScript("if (typeof App !== 'undefined' && App.closeLogin) App.closeLogin();")
+        dismiss(animated: true)
+    }
+    
+    @objc private func guestTapped() {
+        dismissKeyboard()
+        scriptBridge?.evaluateJavaScript("if (typeof App !== 'undefined' && App.skipLogin) App.skipLogin();")
+        dismiss(animated: true)
     }
     
     @objc private func segmentChanged() {
+        dismissKeyboard()
         isSignUpMode = (segmentedControl.selectedSegmentIndex == 1)
-        UIView.animate(withDuration: 0.25) {
-            self.nameContainer.isHidden = !self.isSignUpMode
-            self.confirmPasswordContainer.isHidden = !self.isSignUpMode
-            self.forgotPasswordButton.isHidden = self.isSignUpMode
-            self.actionButton.setTitle(self.isSignUpMode ? "Create Account" : "Sign In", for: .normal)
-            self.errorLabel.isHidden = true
-            self.contentView.layoutIfNeeded()
-        }
+        nameStack.isHidden = !isSignUpMode
+        displayNameContainer.isHidden = !isSignUpMode
+        confirmPasswordContainer.isHidden = !isSignUpMode
+        forgotPasswordButton.isHidden = isSignUpMode
+        actionButton.setTitle(isSignUpMode ? "Create Account" : "Sign In", for: .normal)
+        errorLabel.isHidden = true
+        view.layoutIfNeeded()
     }
     
     @objc private func appleSignInTapped() {
@@ -1167,6 +1292,56 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             self?.dismiss(animated: true) {
                 self?.onAuthSuccess?()
+            }
+        }
+    }
+    
+    @objc private func googleSignInTapped() {
+        HapticManager.shared.impact(style: .medium)
+        setLoading(true)
+        scriptBridge?.evaluateJavaScript("""
+        (async function() {
+            try {
+                if (typeof App !== 'undefined' && App.handleGoogleSignIn) {
+                    await App.handleGoogleSignIn();
+                    return JSON.stringify({ success: true });
+                }
+                return JSON.stringify({ success: false, error: 'App not loaded' });
+            } catch(e) {
+                return JSON.stringify({ success: false, error: e.message });
+            }
+        })();
+        """) { [weak self] (_, _) in
+            DispatchQueue.main.async {
+                self?.setLoading(false)
+                self?.dismiss(animated: true) {
+                    self?.onAuthSuccess?()
+                }
+            }
+        }
+    }
+    
+    @objc private func anonymousSignInTapped() {
+        HapticManager.shared.impact(style: .medium)
+        setLoading(true)
+        scriptBridge?.evaluateJavaScript("""
+        (async function() {
+            try {
+                if (typeof App !== 'undefined' && App.handleAnonymousSignIn) {
+                    await App.handleAnonymousSignIn();
+                    return JSON.stringify({ success: true });
+                }
+                return JSON.stringify({ success: false, error: 'App not loaded' });
+            } catch(e) {
+                return JSON.stringify({ success: false, error: e.message });
+            }
+        })();
+        """) { [weak self] (_, _) in
+            DispatchQueue.main.async {
+                self?.setLoading(false)
+                self?.dismiss(animated: true) {
+                    self?.onAuthSuccess?()
+                }
             }
         }
     }
@@ -1181,7 +1356,8 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alert.addAction(UIAlertAction(title: "Send", style: .default, handler: { [weak self] _ in
             guard let email = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty else { return }
-            self?.scriptBridge?.evaluateJavaScript("if (typeof FirebaseService !== 'undefined') FirebaseService.sendPasswordReset('\(email)');")
+            let escaped = email.replacingOccurrences(of: "'", with: "\\'")
+            self?.scriptBridge?.evaluateJavaScript("if (typeof FirebaseService !== 'undefined') FirebaseService.sendPasswordReset('\(escaped)');")
             let confirmation = UIAlertController(title: "Sent", message: "If an account exists for \(email), a reset link has been sent.", preferredStyle: .alert)
             confirmation.addAction(UIAlertAction(title: "OK", style: .default))
             self?.present(confirmation, animated: true)
@@ -1196,32 +1372,44 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let password = passwordTextField.text ?? ""
         
-        guard !email.isEmpty else {
-            showError("Please enter an email address.")
-            return
-        }
-        guard email.contains("@") && email.contains(".") else {
-            showError("Please enter a valid email address.")
-            return
-        }
-        guard password.count >= 6 else {
-            showError("Password must be at least 6 characters.")
-            return
-        }
-        
         if isSignUpMode {
-            let name = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let confirm = confirmPasswordTextField.text ?? ""
-            guard !name.isEmpty else {
-                showError("Please enter your player name.")
+            let firstName = firstNameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let lastName = lastNameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let displayName = displayNameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let confirmPassword = confirmPasswordTextField.text ?? ""
+            
+            guard !firstName.isEmpty else {
+                showError("Please enter your first name.")
                 return
             }
-            guard password == confirm else {
+            guard !lastName.isEmpty else {
+                showError("Please enter your last name.")
+                return
+            }
+            guard !email.isEmpty && email.contains("@") && email.contains(".") else {
+                showError("Please enter a valid email address.")
+                return
+            }
+            guard password.count >= 6 else {
+                showError("Password must be at least 6 characters.")
+                return
+            }
+            guard password == confirmPassword else {
                 showError("Passwords do not match.")
                 return
             }
-            performSignUp(name: name, email: email, password: password)
+            
+            let fullDisplayName = displayName.isEmpty ? "\(firstName) \(lastName)" : displayName
+            performSignUp(firstName: firstName, lastName: lastName, fullDisplayName: fullDisplayName, email: email, password: password)
         } else {
+            guard !email.isEmpty else {
+                showError("Please enter your email address.")
+                return
+            }
+            guard password.count >= 6 else {
+                showError("Password must be at least 6 characters.")
+                return
+            }
             performSignIn(email: email, password: password)
         }
     }
@@ -1252,7 +1440,14 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
             try {
                 if (typeof FirebaseService !== 'undefined') {
                     const res = await FirebaseService.signInWithEmail('\(escapedEmail)', '\(escapedPassword)');
-                    return JSON.stringify(res);
+                    if (res && res.success) {
+                        if (typeof App !== 'undefined' && App.handleSuccessfulLogin) {
+                            App.handleSuccessfulLogin(res.user, 'email');
+                        }
+                        return JSON.stringify({ success: true, user: res.user });
+                    } else {
+                        return JSON.stringify({ success: false, error: (res && res.error) || 'Invalid credentials' });
+                    }
                 }
                 return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
             } catch(e) {
@@ -1280,9 +1475,11 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    private func performSignUp(name: String, email: String, password: String) {
+    private func performSignUp(firstName: String, lastName: String, fullDisplayName: String, email: String, password: String) {
         setLoading(true)
-        let escapedName = name.replacingOccurrences(of: "'", with: "\\'")
+        let escapedFirst = firstName.replacingOccurrences(of: "'", with: "\\'")
+        let escapedLast = lastName.replacingOccurrences(of: "'", with: "\\'")
+        let escapedName = fullDisplayName.replacingOccurrences(of: "'", with: "\\'")
         let escapedEmail = email.replacingOccurrences(of: "'", with: "\\'")
         let escapedPassword = password.replacingOccurrences(of: "'", with: "\\'")
         
@@ -1291,7 +1488,19 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
             try {
                 if (typeof FirebaseService !== 'undefined') {
                     const res = await FirebaseService.signUpWithEmail('\(escapedEmail)', '\(escapedPassword)', '\(escapedName)');
-                    return JSON.stringify(res);
+                    if (res && res.success) {
+                        if (typeof App !== 'undefined') {
+                            App.state.firstName = '\(escapedFirst)';
+                            App.state.lastName = '\(escapedLast)';
+                            App.state.playerName = '\(escapedName)';
+                            if (App.handleSuccessfulLogin) {
+                                App.handleSuccessfulLogin(res.user, 'email');
+                            }
+                        }
+                        return JSON.stringify({ success: true, user: res.user });
+                    } else {
+                        return JSON.stringify({ success: false, error: (res && res.error) || 'Registration failed' });
+                    }
                 }
                 return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
             } catch(e) {
@@ -1319,8 +1528,16 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
+    private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == nameTextField {
+        if textField == firstNameTextField {
+            lastNameTextField.becomeFirstResponder()
+        } else if textField == lastNameTextField {
+            displayNameTextField.becomeFirstResponder()
+        } else if textField == displayNameTextField {
             emailTextField.becomeFirstResponder()
         } else if textField == emailTextField {
             passwordTextField.becomeFirstResponder()
@@ -1330,96 +1547,125 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
             } else {
                 actionButtonTapped()
             }
-        } else {
+        } else if textField == confirmPasswordTextField {
             actionButtonTapped()
         }
         return true
     }
 }
 
-// MARK: - Fully Native Daily Reward Modal View Controller
+// MARK: - Native Daily Reward View Controller
 final class NativeDailyRewardViewController: UIViewController {
     
     weak var scriptBridge: ScriptBridge?
-    var onClaimReward: ((Int) -> Void)?
     
-    private let rewardAmounts = [100, 250, 500, 750, 1000, 1500, 2500]
-    private var currentDayIndex = 2 // Day 3 by default
+    private let rewards = [100, 200, 300, 500, 750, 1000, 2000]
+    private var currentStreak: Int = 1
+    private var isClaimedToday: Bool = false
+    
+    private let titleLabel = UILabel()
+    private let subtitleLabel = UILabel()
+    private let gridStack = UIStackView()
+    private let claimButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        loadDailyStatus()
     }
     
     private func setupUI() {
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        title = "Daily Streak Reward"
+        view.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
         
-        let dismissTap = UITapGestureRecognizer(target: self, action: #selector(closeTapped))
-        view.addGestureRecognizer(dismissTap)
+        let closeItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeTapped))
+        navigationItem.rightBarButtonItem = closeItem
+        navigationController?.navigationBar.tintColor = .white
+        navigationController?.navigationBar.barStyle = .black
         
-        // Card Container
-        let card = UIView()
-        card.backgroundColor = UIColor(red: 24/255, green: 32/255, blue: 47/255, alpha: 1.0)
-        card.layer.cornerRadius = 24
-        card.layer.borderWidth = 1.5
-        card.layer.borderColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.35).cgColor
-        card.layer.shadowColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.25).cgColor
-        card.layer.shadowRadius = 25
-        card.layer.shadowOpacity = 0.8
-        card.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(card)
-        
-        let cardTap = UITapGestureRecognizer(target: nil, action: nil)
-        card.addGestureRecognizer(cardTap)
-        
-        // Close Button
-        let closeBtn = UIButton(type: .system)
-        let closeConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
-        closeBtn.setImage(UIImage(systemName: "xmark", withConfiguration: closeConfig), for: .normal)
-        closeBtn.tintColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
-        closeBtn.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
-        closeBtn.layer.cornerRadius = 16
-        closeBtn.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        closeBtn.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(closeBtn)
-        
-        // Icon
-        let iconLabel = UILabel()
-        iconLabel.text = "🎁"
-        iconLabel.font = UIFont.systemFont(ofSize: 46)
-        iconLabel.textAlignment = .center
-        iconLabel.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(iconLabel)
-        
-        // Title
-        let titleLabel = UILabel()
-        titleLabel.text = "Daily Login Reward"
-        titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .black)
+        titleLabel.text = "📅 7-Day Login Streak"
+        titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         titleLabel.textColor = .white
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(titleLabel)
+        view.addSubview(titleLabel)
         
-        // Streak Pill
-        let streakPill = UILabel()
-        streakPill.text = "🔥 3 DAY STREAK"
-        streakPill.font = UIFont.systemFont(ofSize: 12, weight: .black)
-        streakPill.textColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
-        streakPill.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.15)
-        streakPill.layer.cornerRadius = 12
-        streakPill.layer.masksToBounds = true
-        streakPill.textAlignment = .center
-        streakPill.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(streakPill)
+        subtitleLabel.text = "Check in every day to claim bonus gold coins!"
+        subtitleLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        subtitleLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        subtitleLabel.textAlignment = .center
+        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(subtitleLabel)
         
-        // 7-Day Grid
-        let gridStack = UIStackView()
         gridStack.axis = .vertical
-        gridStack.spacing = 8
-        gridStack.alignment = .fill
+        gridStack.spacing = 10
         gridStack.distribution = .fillEqually
         gridStack.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(gridStack)
+        view.addSubview(gridStack)
+        
+        claimButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        claimButton.setTitle("💰 Claim Daily Reward", for: .normal)
+        claimButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        claimButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        claimButton.layer.cornerRadius = 14
+        claimButton.layer.masksToBounds = true
+        claimButton.addTarget(self, action: #selector(claimTapped), for: .touchUpInside)
+        claimButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(claimButton)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
+            subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            gridStack.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 20),
+            gridStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            gridStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            claimButton.topAnchor.constraint(equalTo: gridStack.bottomAnchor, constant: 24),
+            claimButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            claimButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            claimButton.heightAnchor.constraint(equalToConstant: 50),
+            claimButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+        ])
+    }
+    
+    private func loadDailyStatus() {
+        scriptBridge?.evaluateJavaScript("""
+        (function() {
+            var s = (typeof App !== 'undefined' && App.state) ? App.state : {};
+            return JSON.stringify({
+                streak: s.streakDays || 1,
+                claimed: !!s.dailyChallengeDone
+            });
+        })();
+        """) { [weak self] (result, _) in
+            if let str = result as? String,
+               let data = str.data(using: .utf8),
+               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                let streak = dict["streak"] as? Int ?? 1
+                let claimed = dict["claimed"] as? Bool ?? false
+                DispatchQueue.main.async {
+                    self?.currentStreak = max(1, min(7, streak))
+                    self?.isClaimedToday = claimed
+                    self?.renderGrid()
+                    self?.updateClaimButton()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self?.renderGrid()
+                    self?.updateClaimButton()
+                }
+            }
+        }
+    }
+    
+    private func renderGrid() {
+        gridStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         let row1 = UIStackView()
         row1.axis = .horizontal
@@ -1431,112 +1677,130 @@ final class NativeDailyRewardViewController: UIViewController {
         row2.spacing = 8
         row2.distribution = .fillEqually
         
-        gridStack.addArrangedSubview(row1)
-        gridStack.addArrangedSubview(row2)
-        
-        for i in 0..<7 {
-            let dayNum = i + 1
-            let amount = rewardAmounts[i]
-            let isClaimed = i < currentDayIndex
-            let isToday = i == currentDayIndex
-            let cell = createDayCard(day: dayNum, coins: amount, isClaimed: isClaimed, isToday: isToday)
-            if i < 4 {
-                row1.addArrangedSubview(cell)
+        for day in 1...7 {
+            let card = createDayCard(day: day, reward: rewards[day - 1])
+            if day <= 4 {
+                row1.addArrangedSubview(card)
             } else {
-                row2.addArrangedSubview(cell)
+                row2.addArrangedSubview(card)
             }
         }
         
-        // Claim Button
-        let claimBtn = UIButton(type: .system)
-        let todayReward = rewardAmounts[currentDayIndex]
-        claimBtn.setTitle("CLAIM +\(todayReward) COINS", for: .normal)
-        claimBtn.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .black)
-        claimBtn.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
-        claimBtn.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
-        claimBtn.layer.cornerRadius = 16
-        claimBtn.addTarget(self, action: #selector(claimTapped), for: .touchUpInside)
-        claimBtn.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(claimBtn)
-        
-        NSLayoutConstraint.activate([
-            card.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            card.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            card.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            card.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            closeBtn.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
-            closeBtn.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
-            closeBtn.widthAnchor.constraint(equalToConstant: 32),
-            closeBtn.heightAnchor.constraint(equalToConstant: 32),
-            
-            iconLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 20),
-            iconLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            
-            titleLabel.topAnchor.constraint(equalTo: iconLabel.bottomAnchor, constant: 4),
-            titleLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            
-            streakPill.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            streakPill.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            streakPill.heightAnchor.constraint(equalToConstant: 24),
-            streakPill.widthAnchor.constraint(greaterThanOrEqualToConstant: 130),
-            
-            gridStack.topAnchor.constraint(equalTo: streakPill.bottomAnchor, constant: 18),
-            gridStack.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
-            gridStack.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
-            
-            claimBtn.topAnchor.constraint(equalTo: gridStack.bottomAnchor, constant: 20),
-            claimBtn.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 16),
-            claimBtn.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -16),
-            claimBtn.heightAnchor.constraint(equalToConstant: 52),
-            claimBtn.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -20)
-        ])
+        gridStack.addArrangedSubview(row1)
+        gridStack.addArrangedSubview(row2)
     }
     
-    private func createDayCard(day: Int, coins: Int, isClaimed: Bool, isToday: Bool) -> UIView {
-        let v = UIView()
-        v.layer.cornerRadius = 10
-        v.backgroundColor = isToday ? UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.18) : UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 0.8)
-        v.layer.borderWidth = isToday ? 1.5 : 0.5
-        v.layer.borderColor = isToday ? UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0).cgColor : UIColor(white: 1.0, alpha: 0.1).cgColor
-        v.translatesAutoresizingMaskIntoConstraints = false
+    private func createDayCard(day: Int, reward: Int) -> UIView {
+        let card = UIView()
+        card.layer.cornerRadius = 10
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.heightAnchor.constraint(equalToConstant: 74).isActive = true
         
-        let dayLbl = UILabel()
-        dayLbl.text = "D\(day)"
-        dayLbl.font = UIFont.systemFont(ofSize: 11, weight: .bold)
-        dayLbl.textColor = isToday ? UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0) : UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
-        dayLbl.textAlignment = .center
-        dayLbl.translatesAutoresizingMaskIntoConstraints = false
-        v.addSubview(dayLbl)
+        let isPast = day < currentStreak || (day == currentStreak && isClaimedToday)
+        let isCurrent = day == currentStreak && !isClaimedToday
         
-        let coinLbl = UILabel()
-        coinLbl.text = isClaimed ? "✓" : "+\(coins)"
-        coinLbl.font = UIFont.systemFont(ofSize: 12, weight: .heavy)
-        coinLbl.textColor = isClaimed ? UIColor(red: 34/255, green: 197/255, blue: 94/255, alpha: 1.0) : .white
-        coinLbl.textAlignment = .center
-        coinLbl.translatesAutoresizingMaskIntoConstraints = false
-        v.addSubview(coinLbl)
+        if isCurrent {
+            card.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.2)
+            card.layer.borderWidth = 2
+            card.layer.borderColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0).cgColor
+        } else if isPast {
+            card.backgroundColor = UIColor(red: 16/255, green: 185/255, blue: 129/255, alpha: 0.15)
+            card.layer.borderWidth = 1
+            card.layer.borderColor = UIColor(red: 16/255, green: 185/255, blue: 129/255, alpha: 0.5).cgColor
+        } else {
+            card.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
+            card.layer.borderWidth = 1
+            card.layer.borderColor = UIColor(white: 1.0, alpha: 0.08).cgColor
+        }
+        
+        let dayLabel = UILabel()
+        dayLabel.text = "Day \(day)"
+        dayLabel.font = UIFont.systemFont(ofSize: 11, weight: .bold)
+        dayLabel.textColor = isCurrent ? UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0) : UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        dayLabel.textAlignment = .center
+        dayLabel.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(dayLabel)
+        
+        let iconLabel = UILabel()
+        iconLabel.text = isPast ? "✅" : (day == 7 ? "👑" : "💰")
+        iconLabel.font = UIFont.systemFont(ofSize: 18)
+        iconLabel.textAlignment = .center
+        iconLabel.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(iconLabel)
+        
+        let rewardLabel = UILabel()
+        rewardLabel.text = "+\(reward)"
+        rewardLabel.font = UIFont.systemFont(ofSize: 12, weight: .heavy)
+        rewardLabel.textColor = .white
+        rewardLabel.textAlignment = .center
+        rewardLabel.translatesAutoresizingMaskIntoConstraints = false
+        card.addSubview(rewardLabel)
         
         NSLayoutConstraint.activate([
-            v.heightAnchor.constraint(equalToConstant: 54),
-            dayLbl.topAnchor.constraint(equalTo: v.topAnchor, constant: 8),
-            dayLbl.centerXAnchor.constraint(equalTo: v.centerXAnchor),
-            coinLbl.bottomAnchor.constraint(equalTo: v.bottomAnchor, constant: -8),
-            coinLbl.centerXAnchor.constraint(equalTo: v.centerXAnchor)
+            dayLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 6),
+            dayLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            
+            iconLabel.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            iconLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            
+            rewardLabel.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -6),
+            rewardLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor)
         ])
         
-        return v
+        return card
+    }
+    
+    private func updateClaimButton() {
+        if isClaimedToday {
+            claimButton.isEnabled = false
+            claimButton.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
+            claimButton.setTitle("✅ Claimed for Today!", for: .normal)
+            claimButton.setTitleColor(UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0), for: .normal)
+        } else {
+            let reward = rewards[currentStreak - 1]
+            claimButton.isEnabled = true
+            claimButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+            claimButton.setTitle("💰 Claim +\(reward) Coins", for: .normal)
+            claimButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        }
     }
     
     @objc private func claimTapped() {
+        guard !isClaimedToday else { return }
+        let reward = rewards[currentStreak - 1]
+        let nextStreak = currentStreak >= 7 ? 1 : currentStreak + 1
+        
         HapticManager.shared.notification(type: .success)
-        let amount = rewardAmounts[currentDayIndex]
-        dismiss(animated: true) { [weak self] in
-            self?.onClaimReward?(amount)
+        
+        let js = """
+        (function() {
+            if (typeof App !== 'undefined' && App.state) {
+                App.state.coins = (App.state.coins || 0) + \(reward);
+                App.state.dailyChallengeDone = true;
+                App.state.streakDays = \(nextStreak);
+                App.saveState();
+                App.updateAllCoinDisplays();
+                if (typeof FirebaseService !== 'undefined') {
+                    FirebaseService.saveUserData(App.state);
+                }
+                App.showToast('🎉 +\(reward) Daily Bonus Coins Claimed!');
+            }
+        })();
+        """
+        
+        scriptBridge?.evaluateJavaScript(js) { [weak self] (_, _) in
+            DispatchQueue.main.async {
+                self?.isClaimedToday = true
+                self?.renderGrid()
+                self?.updateClaimButton()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    self?.dismiss(animated: true)
+                }
+            }
         }
     }
     
     @objc private func closeTapped() {
-        dismiss(animated: true, completion: nil)
+        dismiss(animated: true)
     }
 }
