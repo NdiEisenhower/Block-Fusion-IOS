@@ -38,6 +38,8 @@ final class AdMobManager: NSObject {
     
     #if canImport(GoogleMobileAds)
     private var bannerView: GADBannerView?
+    private var bannerWidthConstraint: NSLayoutConstraint?
+    private var bannerHeightConstraint: NSLayoutConstraint?
     private var interstitialAd: GADInterstitialAd?
     private var rewardedAd: GADRewardedAd?
     private var isInterstitialLoading = false
@@ -143,12 +145,17 @@ final class AdMobManager: NSObject {
             banner.translatesAutoresizingMaskIntoConstraints = false
             containerView.addSubview(banner)
             
+            let widthC = banner.widthAnchor.constraint(equalToConstant: adSize.size.width)
+            let heightC = banner.heightAnchor.constraint(equalToConstant: adSize.size.height)
+            
             NSLayoutConstraint.activate([
-                banner.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
                 banner.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-                banner.widthAnchor.constraint(equalToConstant: adSize.size.width),
-                banner.heightAnchor.constraint(equalToConstant: adSize.size.height)
+                banner.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+                widthC,
+                heightC
             ])
+            self.bannerWidthConstraint = widthC
+            self.bannerHeightConstraint = heightC
             self.bannerView = banner
         }
         
@@ -156,11 +163,30 @@ final class AdMobManager: NSObject {
         containerView.bringSubviewToFront(bannerView!)
         bannerView?.load(GADRequest())
         isBannerVisible = true
-        delegate?.onBannerVisibilityChanged(visible: true, height: 50)
+        let actualHeight = bannerView?.adSize.size.height ?? 50
+        delegate?.onBannerVisibilityChanged(visible: true, height: actualHeight)
         #else
         print("📱 [Mock] Banner ad shown")
         isBannerVisible = true
         delegate?.onBannerVisibilityChanged(visible: true, height: 50)
+        #endif
+    }
+    
+    /// Re-calculates and applies anchored adaptive banner dimensions when orientation or device bounds change
+    func updateBannerLayout(in containerView: UIView) {
+        guard isBannerVisible else { return }
+        let currentWidth = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
+        guard currentWidth > 0 else { return }
+        
+        #if canImport(GoogleMobileAds)
+        guard let banner = bannerView, banner.superview == containerView else { return }
+        let newSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(currentWidth)
+        if banner.adSize.size.width != newSize.size.width || banner.adSize.size.height != newSize.size.height {
+            banner.adSize = newSize
+            bannerWidthConstraint?.constant = newSize.size.width
+            bannerHeightConstraint?.constant = newSize.size.height
+            delegate?.onBannerVisibilityChanged(visible: true, height: newSize.size.height)
+        }
         #endif
     }
     

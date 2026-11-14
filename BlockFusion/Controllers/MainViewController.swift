@@ -84,6 +84,7 @@ final class MainViewController: UIViewController {
         // Ensure bottom navigation bar stays above webview and ads
         view.bringSubviewToFront(bannerContainer)
         view.bringSubviewToFront(bottomBar)
+        AdMobManager.shared.updateBannerLayout(in: bannerContainer)
     }
     
     // MARK: - Native Modals
@@ -474,6 +475,7 @@ extension MainViewController: AdMobEventListener {
             self.currentBannerHeight = visible ? height : 0
             self.bannerHeightConstraint.constant = visible ? height : 0
             self.bannerContainer.isHidden = !visible
+            self.updateSafeAreaInsets()
             UIView.animate(withDuration: 0.25) {
                 self.view.layoutIfNeeded()
             }
@@ -483,6 +485,10 @@ extension MainViewController: AdMobEventListener {
 
 // MARK: - ScriptBridgeDelegate
 extension MainViewController: ScriptBridgeDelegate {
+    var bannerContainerView: UIView? {
+        return bannerContainer
+    }
+    
     func openShareSheet(text: String, url: URL?) {
         var items: [Any] = [text]
         if let u = url { items.append(u) }
@@ -1524,9 +1530,11 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     private func fetchOfflineStatus() {
         scriptBridge?.evaluateJavaScript("""
         (function() {
-            var max = (typeof CONFIG !== 'undefined' && CONFIG.OFFLINE) ? (CONFIG.OFFLINE.MAX_LEVELS || 5) : 5;
-            var played = (typeof App !== 'undefined' && App.state) ? (App.state.offlineLevelsPlayed || 0) : 0;
-            return JSON.stringify({ max: max, remaining: Math.max(0, max - played) });
+            var info = (typeof App !== 'undefined' && typeof App.getOfflineInfo === 'function') ? App.getOfflineInfo() : null;
+            var max = info ? info.maxLevels : ((typeof CONFIG !== 'undefined' && CONFIG.OFFLINE) ? (parseInt(CONFIG.OFFLINE.MAX_LEVELS, 10) || 3) : 3);
+            var remaining = info ? info.remaining : Math.max(0, max - ((typeof App !== 'undefined' && App.state) ? (App.state.offlineLevelsPlayed || 0) : 0));
+            var label = (typeof App !== 'undefined' && typeof App.formatMovesLeft === 'function') ? App.formatMovesLeft(remaining, max) : (remaining + '/' + max + ' moves left');
+            return JSON.stringify({ max: max, remaining: remaining, label: label, threshold: info ? info.warningThreshold : 2 });
         })();
         """) { [weak self] (result, _) in
             if let str = result as? String,
@@ -1534,9 +1542,12 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
                let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let remaining = dict["remaining"] as? Int,
                let max = dict["max"] as? Int {
+                let label = dict["label"] as? String ?? "\(remaining)/\(max) moves left"
+                let threshold = dict["threshold"] as? Int ?? 2
                 DispatchQueue.main.async {
-                    self?.offlineLabel.text = "📱 Offline Mode: \(remaining) of \(max) moves remaining"
-                    if remaining <= 2 {
+                    self?.offlineLabel.text = "📱 Offline Mode: \(label)"
+                    self?.guestButton.setTitle("Continue as Guest (\(label))", for: .normal)
+                    if remaining <= threshold {
                         self?.offlineBanner.layer.borderColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 0.6).cgColor
                         self?.offlineLabel.textColor = UIColor(red: 239/255, green: 68/255, blue: 68/255, alpha: 1.0)
                     }

@@ -6,7 +6,7 @@ class I18N {
 
     static languages = [
         { code: 'en', name: 'English', flag: '🇬🇧', enabled: true },
-        { code: 've', name: 'TshiVenda', flag: '🇿🇦', enabled: true },
+        { code: 've', name: 'Tshivenḓa', flag: '🇿🇦', enabled: true },
         { code: 'zu', name: 'isiZulu', flag: '🇿🇦', enabled: true }
     ];
 
@@ -16,7 +16,9 @@ class I18N {
             continue_game: '▶ Continue',
             worlds: '🌍 Worlds',
             daily_challenge: '📅 Daily Challenge',
+            daily_challenge_card: 'Daily Challenge',
             refer_earn: '🎁 Refer & Earn',
+            refer_earn_card: 'Refer & Earn',
             store: '🛒 Store',
             leaderboard: '📊 Leaderboard',
             settings: '⚙️ Settings',
@@ -148,7 +150,9 @@ class I18N {
             continue_game: '▶ Bvela Phanda',
             worlds: '🌍 Shango',
             daily_challenge: '📅 Mbila ya Tšuvha',
+            daily_challenge_card: 'Mbila ya Tšuvha',
             refer_earn: '🎁 Rhamba Khonani',
+            refer_earn_card: 'Rhamba Khonani',
             store: '🛒 Zwitolo',
             leaderboard: '📊 Vhavhuli',
             settings: '⚙️ Zwiimwa',
@@ -280,7 +284,9 @@ class I18N {
             continue_game: '▶ Qhubeka',
             worlds: '🌍 Imihlaba',
             daily_challenge: '📅 Inselelo Yansuku Zonke',
+            daily_challenge_card: 'Inselelo Yansuku Zonke',
             refer_earn: '🎁 Mema Abangane',
+            refer_earn_card: 'Mema Abangane',
             store: '🛒 Isitolo',
             leaderboard: '📊 Abaphambili',
             settings: '⚙️ Izilungiselelo',
@@ -497,7 +503,12 @@ class I18N {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (key) {
-                const text = this.t(key);
+                let text = this.t(key);
+                // Elements that already render their own icon (e.g. iOS home feature cards)
+                // opt out of the emoji prefix so the icon isn't shown twice.
+                if (text && el.hasAttribute('data-i18n-noicon')) {
+                    text = text.replace(/^[^\p{L}\p{N}]+/u, '').trim();
+                }
                 if (text) el.textContent = text;
             }
         });

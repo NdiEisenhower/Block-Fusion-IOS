@@ -35,7 +35,16 @@ const CONFIG = {
 
     // Offline Mode Settings (Active on mobile app, disabled on website for unlimited play)
     OFFLINE: {
-        MAX_LEVELS: 5,            // Maximum number of offline levels allowed (mobile only)
+        // Maximum number of offline moves allowed without an account (mobile only).
+        // Source of truth is Firebase `remote_config/offline/maxLevels` (set in Admin Portal / RTDB);
+        // default matches database: 3 free moves without account.
+        MAX_LEVELS: (function () {
+            try {
+                const cached = parseInt(localStorage.getItem('br2k_offline_max_levels'), 10);
+                if (cached > 0) return cached;
+            } catch (e) { }
+            return 3;
+        })(),
         WARNING_THRESHOLD: 2,     // Show warning when this many moves left
         ENABLED: typeof window !== 'undefined' && (typeof Android !== 'undefined' || !!window.Android || !!window.Billing),
         RESET_ON_LOGIN: true      // Reset offline count when user logs in

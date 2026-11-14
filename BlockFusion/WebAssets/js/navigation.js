@@ -484,7 +484,7 @@ class Navigation {
                 <div class="item-desc">
                     ${App.state.isLoggedIn ?
                 '✅ Signed in - Unlimited play' :
-                `${offlineInfo.remaining} of ${offlineInfo.maxLevels} offline moves remaining`}
+                App.formatMovesLeft(offlineInfo.remaining, offlineInfo.maxLevels)}
                 </div>
             </div>
             <span style="font-size:20px;">

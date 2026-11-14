@@ -962,8 +962,24 @@ class App {
         };
     }
 
+    // Single source of truth for the free (no-account) move allowance.
+    // Value comes from Firebase remote_config/offline/maxLevels via CONFIG.OFFLINE.MAX_LEVELS (database export: 3).
+    static getOfflineMax() {
+        const v = parseInt(CONFIG.OFFLINE && CONFIG.OFFLINE.MAX_LEVELS, 10);
+        return v > 0 ? v : 3;
+    }
+
+    // Standard wording used everywhere: "X/Y moves left"
+    static formatMovesLeft(remaining, max) {
+        const info = (remaining === undefined || max === undefined) ? this.getOfflineInfo() : null;
+        const r = info ? info.remaining : remaining;
+        const m = info ? info.maxLevels : max;
+        const movesLeftText = (typeof I18N !== 'undefined') ? I18N.t('moves_left', 'moves left') : 'moves left';
+        return `${r}/${m} ${movesLeftText}`;
+    }
+
     static getOfflineInfo() {
-        const maxLevels = CONFIG.OFFLINE.MAX_LEVELS || 5;
+        const maxLevels = this.getOfflineMax();
         const warningThreshold = CONFIG.OFFLINE.WARNING_THRESHOLD || 2;
         const played = this.state.offlineLevelsPlayed || 0;
         const remaining = Math.max(0, maxLevels - played);
@@ -988,10 +1004,7 @@ class App {
 
         if (offlineBox) {
             if (!this.state.isLoggedIn && CONFIG.OFFLINE.ENABLED) {
-                const maxLevels = CONFIG.OFFLINE.MAX_LEVELS || 5;
-                const warningThreshold = CONFIG.OFFLINE.WARNING_THRESHOLD || 2;
-                const played = this.state.offlineLevelsPlayed || 0;
-                const remaining = Math.max(0, maxLevels - played);
+                const { maxLevels, warningThreshold, remaining } = this.getOfflineInfo();
 
                 const leftLabel = offlineBox.querySelector('.offline-left');
                 if (leftLabel) {
@@ -1001,8 +1014,7 @@ class App {
 
                 const rightLabel = offlineBox.querySelector('.offline-right');
                 if (rightLabel) {
-                    const movesLeftText = (typeof I18N !== 'undefined') ? I18N.t('moves_left', 'moves left') : 'moves left';
-                    rightLabel.textContent = `${remaining}/${maxLevels} ${movesLeftText}`;
+                    rightLabel.textContent = this.formatMovesLeft(remaining, maxLevels);
 
                     if (remaining <= warningThreshold) {
                         rightLabel.style.color = '#e94560';
@@ -1383,11 +1395,8 @@ class App {
             return;
         }
 
-        const maxLevels = CONFIG.OFFLINE.MAX_LEVELS || 5;
-        const warningThreshold = CONFIG.OFFLINE.WARNING_THRESHOLD || 2;
-        const played = this.state.offlineLevelsPlayed || 0;
-        const remaining = Math.max(0, maxLevels - played);
-        const isLow = remaining <= warningThreshold;
+        const { maxLevels, remaining, isLow } = this.getOfflineInfo();
+        const movesLeftLabel = this.formatMovesLeft(remaining, maxLevels);
 
        PopupManager.show({
                icon: '🔐',
@@ -1405,7 +1414,7 @@ class App {
                        ${(CONFIG.OFFLINE && CONFIG.OFFLINE.ENABLED) ? `
                        <div style="background:${isLow ? 'rgba(233,69,96,0.15)' : 'rgba(255,255,255,0.05)'};border-radius:8px;padding:12px;margin-bottom:16px;text-align:center;border:1px solid ${isLow ? '#e94560' : 'transparent'};">
                            <div style="font-size:14px;color:var(--text-muted);">
-                               📱 Offline Mode: <strong style="color:${isLow ? '#e94560' : '#f7c948'};">${remaining}</strong> of ${maxLevels} moves remaining
+                               📱 Offline Mode: <strong style="color:${isLow ? '#e94560' : '#f7c948'};">${movesLeftLabel}</strong>
                            </div>
                            ${isLow ? '<div style="font-size:12px;color:#e94560;margin-top:4px;">⚠️ Low on offline moves! Sign in for unlimited play.</div>' : ''}
                            ${remaining <= 0 ? '<div style="font-size:12px;color:#e94560;margin-top:4px;">🚫 No offline moves left! Please sign in to continue.</div>' : ''}
@@ -1466,7 +1475,7 @@ class App {
 
                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;gap:8px;">
                            <button class="btn btn-sm btn-outline" onclick="App.skipLogin()" style="width:100%;font-size:12px;color:var(--text-muted);">
-                               ${(CONFIG.OFFLINE && CONFIG.OFFLINE.ENABLED) ? `Continue as Guest (${remaining} moves left)` : 'Continue as Guest'}
+                               ${(CONFIG.OFFLINE && CONFIG.OFFLINE.ENABLED) ? `Continue as Guest (${movesLeftLabel})` : 'Continue as Guest'}
                            </button>
                            <button class="btn btn-secondary" onclick="App.closeLogin()" style="width:100%;padding:10px;font-size:14px;">
                                ← Back to Game
@@ -1577,7 +1586,7 @@ class App {
         }
 
         if (!this.state.isLoggedIn && CONFIG.OFFLINE.ENABLED) {
-            const maxLevels = CONFIG.OFFLINE.MAX_LEVELS || 5;
+            const maxLevels = this.getOfflineMax();
             if ((this.state.offlineLevelsPlayed || 0) >= maxLevels) {
                 this.showToast('⚠️ You\'ve reached the offline limit! Sign in to continue playing.');
                 this.showLoginPrompt();
@@ -1589,12 +1598,10 @@ class App {
             this.state.offlineLevelsPlayed = (this.state.offlineLevelsPlayed || 0) + 1;
             this.updateOfflineIndicator();
 
-            const maxLevels = CONFIG.OFFLINE.MAX_LEVELS || 5;
-            const remaining = maxLevels - this.state.offlineLevelsPlayed;
-            const warningThreshold = CONFIG.OFFLINE.WARNING_THRESHOLD || 2;
+            const { maxLevels, remaining, warningThreshold } = this.getOfflineInfo();
 
             if (remaining <= warningThreshold && remaining > 0) {
-                this.showToast(`⚠️ ${remaining} offline moves left! Sign in for unlimited play.`);
+                this.showToast(`⚠️ ${this.formatMovesLeft(remaining, maxLevels)}! Sign in for unlimited play.`);
             }
         }
 

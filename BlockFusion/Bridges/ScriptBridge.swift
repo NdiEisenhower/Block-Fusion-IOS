@@ -5,6 +5,7 @@ import WebKit
 import StoreKit
 
 protocol ScriptBridgeDelegate: AnyObject {
+    var bannerContainerView: UIView? { get }
     func openShareSheet(text: String, url: URL?)
     func openStoreReview()
     func exitApp()
@@ -64,8 +65,8 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             AdMobManager.shared.initialize(bannerId: banner, interId: inter, rewardedId: reward)
             
         case "showBannerAd", "showBanner":
-            if let view = webView?.superview {
-                AdMobManager.shared.showBannerAd(in: view)
+            if let container = delegate?.bannerContainerView ?? webView?.superview {
+                AdMobManager.shared.showBannerAd(in: container)
             }
             
         case "hideBannerAd", "hideBanner":

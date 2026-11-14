@@ -496,8 +496,20 @@ class FirebaseService {
 
         // 4. Offline mode settings
         if (config.offline && typeof CONFIG.OFFLINE === 'object') {
-            if (config.offline.maxLevels) {
-                CONFIG.OFFLINE.MAX_LEVELS = config.offline.maxLevels;
+            const remoteMax = parseInt(config.offline.maxLevels, 10);
+            if (remoteMax > 0) {
+                const changed = CONFIG.OFFLINE.MAX_LEVELS !== remoteMax;
+                CONFIG.OFFLINE.MAX_LEVELS = remoteMax;
+                try { localStorage.setItem('br2k_offline_max_levels', String(remoteMax)); } catch (e) { }
+                if (changed && typeof App !== 'undefined' && App.state) {
+                    // Refresh every place that shows the free-move counter so they stay in sync
+                    try { App.updateOfflineIndicator(); } catch (e) { }
+                    try {
+                        if (typeof Navigation !== 'undefined' && document.getElementById('screen-settings')?.classList.contains('active')) {
+                            Navigation.renderSettings();
+                        }
+                    } catch (e) { }
+                }
             }
         }
     }
@@ -776,13 +788,9 @@ class FirebaseService {
             }
         } catch (error) {
             let msg = 'Sign-in failed';
-            if (error.code === 'auth/popup-closed-by-user') {
-                msg = 'Cancelled';
-            } else if (error.code === 'auth/popup-blocked') {
-                msg = 'Pop-up blocked';
-            } else if (error.code === 'auth/unauthorized-domain') {
-                msg = 'On iOS, please use Sign in with Apple or Email';
-            }
+            if (error.code === 'auth/popup-closed-by-user') msg = 'Cancelled';
+            if (error.code === 'auth/popup-blocked') msg = 'Pop-up blocked';
+            if (error.code === 'auth/unauthorized-domain') msg = 'On iOS, please use Sign in with Apple or Email';
             this.logCrash('google_signin_error', error.code);
             return { success: false, error: msg };
         }
