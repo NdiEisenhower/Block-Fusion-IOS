@@ -9,6 +9,10 @@ final class AppTrackingManager {
     private init() {}
     
     func requestAuthorization(completion: @escaping (ATTrackingManager.AuthorizationStatus) -> Void) {
+        #if targetEnvironment(simulator)
+        completion(.notDetermined)
+        return
+        #endif
         if #available(iOS 14.5, *) {
             // Small delay to ensure the UI / window is fully loaded
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

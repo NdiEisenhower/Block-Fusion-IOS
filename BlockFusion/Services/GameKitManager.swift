@@ -15,6 +15,9 @@ final class GameKitManager: NSObject {
     
     // MARK: - Authentication
     func authenticateLocalPlayer() {
+        #if targetEnvironment(simulator)
+        return
+        #endif
         let localPlayer = GKLocalPlayer.local
         localPlayer.authenticateHandler = { [weak self] gcAuthVC, error in
             guard let self = self else { return }

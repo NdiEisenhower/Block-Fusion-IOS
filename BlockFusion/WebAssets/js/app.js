@@ -2134,6 +2134,15 @@ class App {
     }
 
     static startDailyChallenge() {
+        // Trigger native iOS Daily Challenge / Reward modal when running in native app
+        if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) {
+            try {
+                window.webkit.messageHandlers.appBridge.postMessage({ action: 'showDailyReward' });
+                return;
+            } catch (e) {
+                console.error('Failed to post showDailyReward to iOS appBridge:', e);
+            }
+        }
         if (typeof DailyChallenge !== 'undefined') {
             DailyChallenge.start();
         } else {

@@ -278,6 +278,37 @@ body:not(.tv-mode) [tabindex]:focus {
         height: 95vh;
     }
 
+    /* In Native iOS app on iPad / tablets, ensure #app fills full viewport seamlessly without phone frame margins */
+    body.is-native-ios #app,
+    body.is-native-app #app,
+    html.is-native-ios #app,
+    html.is-native-app #app {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        height: 100dvh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    body.is-native-ios #screen-home.active,
+    body.is-native-app #screen-home.active {
+        max-width: 640px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        padding: 20px 24px !important;
+    }
+
+    body.is-native-ios #screen-home .home-menu-container,
+    body.is-native-app #screen-home .home-menu-container {
+        max-width: 500px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+
     .tile { font-size: 26px; }
     .tile[data-value="1024"] { font-size: 18px; }
     .tile[data-value="2048"] { font-size: 17px; }
@@ -538,44 +569,68 @@ body:not(.tv-mode) [tabindex]:focus {
 
     #screen-home .home-menu-container {
         flex: 1.2 !important;
-        max-width: 440px !important;
+        max-width: 480px !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
         margin: 0 auto !important;
-        gap: 10px !important;
+        gap: 14px !important;
+        width: 100% !important;
     }
 
     #screen-home .home-menu {
         width: 100% !important;
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
     }
 
-    #screen-home .home-menu .btn-block:first-child {
-        grid-column: 1 / -1 !important;
-        min-height: 48px !important;
-        font-size: 15px !important;
-        font-weight: 800 !important;
-    }
-
-    #screen-home .home-menu .btn {
-        font-size: 13px !important;
-        padding: 10px 12px !important;
-        min-height: 44px !important;
-        margin-bottom: 0 !important;
-        white-space: normal !important;
-        border-radius: 14px !important;
+    #screen-home .hero-continue-btn {
+        width: 100% !important;
+        min-height: 68px !important;
+        padding: 14px 20px !important;
+        border-radius: 18px !important;
         display: flex !important;
         align-items: center !important;
-        justify-content: center !important;
-        transition: all 0.2s ease !important;
+        gap: 14px !important;
+        box-shadow: 0 10px 24px -2px rgba(238, 9, 121, 0.45), 0 4px 12px rgba(255, 106, 0, 0.35) !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
-    #screen-home .home-menu .btn:hover {
+    #screen-home .hero-continue-btn:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
+        box-shadow: 0 14px 28px -4px rgba(238, 9, 121, 0.55), 0 6px 16px rgba(255, 106, 0, 0.45) !important;
+    }
+
+    #screen-home .home-features-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    #screen-home .home-feature-card {
+        min-height: 92px !important;
+        padding: 12px 14px !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    #screen-home .home-feature-card:hover {
+        transform: translateY(-2px) !important;
+    }
+
+    #screen-home .daily-card:hover {
+        box-shadow: 0 8px 24px rgba(168, 85, 247, 0.25) !important;
+        border-color: rgba(168, 85, 247, 0.6) !important;
+    }
+
+    #screen-home .referral-card:hover {
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25) !important;
+        border-color: rgba(245, 158, 11, 0.6) !important;
     }
 
     /* ===== 3. WORLDS SELECT SCREEN (#screen-world-select) ===== */

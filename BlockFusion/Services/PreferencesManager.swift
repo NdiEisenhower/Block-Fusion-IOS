@@ -20,8 +20,13 @@ final class PreferencesManager {
     }
     
     private init() {
+        var adsRemovedDefault = false
+        #if targetEnvironment(simulator)
+        adsRemovedDefault = true
+        #endif
+        
         defaults.register(defaults: [
-            Keys.adsRemoved: false,
+            Keys.adsRemoved: adsRemovedDefault,
             Keys.offlineSubActive: false,
             Keys.activeTheme: "numbers",
             Keys.themePackOwned: false,

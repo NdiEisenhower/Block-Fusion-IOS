@@ -77,6 +77,9 @@ final class MainViewController: UIViewController {
         
         setupManagers()
         loadGame()
+        #if targetEnvironment(simulator)
+        setupSimulatorNavWatcher()
+        #endif
     }
     
     override func viewDidLayoutSubviews() {
@@ -128,7 +131,7 @@ final class MainViewController: UIViewController {
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
+        return UIDevice.current.userInterfaceIdiom == .pad ? .all : .portrait
     }
     
     // MARK: - Setup UI
@@ -357,6 +360,168 @@ final class MainViewController: UIViewController {
         }
     }
     
+    #if targetEnvironment(simulator)
+    private func setupSimulatorNavWatcher() {
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            let paths = [
+                NSTemporaryDirectory() + "blockrush_nav.txt",
+                "/tmp/blockrush_nav.txt"
+            ]
+            for navFile in paths {
+                if FileManager.default.fileExists(atPath: navFile),
+                   let target = try? String(contentsOfFile: navFile, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines),
+                   !target.isEmpty {
+                    try? FileManager.default.removeItem(atPath: navFile)
+                    self.navigateToScreen(target)
+                    break
+                }
+            }
+        }
+    }
+    #endif
+
+    func navigateToScreen(_ target: String) {
+        print("🎮 Navigating simulator to screen: \(target)")
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.dismiss(animated: false, completion: nil)
+            
+            let switchScreenJS: (String) -> String = { screen in
+                return """
+                (function() {
+                    if (typeof PopupManager !== 'undefined' && typeof PopupManager.close === 'function') {
+                        PopupManager.close();
+                    }
+                    if (typeof App !== 'undefined' && App.state) {
+                        App.state.hasSeenTutorial = true;
+                        localStorage.setItem('br2k_tutorial_completed', 'true');
+                    }
+                    const mc = document.getElementById('modal-container');
+                    if (mc) mc.innerHTML = '';
+                    const overlay = document.querySelector('.popup-overlay');
+                    if (overlay) overlay.remove();
+                    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                    const targetEl = document.getElementById('screen-\(screen)');
+                    if (targetEl) targetEl.classList.add('active');
+                    Navigation.currentScreenId = '\(screen)';
+                    if ('\(screen)' === 'game') {
+                        if (typeof App !== 'undefined') {
+                            App.startLevel(1, 0);
+                            if (typeof GameUI !== 'undefined' && App.currentGame) {
+                                GameUI.renderBoard(App.currentGame);
+                                GameUI.updateGameUI(App.currentGame);
+                            }
+                        }
+                    } else if ('\(screen)' === 'world-select') {
+                        if (typeof Navigation !== 'undefined') Navigation.renderWorldSelect();
+                    } else if ('\(screen)' === 'level-select') {
+                        if (typeof Navigation !== 'undefined') Navigation.renderLevelSelect();
+                    } else if ('\(screen)' === 'leaderboard') {
+                        if (typeof Leaderboard !== 'undefined') {
+                            Leaderboard.viewMode = 'smart';
+                            Leaderboard.loadCountries();
+                            Leaderboard.renderSmart();
+                        }
+                    } else if ('\(screen)' === 'achievements') {
+                        if (typeof Achievements !== 'undefined') Achievements.render();
+                    } else if ('\(screen)' === 'store') {
+                        if (typeof Store !== 'undefined') Store.renderStoreContent();
+                    } else if ('\(screen)' === 'home') {
+                        if (typeof App !== 'undefined') {
+                            App.updatePlayerDisplay();
+                            App.updateOfflineIndicator();
+                        }
+                    }
+                })();
+                """
+            }
+            
+            switch target {
+                                                case "game":
+                self.bottomBar.selectTab(forScreen: "game")
+                let js = """
+                (function() {
+                    if (typeof PopupManager !== 'undefined' && typeof PopupManager.close === 'function') {
+                        PopupManager.close();
+                    }
+                    if (typeof App !== 'undefined' && App.state) {
+                        App.state.hasSeenTutorial = true;
+                        localStorage.setItem('br2k_tutorial_completed', 'true');
+                        App.state.isLoggedIn = true;
+                        App.state.offlineLevelsPlayed = 0;
+                        if (typeof App.startLevel === 'function') {
+                            App.startLevel(1, 0);
+                        }
+                    }
+                    const mc = document.getElementById('modal-container');
+                    if (mc) mc.innerHTML = '';
+                    const overlay = document.querySelector('.popup-overlay');
+                    if (overlay) overlay.remove();
+                    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                    const targetEl = document.getElementById('screen-game');
+                    if (targetEl) targetEl.classList.add('active');
+                    Navigation.currentScreenId = 'game';
+
+                    // Seed some nice 2048 tiles on the board for screenshots!
+                    if (typeof App !== 'undefined' && App.currentGame) {
+                        const g = App.currentGame;
+                        g.score = 2840;
+                        g.moves = 24;
+                        // Set realistic tiles
+                        if (g.grid && g.grid.cells) {
+                            const sampleValues = [
+                                [2, 4, 8, 16],
+                                [4, 16, 64, 128],
+                                [8, 32, 256, 512],
+                                [16, 64, 128, 1024]
+                            ];
+                            for (let r = 0; r < 4; r++) {
+                                for (let col = 0; col < 4; col++) {
+                                    if (sampleValues[r] && sampleValues[r][col]) {
+                                        g.grid.cells[r][col] = {
+                                            value: sampleValues[r][col],
+                                            row: r,
+                                            col: col,
+                                            id: r * 4 + col
+                                        };
+                                    }
+                                }
+                            }
+                        }
+                        if (typeof GameUI !== 'undefined') {
+                            GameUI.renderBoard(g);
+                            GameUI.updateGameUI(g);
+                        }
+                    }
+                })();
+                """
+                self.scriptBridge.webView?.evaluateJavaScript(js, completionHandler: nil)
+case "level-select", "levels":
+                self.bottomBar.selectTab(forScreen: "world-select")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("level-select"), completionHandler: nil)
+            case "world-select", "worlds":
+                self.bottomBar.selectTab(forScreen: "world-select")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("world-select"), completionHandler: nil)
+            case "leaderboard", "ranks":
+                self.bottomBar.selectTab(forScreen: "leaderboard")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("leaderboard"), completionHandler: nil)
+            case "achievements":
+                self.bottomBar.selectTab(forScreen: "achievements")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("achievements"), completionHandler: nil)
+            case "daily":
+                self.bottomBar.selectTab(forScreen: "daily")
+                self.presentDailyReward()
+            case "store":
+                self.bottomBar.selectTab(forScreen: "store")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("store"), completionHandler: nil)
+            default:
+                self.bottomBar.selectTab(forScreen: "home")
+                self.scriptBridge.webView?.evaluateJavaScript(switchScreenJS("home"), completionHandler: nil)
+            }
+        }
+    }
+
     // MARK: - Deep Links
     func handleDeepLink(_ url: URL) {
         let route = url.host ?? url.path.replacingOccurrences(of: "/", with: "")
@@ -367,17 +532,34 @@ final class MainViewController: UIViewController {
         case "daily": target = "daily"
         case "achievements": target = "achievements"
         case "settings": target = "settings"
-        case "world", "worlds": target = "world-select"
+        case "world", "worlds", "world-select": target = "world-select"
+        case "levels", "level-select": target = "level-select"
+        case "game": target = "game"
         default: target = "home"
         }
         
         bottomBar.selectTab(forScreen: target)
         
-        scriptBridge.evaluateJavaScript("""
-        if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
-            Navigation.navigateTo('\(target)');
+        if target == "game" {
+            scriptBridge.evaluateJavaScript("""
+            if (typeof App !== 'undefined') {
+                if (typeof App.continueGame === 'function') {
+                    App.continueGame();
+                } else if (typeof App.startLevel === 'function') {
+                    App.startLevel(0, 1);
+                }
+                if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                    Navigation.navigateTo('game');
+                }
+            }
+            """)
+        } else {
+            scriptBridge.evaluateJavaScript("""
+            if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                Navigation.navigateTo('\(target)');
+            }
+            """)
         }
-        """)
     }
 }
 
@@ -797,7 +979,7 @@ final class NativeBottomBar: UIView {
             return nil
         }
         if self.point(inside: point, with: event) {
-            // Check elevated ranks button first
+            // Check elevated ranks button first (has expanded top area for circular medallion)
             if buttonViews.count > 2 {
                 let elevatedBtn = buttonViews[2]
                 let pt = self.convert(point, to: elevatedBtn)
@@ -805,10 +987,12 @@ final class NativeBottomBar: UIView {
                     return elevatedBtn
                 }
             }
-            let tabWidth = bounds.width / CGFloat(max(1, buttonViews.count))
-            let tappedIndex = Int(point.x / tabWidth)
-            if tappedIndex >= 0 && tappedIndex < buttonViews.count {
-                return buttonViews[tappedIndex]
+            // Check each tab button based on actual position in stackView (supports both mobile full-width and iPad centered width)
+            for btn in buttonViews {
+                let pt = self.convert(point, to: btn)
+                if btn.point(inside: pt, with: event) {
+                    return btn
+                }
             }
             return self
         }
@@ -860,6 +1044,15 @@ final class NativeBottomBar: UIView {
             buttonViews.append(btn)
         }
         
+        let stackLeading = stackView.leadingAnchor.constraint(equalTo: leadingAnchor)
+        stackLeading.priority = UILayoutPriority(800)
+        let stackTrailing = stackView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        stackTrailing.priority = UILayoutPriority(800)
+        let stackMinLeading = stackView.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 12)
+        let stackMaxTrailing = stackView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -12)
+        let stackCenterX = stackView.centerXAnchor.constraint(equalTo: centerXAnchor)
+        let stackWidth = stackView.widthAnchor.constraint(lessThanOrEqualToConstant: 580)
+        
         NSLayoutConstraint.activate([
             blurView.topAnchor.constraint(equalTo: topAnchor),
             blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -872,9 +1065,13 @@ final class NativeBottomBar: UIView {
             topBorder.heightAnchor.constraint(equalToConstant: 0.75),
             
             stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor),
+            stackCenterX,
+            stackWidth,
+            stackLeading,
+            stackTrailing,
+            stackMinLeading,
+            stackMaxTrailing
         ])
         
         updateSelection(index: 0, animated: false)
