@@ -111,7 +111,9 @@ enum NativeBridgeScript {
         // 1. Core Native App Bridge
         // ==========================================
         window.iOS = {
-            vibrate: function(type) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium' }); },
+            vibrate: function(type, force) { postToNative('hapticBridge', 'vibrate', { type: type || 'medium', force: !!force }); },
+            setHapticsEnabled: function(enabled) { postToNative('hapticBridge', 'setEnabled', { enabled: !!enabled }); },
+            logEvent: function(eventName, paramsJson) { postToNative('adBridge', 'logEvent', { name: eventName, params: paramsJson }); },
             share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
             showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); },
             signInWithApple: function() { postToNative('socialBridge', 'performAppleSignIn'); },
@@ -281,8 +283,11 @@ enum NativeBridgeScript {
             isAdEnabled: function() {
                 return !window._isAdsRemoved;
             },
-            vibrate: function(type) {
-                postToNative('hapticBridge', 'vibrate', { type: type || 'medium' });
+            vibrate: function(type, force) {
+                postToNative('hapticBridge', 'vibrate', { type: type || 'medium', force: !!force });
+            },
+            setHapticsEnabled: function(enabled) {
+                postToNative('hapticBridge', 'setEnabled', { enabled: !!enabled });
             },
             exitApp: function() {
                 postToNative('appBridge', 'exitApp');

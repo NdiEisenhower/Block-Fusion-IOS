@@ -567,6 +567,25 @@ extension MainViewController: ScriptBridgeDelegate {
         }
     }
     
+    func didTrackEvent(name: String, parameters: [String: Any]) {
+        let screen = parameters["screen_name"] as? String ?? currentScreen
+        let section = parameters["section_name"] as? String
+        let element = parameters["element_name"] as? String
+        
+        switch name {
+        case "screen_view":
+            let title = parameters["page_title"] as? String ?? screen
+            let prev = parameters["previous_screen"] as? String ?? "initial"
+            print("📱 [iOS Telemetry] Screen View: [\(screen)] (Title: \(title), Prev: \(prev))")
+        case "section_view":
+            print("📑 [iOS Telemetry] Section View: [\(section ?? "unknown")] on screen [\(screen)]")
+        case "section_click":
+            print("👆 [iOS Telemetry] Click: [\(element ?? "unknown")] in section [\(section ?? "unknown")] on screen [\(screen)]")
+        default:
+            print("📊 [iOS Telemetry] Event [\(name)]: \(parameters)")
+        }
+    }
+    
     func didChangeAuthStatus(isLoggedIn: Bool, displayName: String?) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }

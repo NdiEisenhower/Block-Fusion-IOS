@@ -622,12 +622,22 @@ class FirebaseService {
                 console.warn('Native logEvent failed:', e.message);
             }
         }
-        if (typeof Android !== 'undefined' && typeof Android.logEvent === 'function') {
-            try {
-                Android.logEvent(eventName, JSON.stringify(eventParams));
-            } catch (e) {
-                console.warn('Native logEvent failed:', e.message);
+
+        // Forward to iOS native bridge (WKWebView)
+        try {
+            if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+                window.webkit.messageHandlers.adBridge.postMessage({
+                    action: 'logEvent',
+                    name: eventName,
+                    params: JSON.stringify(enrichedParams)
+                });
+            } else if (typeof NativeBridge !== 'undefined' && typeof NativeBridge.logEvent === 'function') {
+                NativeBridge.logEvent(eventName, JSON.stringify(enrichedParams));
+            } else if (typeof window.iOS !== 'undefined' && typeof window.iOS.logEvent === 'function') {
+                window.iOS.logEvent(eventName, JSON.stringify(enrichedParams));
             }
+        } catch (e) {
+            console.warn('iOS Native logEvent error:', e);
         }
 
         if (this.analytics) {
@@ -637,6 +647,40 @@ class FirebaseService {
                 console.warn('Analytics event failed:', e.message);
             }
         }
+    }
+
+    static logScreenView(screenName, screenTitle = null, previousScreen = null) {
+        this.logEvent('screen_view', {
+            screen_name: screenName,
+            screen_class: screenName,
+            page_title: screenTitle || screenName,
+            previous_screen: previousScreen || 'initial',
+            timestamp: Date.now()
+        });
+        this.logEvent('page_view', {
+            page_location: screenName,
+            page_title: screenTitle || screenName,
+            page_path: '/' + screenName
+        });
+    }
+
+    static logSectionView(sectionName, screenName = null, metadata = {}) {
+        this.logEvent('section_view', {
+            section_name: sectionName,
+            screen_name: screenName || (typeof Navigation !== 'undefined' ? Navigation.currentScreenId : 'unknown'),
+            timestamp: Date.now(),
+            ...metadata
+        });
+    }
+
+    static logSectionClick(sectionName, elementName, screenName = null, metadata = {}) {
+        this.logEvent('section_click', {
+            section_name: sectionName,
+            element_name: elementName,
+            screen_name: screenName || (typeof Navigation !== 'undefined' ? Navigation.currentScreenId : 'unknown'),
+            timestamp: Date.now(),
+            ...metadata
+        });
     }
 
     static setUserProperties(properties) {

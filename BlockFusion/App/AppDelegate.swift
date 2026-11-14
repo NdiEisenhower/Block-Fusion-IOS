@@ -11,14 +11,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Configure audio session as .playback with .mixWithOthers so game audio plays
         // through the iPhone speaker even when the silent/ring switch is muted,
         // without interrupting user's background music or podcasts.
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-                try session.setActive(true)
-            } catch {
-                print("⚠️ Audio session setup error: \(error)")
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            if #available(iOS 27.0, *) {
+                session.activate(options: []) { success, error in
+                    if let error = error {
+                        print("⚠️ Audio session setup error: \(error)")
+                    }
+                }
+            } else {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        try session.setActive(true)
+                    } catch {
+                        print("⚠️ Audio session setup error: \(error)")
+                    }
+                }
             }
+        } catch {
+            print("⚠️ Audio session setup error: \(error)")
         }
         
         return true

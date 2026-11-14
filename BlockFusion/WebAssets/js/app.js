@@ -7,6 +7,7 @@ class App {
         currentLevel: 1,
         highestTileEver: 0,
         soundOn: true,
+        hapticsEnabled: true,
         activeTheme: 'numbers',
         unlockedThemes: ['numbers'],
         dailyChallengeDone: false,
@@ -97,6 +98,12 @@ class App {
 
         if (typeof SoundManager !== 'undefined') {
             SoundManager.enabled = this.state.soundOn;
+            SoundManager.vibrationEnabled = this.state.hapticsEnabled !== false;
+            try {
+                if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.hapticBridge) {
+                    window.webkit.messageHandlers.hapticBridge.postMessage({ action: 'setEnabled', enabled: this.state.hapticsEnabled !== false });
+                }
+            } catch(e) {}
         }
 
         this.updateAllCoinDisplays();

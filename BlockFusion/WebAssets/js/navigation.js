@@ -1,7 +1,53 @@
 // Navigation Manager
 class Navigation {
+    static currentScreenId = 'home';
+    static _sectionTrackingInitialized = false;
+
+    static setupSectionTracking() {
+        if (this._sectionTrackingInitialized) return;
+        if (typeof document === 'undefined') return;
+        this._sectionTrackingInitialized = true;
+
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-track-click], [data-track-section], .btn, .store-item, .nav-item, .tab-btn');
+            if (!target) return;
+            const screen = Navigation.currentScreenId || 'home';
+            const section = target.dataset.trackSection || target.closest('[data-track-section]')?.dataset.trackSection || screen;
+            const action = target.dataset.trackClick || target.getAttribute('aria-label') || target.innerText?.trim()?.substring(0, 30) || target.className;
+            if (typeof FirebaseService !== 'undefined' && typeof FirebaseService.logSectionClick === 'function') {
+                FirebaseService.logSectionClick(section, action, screen);
+            }
+        }, { passive: true });
+    }
+
     static async navigateTo(screenId) {
         try { SoundManager.click(); } catch (e) { }
+
+        // Track screen / page change telemetry
+        const previousScreen = Navigation.currentScreenId || 'initial';
+        Navigation.currentScreenId = screenId;
+        const screenTitles = {
+            'home': 'Home Screen',
+            'game': 'Game Play Screen',
+            'world-select': 'World Selection Screen',
+            'level-select': 'Level Selection Screen',
+            'store': 'Store & In-App Purchases',
+            'leaderboard': 'Global Leaderboard Screen',
+            'daily': 'Daily Challenge Screen',
+            'referral': 'Referral & Invite Screen',
+            'settings': 'Settings Screen',
+            'feedback': 'Feedback Screen',
+            'tutorial': 'How to Play Screen',
+            'login-prompt': 'Sign In Screen'
+        };
+        const pageTitle = screenTitles[screenId] || screenId;
+
+        if (typeof FirebaseService !== 'undefined' && typeof FirebaseService.logScreenView === 'function') {
+            FirebaseService.logScreenView(screenId, pageTitle, previousScreen);
+            FirebaseService.logSectionView(screenId + '_overview', screenId);
+        }
+
+        Navigation.setupSectionTracking();
 
         // iOS-specific: Notify native bottom navigation and top bar of active screen
         if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { 
@@ -516,16 +562,17 @@ class Navigation {
         </div>`;
 
         // Dedicated Player Nickname row with Edit button (guaranteed never cut off)
+        const isAuthUser = App.state.isLoggedIn && App.state.loginProvider !== 'anonymous';
         html += `
         <h3 style="margin:10px 0 4px;color:var(--gold);">👤 Player Profile</h3>
-        <div class="store-item" onclick="Navigation.editPlayerName()" style="cursor:pointer;">
+        <div class="store-item" onclick="Navigation.editPlayerName()" style="cursor:pointer;" data-track-section="settings_profile">
             <div class="item-icon">✏️</div>
             <div class="item-info">
                 <div class="item-name">${App.state.playerName || (App.state.userId ? 'Player' : 'Guest')}</div>
-                <div class="item-desc">Tap to edit your display name</div>
+                <div class="item-desc">${isAuthUser ? 'Tap to edit your display name' : 'Tap to sign in & edit display name'}</div>
             </div>
-            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Navigation.editPlayerName();">
-                Edit
+            <button class="btn btn-sm ${isAuthUser ? 'btn-secondary' : 'btn-primary'}" onclick="event.stopPropagation(); Navigation.editPlayerName();">
+                ${isAuthUser ? 'Edit' : 'Sign In'}
             </button>
         </div>`;
 
@@ -713,18 +760,38 @@ class Navigation {
     }
 
     static toggleHaptics() {
-        App.state.hapticsEnabled = (App.state.hapticsEnabled === false) ? true : false;
+        const nextState = !(App.state.hapticsEnabled !== false);
+        App.state.hapticsEnabled = nextState;
         App.saveState();
         if (typeof SoundManager !== 'undefined') {
-            SoundManager.vibrationEnabled = App.state.hapticsEnabled;
-            if (App.state.hapticsEnabled) {
-                SoundManager.vibrate(30, 'medium');
+            SoundManager.vibrationEnabled = nextState;
+            // Always provide instant tactile confirmation feedback when turning ON or OFF!
+            if (nextState) {
+                SoundManager.vibrate(35, 'medium', true);
+            } else {
+                SoundManager.vibrate(20, 'light', true);
             }
+        }
+        try {
+            if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.hapticBridge) {
+                window.webkit.messageHandlers.hapticBridge.postMessage({ action: 'setEnabled', enabled: nextState });
+            }
+        } catch(e) {}
+        if (typeof FirebaseService !== 'undefined') {
+            FirebaseService.logSectionClick('settings_haptics', nextState ? 'toggle_haptics_on' : 'toggle_haptics_off', 'settings');
         }
         this.renderSettings();
     }
 
     static editPlayerName() {
+        if (typeof FirebaseService !== 'undefined') {
+            FirebaseService.logSectionClick('settings_profile', 'edit_player_name', 'settings');
+        }
+        // Tapping to edit display name spawns login when user is guest or not logged in
+        if (!App.state.isLoggedIn || App.state.loginProvider === 'anonymous') {
+            App.showLoginPrompt();
+            return;
+        }
         const current = App.state.playerName || 'Player';
         const updated = prompt('Enter your player nickname:', current);
         if (updated && updated.trim() && updated.trim() !== current) {

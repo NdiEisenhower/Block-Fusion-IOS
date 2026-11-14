@@ -12,6 +12,11 @@ protocol ScriptBridgeDelegate: AnyObject {
     func didChangeScreen(to screen: String)
     func showLogin()
     func showDailyReward()
+    func didTrackEvent(name: String, parameters: [String: Any])
+}
+
+extension ScriptBridgeDelegate {
+    func didTrackEvent(name: String, parameters: [String: Any]) {}
 }
 
 /// Dispatches native commands between JavaScript and iOS
@@ -81,7 +86,13 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
         case "logEvent":
             let name = body["name"] as? String ?? "unknown"
             let params = body["params"] as? String ?? "{}"
-            print("📊 [iOS Tracking] Native Log: [\(name)] -> \(params)")
+            print("📊 [iOS Tracking] Event [\(name)]: \(params)")
+            if let data = params.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                delegate?.didTrackEvent(name: name, parameters: json)
+            } else {
+                delegate?.didTrackEvent(name: name, parameters: ["raw": params])
+            }
             
         default:
             break
@@ -121,8 +132,23 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
     
     // MARK: - Haptic Handler
     private func handleHapticBridge(action: String, body: [String: Any]) {
-        if action == "vibrate" {
+        switch action {
+        case "vibrate":
             let type = body["type"] as? String ?? "medium"
+            let force = body["force"] as? Bool ?? false
+            if force {
+                let style: UIImpactFeedbackGenerator.FeedbackStyle
+                switch type {
+                case "light": style = .light
+                case "heavy": style = .heavy
+                case "selection":
+                    HapticManager.shared.forceSelection()
+                    return
+                default: style = .medium
+                }
+                HapticManager.shared.forceImpact(style: style)
+                return
+            }
             switch type {
             case "light":
                 HapticManager.shared.impact(style: .light)
@@ -139,6 +165,11 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             default:
                 HapticManager.shared.impact(style: .medium)
             }
+        case "setEnabled":
+            let enabled = body["enabled"] as? Bool ?? true
+            PreferencesManager.shared.hapticsEnabled = enabled
+        default:
+            break
         }
     }
     
@@ -321,14 +352,26 @@ final class NativeSoundManager: NSObject {
     }
     
     func setupAudioSession() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-                try session.setActive(true)
-            } catch {
-                print("⚠️ Audio session error: \(error)")
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            if #available(iOS 27.0, *) {
+                session.activate(options: []) { success, error in
+                    if let error = error {
+                        print("⚠️ Audio session activation error: \(error)")
+                    }
+                }
+            } else {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        try session.setActive(true)
+                    } catch {
+                        print("⚠️ Audio session error: \(error)")
+                    }
+                }
             }
+        } catch {
+            print("⚠️ Audio session error: \(error)")
         }
     }
     

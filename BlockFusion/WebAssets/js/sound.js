@@ -1,5 +1,8 @@
 // Sound Manager with iOS Web Audio resume unlock & native Taptic Engine bridge
 class SoundManager {
+    static enabled = true;
+    static vibrationEnabled = true;
+
     static getContext() {
         if (!this.audioCtx) {
             const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
@@ -52,17 +55,23 @@ class SoundManager {
         } catch (e) { /* ignore */ }
     }
 
-    static vibrate(ms = 40, type = 'medium') {
+    static vibrate(ms = 40, type = 'medium', force = false) {
+        if (!force && this.vibrationEnabled === false) return;
         try {
             // 1. Native iOS WKWebView messageHandler
             if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.hapticBridge) {
-                window.webkit.messageHandlers.hapticBridge.postMessage({ action: 'vibrate', type: type });
+                window.webkit.messageHandlers.hapticBridge.postMessage({ action: 'vibrate', type: type, force: !!force });
                 return;
             }
             // 2. NativeBridge object fallback
-            if (typeof NativeBridge !== 'undefined' && NativeBridge.haptics && typeof NativeBridge.haptics.vibrate === 'function') {
-                NativeBridge.haptics.vibrate(type);
-                return;
+            if (typeof NativeBridge !== 'undefined') {
+                if (NativeBridge.haptics && typeof NativeBridge.haptics.vibrate === 'function') {
+                    NativeBridge.haptics.vibrate(type, force);
+                    return;
+                } else if (typeof NativeBridge.vibrate === 'function') {
+                    NativeBridge.vibrate(type, force);
+                    return;
+                }
             }
             // 3. Android Webview bridge
             if (typeof Android !== 'undefined' && typeof Android.vibrate === 'function') {
