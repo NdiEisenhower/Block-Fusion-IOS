@@ -11,6 +11,10 @@ final class MainViewController: UIViewController {
     private let scriptBridge = ScriptBridge()
     private let preferences = PreferencesManager.shared
     
+    private var topBarHeightConstraint: NSLayoutConstraint!
+    private var bottomBarHeightConstraint: NSLayoutConstraint!
+    private var currentScreen: String = "home"
+    
     private static let remoteGameUrl = "https://blockrush2k.kharitambe.co.za"
     private var currentBannerHeight: CGFloat = 0
     
@@ -21,6 +25,9 @@ final class MainViewController: UIViewController {
     }
     
     private func updateSafeAreaInsets() {
+        let isGame = (currentScreen == "game")
+        let top = isGame ? max(view.safeAreaInsets.top, 8.0) : 0.0
+        let bottom = isGame ? (view.safeAreaInsets.bottom > 0 ? max(view.safeAreaInsets.bottom, 6.0) : 0.0) : 0.0
         let js = """
         (function() {
             var el = document.getElementById('ios-safe-area-rules');
@@ -32,12 +39,12 @@ final class MainViewController: UIViewController {
             if (el) {
                 el.textContent = `
                     :root {
-                        --safe-area-top: 8px !important;
-                        --safe-area-bottom: 8px !important;
+                        --safe-area-top: \(top)px !important;
+                        --safe-area-bottom: \(bottom)px !important;
                     }
                     #app {
-                        padding-top: 8px !important;
-                        padding-bottom: 8px !important;
+                        padding-top: \(top)px !important;
+                        padding-bottom: \(bottom)px !important;
                         box-sizing: border-box !important;
                     }
                 `;
@@ -110,11 +117,12 @@ final class MainViewController: UIViewController {
             """)
         }
         
+        topBarHeightConstraint = topBar.heightAnchor.constraint(equalToConstant: 44)
         NSLayoutConstraint.activate([
             topBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            topBar.heightAnchor.constraint(equalToConstant: 44)
+            topBarHeightConstraint
         ])
     }
     
@@ -133,11 +141,12 @@ final class MainViewController: UIViewController {
             """)
         }
         
+        bottomBarHeightConstraint = bottomBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -58)
         NSLayoutConstraint.activate([
             bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            bottomBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -58)
+            bottomBarHeightConstraint
         ])
     }
     
@@ -380,7 +389,27 @@ extension MainViewController: ScriptBridgeDelegate {
     
     func didChangeScreen(to screen: String) {
         DispatchQueue.main.async { [weak self] in
-            self?.bottomBar.selectTab(forScreen: screen)
+            guard let self = self else { return }
+            self.currentScreen = screen
+            let isGame = (screen == "game")
+            
+            // On gameplay screen, smoothly collapse the top and bottom bars so board & undo button have full height
+            UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseInOut], animations: {
+                self.topBar.alpha = isGame ? 0.0 : 1.0
+                self.topBar.isHidden = isGame
+                self.topBarHeightConstraint.constant = isGame ? 0 : 44
+                
+                self.bottomBar.alpha = isGame ? 0.0 : 1.0
+                self.bottomBar.isHidden = isGame
+                self.bottomBarHeightConstraint.constant = isGame ? 0 : -58
+                
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+            
+            if !isGame {
+                self.bottomBar.selectTab(forScreen: screen)
+            }
+            self.updateSafeAreaInsets()
         }
     }
 }

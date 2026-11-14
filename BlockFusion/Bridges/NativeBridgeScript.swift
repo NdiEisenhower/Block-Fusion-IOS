@@ -24,12 +24,12 @@ enum NativeBridgeScript {
                 safeStyle.id = 'ios-safe-area-rules';
                 safeStyle.textContent = `
                     :root {
-                        --safe-area-top: max(env(safe-area-inset-top, 0px), 48px);
-                        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+                        --safe-area-top: 0px;
+                        --safe-area-bottom: 0px;
                     }
                     #app {
-                        padding-top: max(env(safe-area-inset-top, 0px), 48px) !important;
-                        padding-bottom: 74px !important; /* reserve room for native bottom bar */
+                        padding-top: 0px !important;
+                        padding-bottom: 0px !important;
                         box-sizing: border-box !important;
                     }
                     /* Remove all web download / smart tv / web notice artifacts */

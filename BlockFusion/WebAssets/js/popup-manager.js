@@ -625,7 +625,7 @@ class PopupManager {
             title: 'How to Play - Interactive',
             subtitle: 'Learn by doing!',
             showConfirm: false,
-            showCancel: true,
+            showCancel: false,
             cancelText: 'Skip Tutorial',
             customContent: customContent,
             onCancel: () => {
@@ -762,10 +762,10 @@ class PopupManager {
             <div class="tutorial-step" id="tutorial-step">
                 <div class="board-container" style="padding: 4px 0; display: flex; justify-content: center;">
                     <div class="board-wrapper" id="tutorial-board-wrapper" style="display: inline-block; position: relative;">
-                        <div class="grid-bg" style="display: grid; grid-template-columns: repeat(4, 46px); grid-template-rows: repeat(4, 46px); gap: 6px;">
+                        <div class="grid-bg" style="display: grid; grid-template-columns: repeat(4, 38px); grid-template-rows: repeat(4, 38px); gap: 5px;">
                             ${cellsHtml}
                         </div>
-                        <div class="tiles-layer" id="tutorial-tiles-layer" style="position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px; pointer-events: none;">
+                        <div class="tiles-layer" id="tutorial-tiles-layer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;">
                             <!-- Tiles will be rendered dynamically -->
                         </div>
                         ${gestureGuideHtml}
@@ -796,8 +796,8 @@ class PopupManager {
         const layer = document.getElementById('tutorial-tiles-layer');
         if (!layer) return;
 
-        const tileSize = 46;
-        const gapSize = 6;
+        const tileSize = 38;
+        const gapSize = 5;
 
         let html = '';
         tiles.forEach(tile => {
