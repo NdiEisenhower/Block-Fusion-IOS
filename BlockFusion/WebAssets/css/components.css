@@ -743,8 +743,9 @@ body.is-native-app .download-only-web,
 .popup.popup-tutorial {
     max-width: 380px !important;
     padding: 12px 16px !important;
-    max-height: 96vh !important;
-    overflow-y: hidden !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
 }
 
 .popup.popup-tutorial .popup-header {
@@ -992,10 +993,10 @@ body.tv-mode .popup-header:focus {
 }
 
 #tutorial-board-wrapper {
-    --tile-size: 46px !important;
+    --tile-size: 40px !important;
     --gap-size: 6px !important;
     --board-pad: 8px !important;
-    --cell-size: 46px !important;
+    --cell-size: 40px !important;
     --gap: 6px !important;
     position: relative !important;
     background: var(--bg-primary) !important;
@@ -1008,16 +1009,16 @@ body.tv-mode .popup-header:focus {
 
 #tutorial-board-wrapper .grid-bg {
     display: grid !important;
-    grid-template-columns: repeat(4, 46px) !important;
-    grid-template-rows: repeat(4, 46px) !important;
+    grid-template-columns: repeat(4, 40px) !important;
+    grid-template-rows: repeat(4, 40px) !important;
     gap: 6px !important;
 }
 
 #tutorial-board-wrapper .grid-cell {
-    width: 46px !important;
-    height: 46px !important;
-    min-width: 46px !important;
-    min-height: 46px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: calc(var(--radius-sm) - 2px) !important;
@@ -1025,19 +1026,19 @@ body.tv-mode .popup-header:focus {
 
 #tutorial-board-wrapper .tile {
     position: absolute !important;
-    width: 46px !important;
-    height: 46px !important;
-    font-size: 18px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 16px !important;
     top: 0 !important;
     left: 0 !important;
 }
 
 #tutorial-tiles-layer {
     position: absolute !important;
-    top: var(--board-pad, 8px) !important;
-    left: var(--board-pad, 8px) !important;
-    right: var(--board-pad, 8px) !important;
-    bottom: var(--board-pad, 8px) !important;
+    width: 178px !important;
+    height: 178px !important;
+    top: 8px !important;
+    left: 8px !important;
     pointer-events: none !important;
 }
 

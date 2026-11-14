@@ -796,6 +796,49 @@ class FirebaseService {
         }
     }
 
+    // Apple Sign In (OAuth 2.0 credential)
+    static async signInWithApple(idToken, rawNonce, email = null, fullName = null) {
+        if (!this.initialized) return { success: false, error: 'Not initialized' };
+        try {
+            this.logEvent('login_attempt', { method: 'apple' });
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            const credential = provider.credential({
+                idToken: idToken,
+                rawNonce: rawNonce
+            });
+            const result = await this.auth.signInWithCredential(credential);
+            this.currentUser = result.user;
+
+            let displayName = null;
+            if (fullName) {
+                if (typeof fullName === 'object') {
+                    const first = fullName.givenName || '';
+                    const last = fullName.familyName || '';
+                    displayName = .trim();
+                } else if (typeof fullName === 'string' && fullName.trim()) {
+                    displayName = fullName.trim();
+                }
+            }
+
+            if (displayName && result.user && (!result.user.displayName || result.user.displayName.trim() === '')) {
+                try {
+                    await result.user.updateProfile({ displayName: displayName });
+                    await result.user.reload();
+                    this.currentUser = this.auth.currentUser;
+                } catch(e) {
+                    console.warn('Could not update Apple user display name:', e);
+                }
+            }
+
+            this.logEvent('login', { method: 'apple' });
+            return { success: true, user: this.currentUser };
+        } catch (error) {
+            console.error('Apple Sign-In failed:', error);
+            this.logCrash('apple_signin_error', error.code || error.message);
+            return { success: false, error: error.message || 'Apple sign-in failed' };
+        }
+    }
+
     // Email/Password Sign In
     static async signInWithEmail(email, password) {
         if (!this.initialized) return { success: false, error: 'Not initialized' };

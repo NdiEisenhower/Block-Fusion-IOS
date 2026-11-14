@@ -85,7 +85,31 @@ enum NativeBridgeScript {
             share: function(text, url) { postToNative('socialBridge', 'share', { text: text, url: url }); },
             showGameCenter: function() { postToNative('gameCenterBridge', 'showDashboard'); },
             signInWithApple: function() { postToNative('socialBridge', 'performAppleSignIn'); },
-            notifyScreenChanged: function(screen) { postToNative('appBridge', 'screenChanged', { screen: screen }); }
+            notifyScreenChanged: function(screen) { postToNative('appBridge', 'screenChanged', { screen: screen }); },
+            showLogin: function() { postToNative('appBridge', 'showLogin'); },
+            showDailyReward: function() { postToNative('appBridge', 'showDailyReward'); },
+            showBannerAd: function(adUnitId) { postToNative('adBridge', 'showBannerAd', { adUnitId: adUnitId }); },
+            hideBannerAd: function() { postToNative('adBridge', 'hideBannerAd'); },
+            showInterstitialAd: function(adUnitId) { postToNative('adBridge', 'showInterstitialAd', { adUnitId: adUnitId }); },
+            showRewardedAd: function(adUnitId) { postToNative('adBridge', 'showRewardedAd', { adUnitId: adUnitId }); }
+        };
+
+        window.onAppleSignInSuccess = async function(idToken, rawNonce, email, fullName) {
+            try {
+                if (typeof FirebaseService !== 'undefined') {
+                    const res = await FirebaseService.signInWithApple(idToken, rawNonce, email, fullName);
+                    if (res && res.success) {
+                        if (typeof App !== 'undefined') {
+                            App.onLoginSuccess(res.user);
+                            App.showToast('✅ Signed in with Apple!');
+                        }
+                    } else {
+                        if (typeof App !== 'undefined') App.showToast('❌ Apple Sign In failed: ' + (res ? res.error : 'unknown'));
+                    }
+                }
+            } catch (e) {
+                console.error('onAppleSignInSuccess error:', e);
+            }
         };
 
         // Apple Authentication Bridge

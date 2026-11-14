@@ -7,6 +7,8 @@ protocol ScriptBridgeDelegate: AnyObject {
     func openStoreReview()
     func exitApp()
     func didChangeScreen(to screen: String)
+    func showLogin()
+    func showDailyReward()
 }
 
 /// Dispatches native commands between JavaScript and iOS
@@ -56,18 +58,18 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             let reward = body["rewardedId"] as? String
             AdMobManager.shared.initialize(bannerId: banner, interId: inter, rewardedId: reward)
             
-        case "showBannerAd":
+        case "showBannerAd", "showBanner":
             if let view = webView?.superview {
                 AdMobManager.shared.showBannerAd(in: view)
             }
             
-        case "hideBannerAd":
+        case "hideBannerAd", "hideBanner":
             AdMobManager.shared.hideBannerAd()
             
-        case "showInterstitialAd":
+        case "showInterstitialAd", "showInterstitial":
             AdMobManager.shared.showInterstitialAd()
             
-        case "showRewardedAd":
+        case "showRewardedAd", "showRewarded":
             AdMobManager.shared.showRewardedAd()
             
         case "logEvent":
@@ -161,6 +163,10 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             if let screen = body["screen"] as? String {
                 delegate?.didChangeScreen(to: screen)
             }
+        case "showLogin":
+            delegate?.showLogin()
+        case "showDailyReward":
+            delegate?.showDailyReward()
         default:
             break
         }
@@ -187,12 +193,13 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
     }
     
     // MARK: - JavaScript Evaluation
-    func evaluateJavaScript(_ script: String) {
+    func evaluateJavaScript(_ script: String, completion: ((Any?, Error?) -> Void)? = nil) {
         DispatchQueue.main.async { [weak self] in
-            self?.webView?.evaluateJavaScript(script) { _, error in
+            self?.webView?.evaluateJavaScript(script) { result, error in
                 if let error = error {
                     print("⚠️ JS evaluation error: \(error.localizedDescription) for script: \(script)")
                 }
+                completion?(result, error)
             }
         }
     }

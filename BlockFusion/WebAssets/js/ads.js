@@ -9,9 +9,15 @@ class AdService {
         },
         // Google AdMob Test Ad Unit IDs (Used in Debug mode)
         admobTest: {
-            banner: 'ca-app-pub-3940256099942544/6300978111',
-            interstitial: 'ca-app-pub-3940256099942544/1033173712',
-            rewarded: 'ca-app-pub-3940256099942544/5224354917'
+            banner: 'ca-app-pub-3940256099942544/2934735716',
+            interstitial: 'ca-app-pub-3940256099942544/4411468910',
+            rewarded: 'ca-app-pub-3940256099942544/1712485313'
+        },
+        // iOS Production Ad Units
+        ios: {
+            banner: 'ca-app-pub-4541991465223368/5021200371',
+            interstitial: 'ca-app-pub-4541991465223368/6641883584',
+            rewarded: 'ca-app-pub-4541991465223368/3339070860'
         },
         // Huawei Production Ad Unit IDs
         huawei: {
@@ -39,6 +45,7 @@ class AdService {
         disabledPlatforms: {
             huawei: false,  // Ads enabled on Huawei platform
             google: false,  // Ads enabled on Google platform
+            ios: false,     // Ads enabled on iOS platform
             web: false      // Ads enabled on Web platform
         },
         // Configurable interstitial frequency (number of rounds/game plays before showing ad)
@@ -80,6 +87,11 @@ class AdService {
     }
 
     static detectPlatform() {
+        // 0. Check iOS native bridge
+        if (typeof window.iOS !== 'undefined' || typeof window.AppleAuth !== 'undefined' || (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge)) {
+            return 'ios';
+        }
+
         // 1. Check URL overrides
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -103,6 +115,18 @@ class AdService {
             const f = window.BUILD_FLAVOR.toLowerCase();
             if (f.includes('huawei')) return 'huawei';
             if (f.includes('google')) return 'google';
+        }
+
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.hideBannerAd === 'function') {
+            window.iOS.hideBannerAd();
+            this.androidBannerShown = false;
+            console.log('✅ iOS native banner hidden');
+            return;
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'hideBannerAd' });
+            this.androidBannerShown = false;
+            console.log('✅ iOS webkit native banner hidden');
+            return;
         }
 
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
@@ -253,6 +277,14 @@ class AdService {
             return this.config.huawei;
         }
 
+        if (platform === 'ios' || platform === 'apple') {
+            if (isDebug) {
+                console.log('🐞 Debug build active: Using iOS AdMob Test Ad Units');
+                return this.config.admobTest;
+            }
+            return this.config.ios;
+        }
+
         if (platform === 'google' || platform === 'android') {
             if (isDebug) {
                 console.log('🐞 Debug build active: Using AdMob Test Ad Units');
@@ -384,6 +416,21 @@ class AdService {
     static loadAndroidBanner() {
         if (!this.adsEnabled) return;
         console.log('📱 Loading Android native banner...');
+
+        // Show native iOS banner via bridge
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.showBannerAd === 'function') {
+            const ids = this.getAdUnitIds();
+            window.iOS.showBannerAd(ids.banner || );
+            this.androidBannerShown = true;
+            console.log('✅ iOS native banner shown');
+            return;
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+            const ids = this.getAdUnitIds();
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showBannerAd', bannerId: ids.banner ||  });
+            this.androidBannerShown = true;
+            console.log('✅ iOS webkit native banner shown');
+            return;
+        }
 
         // Show native Android banner via bridge
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
@@ -574,6 +621,18 @@ class AdService {
     }
 
     static showAdMobInterstitial() {
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.showInterstitialAd === 'function') {
+            const ids = this.getAdUnitIds();
+            window.iOS.showInterstitialAd(ids.interstitial || );
+            console.log('📺 iOS native interstitial shown');
+            return;
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+            const ids = this.getAdUnitIds();
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showInterstitialAd', interId: ids.interstitial ||  });
+            console.log('📺 iOS webkit interstitial shown');
+            return;
+        }
+
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
             try {
                 if (typeof window.Android.showInterstitialAd === 'function') {
@@ -626,6 +685,18 @@ class AdService {
     }
 
     static showAdMobRewarded(callback) {
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.showRewardedAd === 'function') {
+            window._rewardCallback = callback;
+            const ids = this.getAdUnitIds();
+            window.iOS.showRewardedAd(ids.rewarded || );
+            return;
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+            window._rewardCallback = callback;
+            const ids = this.getAdUnitIds();
+            window.webkit.messageHandlers.adBridge.postMessage({ action: 'showRewardedAd', rewardedId: ids.rewarded ||  });
+            return;
+        }
+
         if (typeof window.Android !== 'undefined' && window.Android !== null) {
             try {
                 if (typeof window.Android.showRewardedAd === 'function') {

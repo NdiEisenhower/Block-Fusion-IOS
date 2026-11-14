@@ -3,7 +3,33 @@ class Navigation {
     static async navigateTo(screenId) {
         try { SoundManager.click(); } catch (e) { }
 
-        if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { window.iOS.notifyScreenChanged(screenId); } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) { window.webkit.messageHandlers.appBridge.postMessage({ action: 'screenChanged', screen: screenId }); }
+        // Intercept leaderboard if user is not signed in
+        if (screenId === 'leaderboard') {
+            const isUserLoggedIn = (typeof FirebaseService !== 'undefined' && FirebaseService.currentUser && !FirebaseService.currentUser.isAnonymous);
+            if (!isUserLoggedIn) {
+                if (typeof window.iOS !== 'undefined' && typeof window.iOS.showLogin === 'function') {
+                    window.iOS.showLogin();
+                } else if (typeof App !== 'undefined' && typeof App.showLoginPrompt === 'function') {
+                    App.showLoginPrompt();
+                }
+                return;
+            }
+        }
+
+        // Intercept daily challenge to open native modal on iOS
+        if (screenId === 'daily') {
+            if (typeof window.iOS !== 'undefined' && typeof window.iOS.showDailyReward === 'function') {
+                window.iOS.showDailyReward();
+                return;
+            }
+        }
+
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { 
+            window.iOS.notifyScreenChanged(screenId); 
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) { 
+            window.webkit.messageHandlers.appBridge.postMessage({ action: 'screenChanged', screen: screenId }); 
+        }
+
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         const target = document.getElementById('screen-' + screenId);
         if (target) {
@@ -16,6 +42,11 @@ class Navigation {
 
         if (screenId !== 'game' && typeof App !== 'undefined' && App.removeWorldTheme) {
             App.removeWorldTheme();
+        }
+
+        // Hide banner ad when leaving game screen
+        if (screenId !== 'game') {
+            try { AdService.hideBannerAd(); } catch (e) { }
         }
 
         App.updateAllCoinDisplays();
@@ -182,7 +213,7 @@ class Navigation {
         const countryInfo = (typeof App !== 'undefined' && App.getCountryInfo) ? App.getCountryInfo() : { name: 'South Africa', flag: '🇿🇦' };
         const woodSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;display:block;"><path d="M12 3C6.5 3 2 5.2 2 8v8c0 2.8 4.5 5 10 5s10-2.2 10-5V8c0-2.8-4.5-5-10-5z" fill="#8B4513"/><ellipse cx="12" cy="8" rx="8" ry="3" fill="#D2691E" stroke="#A0522D" stroke-width="1.5"/><ellipse cx="12" cy="8" rx="5" ry="1.8" fill="#CD853F" stroke="#8B4513" stroke-width="1.2"/><circle cx="12" cy="8" r="1.5" fill="#8B4513"/></svg>`;
 
-        const themes = [
+        const themes = [\
             { id: 'numbers', nameRaw: 'Classic Numbers', preview: '🔢', bgGradient: 'linear-gradient(135deg, #0f172a, #1e1b4b)' },
             { id: 'fruit', nameRaw: 'Fruit Theme', preview: '🍎', bgGradient: 'linear-gradient(135deg, #052e16, #14532d)' },
             { id: 'animals', nameRaw: 'Animals Theme', preview: '🐾', bgGradient: 'linear-gradient(135deg, #2e1005, #4a1d0d)' },
@@ -322,7 +353,7 @@ class Navigation {
     }
 
     static onSettingsThemeChange(themeId) {
-        if (!themeId) return;
+        if (!themeId) return;\
         Navigation.selectThemeFromPicker(themeId);
     }
 
@@ -334,7 +365,7 @@ class Navigation {
 
         const woodSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;display:block;"><path d="M12 3C6.5 3 2 5.2 2 8v8c0 2.8 4.5 5 10 5s10-2.2 10-5V8c0-2.8-4.5-5-10-5z" fill="#8B4513"/><ellipse cx="12" cy="8" rx="8" ry="3" fill="#D2691E" stroke="#A0522D" stroke-width="1.5"/><ellipse cx="12" cy="8" rx="5" ry="1.8" fill="#CD853F" stroke="#8B4513" stroke-width="1.2"/><circle cx="12" cy="8" r="1.5" fill="#8B4513"/></svg>`;
 
-        const themes = [
+        const themes = [\
             { id: 'numbers', name: 'Classic Numbers', nameRaw: 'Classic Numbers', icon: '🔢', preview: '🔢', bgGradient: 'linear-gradient(135deg, #0f172a, #1e1b4b)' },
             { id: 'fruit', name: 'Fruit Theme', nameRaw: 'Fruit Theme', icon: '🍎', preview: '🍎', bgGradient: 'linear-gradient(135deg, #052e16, #14532d)' },
             { id: 'animals', name: 'Animals Theme', nameRaw: 'Animals Theme', icon: '🐾', preview: '🐾', bgGradient: 'linear-gradient(135deg, #2e1005, #4a1d0d)' },
@@ -660,7 +691,7 @@ class Navigation {
 
         const shareUrl = `https://blockrush2k.kharitambe.co.za/?ref=${refCode}`;
 
-        const milestones = [
+        const milestones = [\
             { target: 1, reward: 300, adFreeDays: 0, label: '💰 +300 Coins', icon: '👤' },
             { target: 5, reward: 1500, adFreeDays: 3, label: '💰 +1,500 Coins & 3 Days Ad-Free', icon: '👥' },
             { target: 8, reward: 3000, adFreeDays: 7, label: '💰 +3,000 Coins & 7 Days Ad-Free (1 Week!)', icon: '🌟' },

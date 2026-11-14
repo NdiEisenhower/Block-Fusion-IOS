@@ -132,7 +132,7 @@ class PopupManager {
 
         content.innerHTML = `
             ${showBack ? `<button class="popup-back-btn login-back-btn" onclick="PopupManager.handleBack()" title="Back" aria-label="Back">←</button>` : ''}
-            ${showClose ? `<button class="popup-close-btn login-close-btn" onclick="PopupManager.close('cancel')" title="Close" aria-label="Close">✕</button>` : ''}
+            ${showClose ? `<button class="popup-close-btn login-close-btn" onclick="PopupManager.close('cancel')\" title=\"Close\" aria-label=\"Close\">✕</button>` : ''}
             <div class="popup-header">
                 <span class="popup-icon">${icon}</span>
                 <h2 class="popup-title">${title}</h2>
@@ -602,8 +602,7 @@ class PopupManager {
                             ]
                         };
                     }
-                },
-                isLastStep: true
+                }
             }
         ];
     }
@@ -611,7 +610,6 @@ class PopupManager {
     static showTutorialPopup() {
         const steps = this._getTutorialSteps();
         const totalSteps = steps.length;
-
         this._tutorialStep = 0;
         this._tutorialTotalSteps = totalSteps;
         this._tutorialMaxStepReached = 0;
@@ -625,7 +623,7 @@ class PopupManager {
             title: 'How to Play - Interactive',
             subtitle: 'Learn by doing!',
             showConfirm: false,
-            showCancel: false,
+            showCancel: true,
             cancelText: 'Skip Tutorial',
             customContent: customContent,
             onCancel: () => {
@@ -723,7 +721,6 @@ class PopupManager {
         }
 
         const stepText = `Step ${stepIndex + 1} of ${total}`;
-        const isNextDisabled = stepIndex >= (this._tutorialMaxStepReached || 0);
 
         let dirButtonsHtml = '';
         if (step.allowedDirections.includes('left') && step.allowedDirections.includes('right') && step.allowedDirections.length === 2) {
@@ -762,10 +759,10 @@ class PopupManager {
             <div class="tutorial-step" id="tutorial-step">
                 <div class="board-container" style="padding: 4px 0; display: flex; justify-content: center;">
                     <div class="board-wrapper" id="tutorial-board-wrapper" style="display: inline-block; position: relative;">
-                        <div class="grid-bg" style="display: grid; grid-template-columns: repeat(4, 38px); grid-template-rows: repeat(4, 38px); gap: 5px;">
+                        <div class="grid-bg" style="display: grid; grid-template-columns: repeat(4, 40px); grid-template-rows: repeat(4, 40px); gap: 6px;">
                             ${cellsHtml}
                         </div>
-                        <div class="tiles-layer" id="tutorial-tiles-layer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;">
+                        <div class="tiles-layer" id="tutorial-tiles-layer" style="position: absolute; top: 8px; left: 8px; width: 178px; height: 178px; pointer-events: none;">
                             <!-- Tiles will be rendered dynamically -->
                         </div>
                         ${gestureGuideHtml}
@@ -783,9 +780,9 @@ class PopupManager {
                 </div>
                 <div class="tutorial-actions" style="display:flex;gap:8px;margin-top:10px;">
                     ${stepIndex > 0 ? `<button class="btn btn-sm btn-outline" onclick="PopupManager.tutorialPrev()">← Back</button>` : ''}
-                    <button class="btn btn-sm ${isNextDisabled ? 'btn-primary' : 'btn-gold pulse-glow'} btn-tutorial-next"
-                            onclick="PopupManager.tutorialNext()" style="flex:1;" ${isNextDisabled ? 'disabled' : ''}>
-                        ${stepIndex === total - 1 && !isNextDisabled ? '✅ Start Playing!' : 'Next →'}
+                    <button class="btn btn-sm btn-gold pulse-glow btn-tutorial-next"
+                            onclick="PopupManager.tutorialNext()" style="flex:1;">
+                        ${stepIndex === total - 1 ? '✅ Start Playing!' : 'Next →'}
                     </button>
                 </div>
             </div>
@@ -796,8 +793,8 @@ class PopupManager {
         const layer = document.getElementById('tutorial-tiles-layer');
         if (!layer) return;
 
-        const tileSize = 38;
-        const gapSize = 5;
+        const tileSize = 40;
+        const gapSize = 6;
 
         let html = '';
         tiles.forEach(tile => {
@@ -833,23 +830,15 @@ class PopupManager {
             isSwiping = true;
         }, { passive: true });
 
-        board.addEventListener('touchmove', (e) => {
-            if (!isSwiping) return;
-            e.preventDefault();
-        }, { passive: false });
-
         board.addEventListener('touchend', (e) => {
-            if (!isSwiping || this._tutorialAnimating) {
-                isSwiping = false;
-                return;
-            }
+            if (!isSwiping) return;
+            isSwiping = false;
 
             const touch = e.changedTouches[0];
             const dx = touch.clientX - startX;
             const dy = touch.clientY - startY;
 
             if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
-                isSwiping = false;
                 return;
             }
 
@@ -861,7 +850,6 @@ class PopupManager {
             }
 
             this.handleTutorialMove(direction);
-            isSwiping = false;
         }, { passive: true });
 
         board.addEventListener('mousedown', (e) => {
@@ -918,65 +906,39 @@ class PopupManager {
         const currentStep = steps[stepIndex];
         if (!currentStep) return;
 
-        // If step is ALREADY completed, guide user directly to Next step
-        if (this._tutorialStepCompleted) {
-            clearTimeout(this._tutorialAutoNextTimer);
-            const container = document.getElementById('popup-content');
-            if (container) {
-                const nextBtn = container.querySelector('.btn-tutorial-next') || container.querySelector('.btn-tutorial-finish');
-                if (nextBtn) {
-                    nextBtn.classList.remove('pulse-glow');
-                    void nextBtn.offsetWidth;
-                    nextBtn.classList.add('pulse-glow');
-                }
-            }
-            this.tutorialNext();
-            return;
-        }
-
+        // Check if move is allowed for this step
         if (currentStep.allowedDirections.includes(direction)) {
             this._tutorialAnimating = true;
 
-            const result = currentStep.executeSwipe(direction, currentStep.tiles);
-            const container = document.getElementById('popup-content');
+            const result = currentStep.executeSwipe(direction);
+
+            // Animate sliding tiles
             const layer = document.getElementById('tutorial-tiles-layer');
-            if (!layer) {
+            const container = document.getElementById('popup-content');
+            if (!layer || !container) {
                 this._tutorialAnimating = false;
                 return;
             }
 
-            // Hide gesture guide overlay
-            const gestureGuide = document.getElementById('tutorial-gesture-guide');
-            if (gestureGuide) gestureGuide.style.display = 'none';
+            try { SoundManager.move(); } catch (e) { }
 
-            // Hide direction buttons
-            const dirContainer = document.getElementById('tutorial-dir-container');
-            if (dirContainer) dirContainer.style.display = 'none';
-
-            const tileSize = 46;
+            // 1. Move sliding tiles
+            const tileSize = 40;
             const gapSize = 6;
+            result.slideAnims.forEach(anim => {
+                const el = layer.querySelector(`.tile[data-r="${anim.from[0]}"][data-c="${anim.from[1]}"]`);
+                if (el) {
+                    const targetX = anim.to[1] * (tileSize + gapSize);
+                    const targetY = anim.to[0] * (tileSize + gapSize);
+                    el.style.transition = 'transform 120ms ease-in-out';
+                    el.style.transform = `translate(${targetX}px, ${targetY}px)`;
+                }
+            });
 
-            // 1. Animate sliding tiles
-            if (result.slideAnims && result.slideAnims.length > 0) {
-                result.slideAnims.forEach(anim => {
-                    const [fr, fc] = anim.from;
-                    const [tr, tc] = anim.to;
-                    const tileEl = container.querySelector(`.tile[data-r="${fr}"][data-c="${fc}"]`);
-                    if (tileEl) {
-                        const x = tc * (tileSize + gapSize);
-                        const y = tr * (tileSize + gapSize);
-                        tileEl.style.transition = 'transform 0.15s ease-in-out';
-                        tileEl.style.transform = `translate(${x}px, ${y}px)`;
-                        tileEl.setAttribute('data-r', tr);
-                        tileEl.setAttribute('data-c', tc);
-                    }
-                });
-            }
-
-            try { SoundManager.click(); } catch (e) { }
-
-            // 2. Wait for sliding to finish
+            // 2. After slide finishes, render final state
             setTimeout(() => {
+                try { SoundManager.merge(); } catch (e) { }
+
                 // Clean deterministic tiles ONLY - no random spawning during tutorial!
                 const finalTiles = result.finalTiles;
 
