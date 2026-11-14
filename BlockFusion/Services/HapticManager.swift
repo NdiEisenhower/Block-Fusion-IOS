@@ -15,44 +15,65 @@ final class HapticManager {
     }
     
     func prepare() {
-        lightImpact.prepare()
-        mediumImpact.prepare()
-        heavyImpact.prepare()
-        notificationGenerator.prepare()
-        selectionGenerator.prepare()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.lightImpact.prepare()
+            self.mediumImpact.prepare()
+            self.heavyImpact.prepare()
+            self.notificationGenerator.prepare()
+            self.selectionGenerator.prepare()
+        }
     }
     
     func impact(style: UIImpactFeedbackGenerator.FeedbackStyle = .medium) {
-        switch style {
-        case .light:
-            lightImpact.impactOccurred()
-        case .medium:
-            mediumImpact.impactOccurred()
-        case .heavy:
-            heavyImpact.impactOccurred()
-        case .rigid:
-            if #available(iOS 13.0, *) {
-                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-            } else {
-                heavyImpact.impactOccurred()
+        guard PreferencesManager.shared.hapticsEnabled else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            switch style {
+            case .light:
+                self.lightImpact.impactOccurred()
+                self.lightImpact.prepare()
+            case .medium:
+                self.mediumImpact.impactOccurred()
+                self.mediumImpact.prepare()
+            case .heavy:
+                self.heavyImpact.impactOccurred()
+                self.heavyImpact.prepare()
+            case .rigid:
+                if #available(iOS 13.0, *) {
+                    let gen = UIImpactFeedbackGenerator(style: .rigid)
+                    gen.impactOccurred()
+                } else {
+                    self.heavyImpact.impactOccurred()
+                }
+            case .soft:
+                if #available(iOS 13.0, *) {
+                    let gen = UIImpactFeedbackGenerator(style: .soft)
+                    gen.impactOccurred()
+                } else {
+                    self.lightImpact.impactOccurred()
+                }
+            @unknown default:
+                self.mediumImpact.impactOccurred()
             }
-        case .soft:
-            if #available(iOS 13.0, *) {
-                UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-            } else {
-                lightImpact.impactOccurred()
-            }
-        @unknown default:
-            mediumImpact.impactOccurred()
         }
     }
     
     func notification(type: UINotificationFeedbackGenerator.FeedbackType) {
-        notificationGenerator.notificationOccurred(type)
+        guard PreferencesManager.shared.hapticsEnabled else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.notificationGenerator.notificationOccurred(type)
+            self.notificationGenerator.prepare()
+        }
     }
     
     func selection() {
-        selectionGenerator.selectionChanged()
+        guard PreferencesManager.shared.hapticsEnabled else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.selectionGenerator.selectionChanged()
+            self.selectionGenerator.prepare()
+        }
     }
 }
-

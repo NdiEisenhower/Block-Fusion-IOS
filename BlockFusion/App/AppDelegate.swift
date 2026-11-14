@@ -8,12 +8,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        // Configure audio session so game audio can mix gracefully with background music
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("⚠️ Audio session setup error: \(error)")
+        // Configure audio session as .playback with .mixWithOthers so game audio plays
+        // through the iPhone speaker even when the silent/ring switch is muted,
+        // without interrupting user's background music or podcasts.
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+                try session.setActive(true)
+            } catch {
+                print("⚠️ Audio session setup error: \(error)")
+            }
         }
         
         return true
@@ -27,4 +32,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
     }
 }
-

@@ -1,3 +1,5 @@
+import AVFoundation
+import AudioToolbox
 import UIKit
 import WebKit
 import StoreKit
@@ -43,6 +45,9 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             
         case "gameCenterBridge":
             handleGameCenterBridge(action: action, body: body)
+            
+        case "soundBridge":
+            handleSoundBridge(action: action, body: body)
             
         default:
             break
@@ -102,6 +107,14 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
             default:
                 break
             }
+        }
+    }
+    
+    // MARK: - Sound Handler
+    private func handleSoundBridge(action: String, body: [String: Any]) {
+        if action == "play" {
+            let sound = body["sound"] as? String ?? "click"
+            NativeSoundManager.shared.play(sound)
         }
     }
     
@@ -204,6 +217,30 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
         }
     }
     
+    func callAsyncJavaScript(_ functionBody: String, arguments: [String: Any] = [:], completion: ((Result<Any, Error>) -> Void)? = nil) {
+        DispatchQueue.main.async { [weak self] in
+            if #available(iOS 14.0, *) {
+                self?.webView?.callAsyncJavaScript(functionBody, arguments: arguments, in: nil, in: .page) { result in
+                    switch result {
+                    case .success(let val):
+                        completion?(.success(val))
+                    case .failure(let err):
+                        print("⚠️ JS async error: \(err.localizedDescription)")
+                        completion?(.failure(err))
+                    }
+                }
+            } else {
+                self?.evaluateJavaScript(functionBody) { res, err in
+                    if let err = err {
+                        completion?(.failure(err))
+                    } else {
+                        completion?(.success(res ?? ()))
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Dispatch to JavaScript
     func notifyAdBridgeReady() {
         evaluateJavaScript("window.onAdBridgeReady && window.onAdBridgeReady();")
@@ -266,3 +303,132 @@ final class ScriptBridge: NSObject, WKScriptMessageHandler {
     }
 }
 
+
+// MARK: - Native Sound Manager
+/// High-performance zero-latency native iOS sound system for game effects (AVAudioPlayer PCM)
+final class NativeSoundManager: NSObject {
+    static let shared = NativeSoundManager()
+    
+    private var soundData: [String: Data] = [:]
+    private var players: [String: [AVAudioPlayer]] = [:]
+    private var playerIndex: [String: Int] = [:]
+    
+    override private init() {
+        super.init()
+        setupAudioSession()
+        preloadSounds()
+    }
+    
+    func setupAudioSession() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+                try session.setActive(true)
+            } catch {
+                print("⚠️ Audio session error: \(error)")
+            }
+        }
+    }
+    
+    private func preloadSounds() {
+        let soundDefs: [(name: String, gen: () -> Data)] = [
+            ("click", { Self.makeTone(freqStart: 523, freqEnd: 784, duration: 0.07, decayRate: 14) }),
+            ("toggle_on", { Self.makeTone(freqStart: 523, freqEnd: 880, duration: 0.09, decayRate: 11) }),
+            ("toggle_off", { Self.makeTone(freqStart: 659, freqEnd: 440, duration: 0.07, decayRate: 16) }),
+            ("merge", { Self.makeTone(freqStart: 440, freqEnd: 659, duration: 0.08, decayRate: 12) }),
+            ("mergeTier2", { Self.makeTone(freqStart: 587, freqEnd: 880, duration: 0.10, decayRate: 10) }),
+            ("mergeTier3", { Self.makeTone(freqStart: 659, freqEnd: 1046, duration: 0.12, decayRate: 9) }),
+            ("mergeTier4", { Self.makeTone(freqStart: 784, freqEnd: 1318, duration: 0.20, decayRate: 7) }),
+            ("win", { Self.makeTone(freqStart: 523, freqEnd: 1046, duration: 0.28, decayRate: 6) }),
+            ("coin", { Self.makeTone(freqStart: 1318, freqEnd: 1760, duration: 0.09, decayRate: 14) }),
+            ("powerup", { Self.makeTone(freqStart: 320, freqEnd: 960, duration: 0.15, decayRate: 8) }),
+            ("pop", { Self.makeTone(freqStart: 360, freqEnd: 240, duration: 0.06, decayRate: 18) })
+        ]
+        
+        for def in soundDefs {
+            let data = def.gen()
+            soundData[def.name] = data
+            var pool: [AVAudioPlayer] = []
+            for _ in 0..<2 {
+                if let player = try? AVAudioPlayer(data: data) {
+                    player.prepareToPlay()
+                    player.volume = 1.0
+                    pool.append(player)
+                }
+            }
+            players[def.name] = pool
+            playerIndex[def.name] = 0
+        }
+    }
+    
+    func play(_ sound: String) {
+        if sound != "toggle_off" {
+            guard PreferencesManager.shared.soundEnabled else { return }
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard let pool = self.players[sound], !pool.isEmpty else { return }
+            let idx = self.playerIndex[sound] ?? 0
+            let player = pool[idx]
+            player.currentTime = 0
+            player.play()
+            self.playerIndex[sound] = (idx + 1) % pool.count
+        }
+    }
+    
+    // Generates valid 16-bit mono PCM WAV data in memory
+    static func makeTone(freqStart: Double, freqEnd: Double, duration: Double, sampleRate: Double = 44100.0, decayRate: Double = 12.0) -> Data {
+        let numSamples = Int(sampleRate * duration)
+        var pcm = Data()
+        pcm.reserveCapacity(numSamples * 2)
+        
+        var phase: Double = 0
+        for i in 0..<numSamples {
+            let t = Double(i) / sampleRate
+            let progress = t / duration
+            let currentFreq = freqStart + (freqEnd - freqStart) * progress
+            let deltaPhase = 2.0 * .pi * currentFreq / sampleRate
+            phase += deltaPhase
+            
+            // Soft sine wave with exponential decay
+            let amplitude = exp(-decayRate * t)
+            let raw = sin(phase) * amplitude
+            let clamped = max(-1.0, min(1.0, raw))
+            let sampleVal = Int16(clamped * 32760.0)
+            withUnsafeBytes(of: sampleVal.littleEndian) { pcm.append(contentsOf: $0) }
+        }
+        
+        let dataSize = UInt32(pcm.count)
+        var header = Data()
+        header.reserveCapacity(44)
+        
+        // "RIFF"
+        header.append(contentsOf: [0x52, 0x49, 0x46, 0x46])
+        let chunkSize = UInt32(36 + dataSize)
+        withUnsafeBytes(of: chunkSize.littleEndian) { header.append(contentsOf: $0) }
+        // "WAVE"
+        header.append(contentsOf: [0x57, 0x41, 0x56, 0x45])
+        // "fmt "
+        header.append(contentsOf: [0x66, 0x6D, 0x74, 0x20])
+        let subchunk1Size = UInt32(16)
+        withUnsafeBytes(of: subchunk1Size.littleEndian) { header.append(contentsOf: $0) }
+        let audioFormat = UInt16(1) // PCM
+        withUnsafeBytes(of: audioFormat.littleEndian) { header.append(contentsOf: $0) }
+        let numChannels = UInt16(1) // Mono
+        withUnsafeBytes(of: numChannels.littleEndian) { header.append(contentsOf: $0) }
+        let sRate = UInt32(sampleRate)
+        withUnsafeBytes(of: sRate.littleEndian) { header.append(contentsOf: $0) }
+        let byteRate = UInt32(sampleRate * 1 * 2)
+        withUnsafeBytes(of: byteRate.littleEndian) { header.append(contentsOf: $0) }
+        let blockAlign = UInt16(2)
+        withUnsafeBytes(of: blockAlign.littleEndian) { header.append(contentsOf: $0) }
+        let bitsPerSample = UInt16(16)
+        withUnsafeBytes(of: bitsPerSample.littleEndian) { header.append(contentsOf: $0) }
+        // "data"
+        header.append(contentsOf: [0x64, 0x61, 0x74, 0x61])
+        withUnsafeBytes(of: dataSize.littleEndian) { header.append(contentsOf: $0) }
+        
+        return header + pcm
+    }
+}

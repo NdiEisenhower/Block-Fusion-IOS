@@ -60,13 +60,36 @@ final class AdMobManager: NSObject {
         if let r = rewardedId, !r.isEmpty { rewardedAdUnitId = r }
         #endif
         
-        AppTrackingManager.shared.requestAuthorization { [weak self] _ in
+        AppTrackingManager.shared.requestAuthorization { [weak self] status in
+            print("📊 ATT Authorization status: \(status.rawValue)")
             self?.startSdk()
+        }
+        
+        // Fallback: If ATT prompt was suppressed or delayed on physical phone, initialize AdMob anyway
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
+            guard let self = self, !self.isInitialized else { return }
+            print("ℹ️ AdMob starting via fallback timer (ATT did not trigger or finished)")
+            self.startSdk()
         }
     }
     
-    private func startSdk() {
+    /// Register a physical iPhone test device ID to receive test ads
+    func registerTestDevice(id: String) {
         #if canImport(GoogleMobileAds)
+        var current = GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers ?? []
+        if !current.contains(id) {
+            current.append(id)
+            GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers = current
+            print("📱 Registered physical AdMob test device: \(id)")
+        }
+        #endif
+    }
+    
+    private func startSdk() {
+        guard !isInitialized else { return }
+        #if canImport(GoogleMobileAds)
+// Simulators are automatically registered as test devices by Google Mobile Ads SDK
+        
         GADMobileAds.sharedInstance().start { [weak self] _ in
             guard let self = self else { return }
             self.isInitialized = true
@@ -105,6 +128,11 @@ final class AdMobManager: NSObject {
             return
         }
         
+        if let banner = bannerView, banner.superview != containerView {
+            banner.removeFromSuperview()
+            self.bannerView = nil
+        }
+        
         let width = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
         if bannerView == nil {
             let adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width)
@@ -116,7 +144,7 @@ final class AdMobManager: NSObject {
             containerView.addSubview(banner)
             
             NSLayoutConstraint.activate([
-                banner.bottomAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.bottomAnchor),
+                banner.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
                 banner.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
                 banner.widthAnchor.constraint(equalToConstant: adSize.size.width),
                 banner.heightAnchor.constraint(equalToConstant: adSize.size.height)
@@ -248,7 +276,13 @@ extension AdMobManager: GADBannerViewDelegate {
     }
     
     func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
-        print("❌ Banner ad failed: \(error.localizedDescription)")
+        let ns = error as NSError
+        print("❌ Banner ad failed: \(error.localizedDescription) [Code: \(ns.code), Domain: \(ns.domain)]")
+        if ns.code == 3 {
+            print("⚠️ AdMob Code 3 (No Fill / No inventory). For physical test phones, register device ID in requestConfiguration.testDeviceIdentifiers or verify AdMob account approval.")
+        } else if ns.code == 1 {
+            print("⚠️ AdMob Code 1 (Invalid Ad Unit / Request). Check ad unit ID format.")
+        }
     }
 }
 

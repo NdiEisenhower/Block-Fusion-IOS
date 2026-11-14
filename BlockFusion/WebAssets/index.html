@@ -44,33 +44,42 @@
 
                 <div class="home-menu-container">
                     <div class="home-menu">
-                        <button class="btn btn-primary btn-block" onclick="App.continueGame()" data-i18n="continue_game">▶ Continue</button>
-                        <button class="btn btn-secondary btn-block" onclick="Navigation.navigateTo('world-select')" data-i18n="worlds">🌍 Worlds</button>
-                        <button class="btn btn-secondary btn-block" onclick="App.startDailyChallenge()">
-                            <span data-i18n="daily_challenge">📅 Daily Challenge</span> <span class="badge-new" data-i18n="new_badge">New</span>
+                        <!-- Hero Play / Continue Button -->
+                        <button class="btn btn-primary btn-block hero-continue-btn" onclick="App.continueGame()" data-i18n="continue_game">
+                            <span class="hero-play-icon">▶</span>
+                            <span class="hero-btn-text">
+                                <span class="hero-main-title">Continue</span>
+                                <span class="hero-subtext">Resume Puzzle & Merge</span>
+                            </span>
+                            <span class="hero-btn-arrow">➔</span>
                         </button>
-                        <button class="btn btn-gold btn-block" onclick="Navigation.navigateTo('referral')">
-                            <span data-i18n="refer_earn">🎁 Refer & Earn</span> <span class="badge-new" style="background:#FF5E62;" data-i18n="coins_free_ads">Coins & Free Ads</span>
-                        </button>
-                        <button class="btn btn-secondary btn-block" onclick="Navigation.navigateTo('store')" data-i18n="store">🛒 Store</button>
-                        <button class="btn btn-secondary btn-block" onclick="Navigation.navigateTo('leaderboard')" data-i18n="leaderboard">📊 Leaderboard</button>
+
+                        <!-- Feature Cards Grid -->
+                        <div class="home-features-grid">
+                            <button class="home-feature-card daily-card" onclick="App.startDailyChallenge()">
+                                <div class="feature-card-header">
+                                    <div class="feature-icon-badge purple-glow">📅</div>
+                                    <span class="badge-new" data-i18n="new_badge">New</span>
+                                </div>
+                                <div class="feature-title" data-i18n="daily_challenge">Daily Challenge</div>
+                                <div class="feature-subtitle">Earn Bonus Coins</div>
+                            </button>
+
+                            <button class="home-feature-card referral-card" onclick="Navigation.navigateTo('referral')">
+                                <div class="feature-card-header">
+                                    <div class="feature-icon-badge gold-glow">🎁</div>
+                                    <span class="badge-new badge-rewards">Rewards</span>
+                                </div>
+                                <div class="feature-title" data-i18n="refer_earn">Refer & Earn</div>
+                                <div class="feature-subtitle">Free Ads & Coins</div>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="menu-footer">
-                        <!-- Thin divider line -->
-                        <hr class="footer-divider" />
-
-                        <div class="footer-icons">
-                            <button class="circle-btn" onclick="Navigation.navigateTo('settings')" title="Settings">⚙️</button>
-                            <button class="circle-btn trophy" onclick="Navigation.navigateTo('leaderboard')" title="Leaderboard">🏆</button>
-                            <button class="circle-btn" onclick="App.showLoginPrompt()" id="btn-login-prompt" title="Account">
-                                <span class="player-avatar-placeholder"
-                                    style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:50%;">☁️</span>
-                            </button>
-                        </div>
-
                         <div class="offline-box hidden" id="offline-box" style="display:none;">
                             <div class="offline-left">
+                                <span class="offline-status-dot"></span>
                                 <span class="icon">📱</span> Offline Mode
                             </div>
                             <div class="offline-right">

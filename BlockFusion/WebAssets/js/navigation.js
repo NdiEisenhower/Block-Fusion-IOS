@@ -400,11 +400,24 @@ class Navigation {
             <div class="item-icon">🔊</div>
             <div class="item-info">
                 <div class="item-name">Sound Effects</div>
-                <div class="item-desc">Toggle game sounds</div>
+                <div class="item-desc">Toggle game audio</div>
             </div>
             <button class="btn btn-sm ${App.state.soundOn ? 'btn-primary' : 'btn-outline'}" 
                 onclick="Navigation.toggleSound()">
                 ${App.state.soundOn ? 'On' : 'Off'}
+            </button>
+        </div>
+
+        <h3 style="margin:10px 0 4px;color:var(--gold);">📳 Haptics</h3>
+        <div class="store-item">
+            <div class="item-icon">📳</div>
+            <div class="item-info">
+                <div class="item-name">Haptic Feedback</div>
+                <div class="item-desc">Vibration on merges & moves</div>
+            </div>
+            <button class="btn btn-sm ${App.state.hapticsEnabled !== false ? 'btn-primary' : 'btn-outline'}" 
+                onclick="Navigation.toggleHaptics()">
+                ${App.state.hapticsEnabled !== false ? 'On' : 'Off'}
             </button>
         </div>
 
@@ -494,45 +507,59 @@ class Navigation {
         <div class="store-item" onclick="Navigation.navigateTo('feedback')" style="cursor:pointer;">
             <div class="item-icon">⭐</div>
             <div class="item-info">
-                <div class="item-name">Send Feedback & Review</div>
-                <div class="item-desc">Share comments and rate our app</div>
+                <div class="item-name">Feedback & Review</div>
+                <div class="item-desc">Rate app or send feedback</div>
             </div>
             <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); Navigation.navigateTo('feedback');">
-                <span>💬</span> Feedback
+                Review
             </button>
         </div>`;
 
-        // Account section
+        // Dedicated Player Nickname row with Edit button (guaranteed never cut off)
+        html += `
+        <h3 style="margin:10px 0 4px;color:var(--gold);">👤 Player Profile</h3>
+        <div class="store-item" onclick="Navigation.editPlayerName()" style="cursor:pointer;">
+            <div class="item-icon">✏️</div>
+            <div class="item-info">
+                <div class="item-name">${App.state.playerName || (App.state.userId ? 'Player' : 'Guest')}</div>
+                <div class="item-desc">Tap to edit your display name</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); Navigation.editPlayerName();">
+                Edit
+            </button>
+        </div>`;
+
+        // Account status section
         if (App.state.isLoggedIn) {
             html += `
-        <h3 style="margin:12px 0 4px;color:var(--gold);">👤 Account</h3>
+        <h3 style="margin:12px 0 4px;color:var(--gold);">🔐 Cloud Account</h3>
         <div class="store-item" style="padding:12px 14px;">
-            <div class="profile-picture-container" style="position:relative;width:48px;height:48px;flex-shrink:0;">
+            <div class="profile-picture-container" style="position:relative;width:44px;height:44px;flex-shrink:0;">
                 ${photoURL ?
                     `<img src="${photoURL}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid var(--accent-primary);" alt="Profile">` :
                     `<div style="width:100%;height:100%;border-radius:50%;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--bg-elevated);">👤</div>`
                 }
-                <button onclick="Navigation.updateProfilePicture()" style="position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:var(--accent-primary);border:2px solid var(--bg-primary);color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">📷</button>
+                <button onclick="Navigation.updateProfilePicture()" style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--accent-primary);border:2px solid var(--bg-primary);color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">📷</button>
             </div>
             <div class="item-info" style="flex:1;min-width:0;">
-                <div class="item-name" style="font-size:15px;word-break:break-word;">${displayName}</div>
+                <div class="item-name" style="font-size:14px;word-break:break-word;">${displayName}</div>
                 <div class="item-desc" style="word-break:break-word;">${email}</div>
                 <div style="font-size:11px;color:var(--text-muted);margin-top:1px;">
-                    ${App.state.loginProvider === 'google' ? '🔵 Google Account' :
+                    ${App.state.loginProvider === 'google' ? '🔵 Google' :
                     App.state.loginProvider === 'anonymous' ? '👤 Anonymous' :
-                        '✉️ Email Account'}
+                        '✉️ Email'}
                 </div>
             </div>
             <button class="btn btn-sm btn-outline" style="color:#e94560;border-color:#e94560;flex-shrink:0;" onclick="App.signOut()">Sign Out</button>
         </div>`;
         } else {
             html += `
-        <h3 style="margin:10px 0 4px;color:var(--gold);">👤 Account</h3>
+        <h3 style="margin:10px 0 4px;color:var(--gold);">🔐 Cloud Account</h3>
         <div class="store-item">
-            <div class="item-icon">👤</div>
+            <div class="item-icon">☁️</div>
             <div class="item-info">
-                <div class="item-name">${App.state.userId ? 'Playing Anonymously' : (typeof CONFIG !== 'undefined' && CONFIG.OFFLINE && CONFIG.OFFLINE.ENABLED ? 'Playing Offline' : 'Playing as Guest')}</div>
-                <div class="item-desc">Sign in to save progress and compete</div>
+                <div class="item-name">${App.state.userId ? 'Playing Anonymously' : 'Guest'}</div>
+                <div class="item-desc">Sign in to sync scores and compete</div>
             </div>
             <button class="btn btn-sm btn-primary" onclick="App.showLoginPrompt()">Sign In</button>
         </div>`;
@@ -540,6 +567,17 @@ class Navigation {
 
         // Data & Privacy section
         html += `
+        
+        <h3 style="margin:10px 0 4px;color:var(--gold);">🎮 Apple Game Center</h3>
+        <div class="store-item" onclick="if(window.webkit&&window.webkit.messageHandlers.gameCenterBridge){window.webkit.messageHandlers.gameCenterBridge.postMessage({action:'showDashboard'});}" style="cursor:pointer;">
+            <div class="item-icon">🏆</div>
+            <div class="item-info">
+                <div class="item-name">Game Center Nickname</div>
+                <div class="item-desc">Change banner ID in iOS Settings → Game Center</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); if(window.webkit&&window.webkit.messageHandlers.gameCenterBridge){window.webkit.messageHandlers.gameCenterBridge.postMessage({action:'showDashboard'});}">View</button>
+        </div>
+
         <h3 style="margin:10px 0 4px;color:var(--text-secondary);">🔐 Data & Privacy</h3>
         
         <div class="store-item">
@@ -661,11 +699,47 @@ class Navigation {
         App.state.soundOn = !App.state.soundOn;
         if (typeof SoundManager !== 'undefined') {
             SoundManager.enabled = App.state.soundOn;
+            if (App.state.soundOn) {
+                SoundManager.unlockAudioContext();
+                SoundManager.playNative('toggle_on');
+                SoundManager.vibrate(20, 'light');
+            } else {
+                SoundManager.playNative('toggle_off');
+                SoundManager.vibrate(15, 'light');
+            }
         }
         App.saveState();
         this.renderSettings();
-        if (App.state.soundOn) {
-            try { SoundManager.click(); } catch (e) { }
+    }
+
+    static toggleHaptics() {
+        App.state.hapticsEnabled = (App.state.hapticsEnabled === false) ? true : false;
+        App.saveState();
+        if (typeof SoundManager !== 'undefined') {
+            SoundManager.vibrationEnabled = App.state.hapticsEnabled;
+            if (App.state.hapticsEnabled) {
+                SoundManager.vibrate(30, 'medium');
+            }
+        }
+        this.renderSettings();
+    }
+
+    static editPlayerName() {
+        const current = App.state.playerName || 'Player';
+        const updated = prompt('Enter your player nickname:', current);
+        if (updated && updated.trim() && updated.trim() !== current) {
+            const clean = updated.trim().substring(0, 24);
+            App.state.playerName = clean;
+            App.saveState();
+            App.updatePlayerDisplay();
+            this.renderSettings();
+            if (typeof FirebaseService !== 'undefined' && FirebaseService.currentUser) {
+                FirebaseService.currentUser.updateProfile({ displayName: clean }).catch(() => {});
+                try {
+                    FirebaseService.db.ref('users/' + FirebaseService.currentUser.uid + '/displayName').set(clean);
+                } catch(e) {}
+            }
+            App.showToast('✅ Player name updated to ' + clean);
         }
     }
 

@@ -51,6 +51,11 @@
 #screen-game {
     overscroll-behavior: contain;
     overflow-y: visible;
+    padding-top: 4px !important;
+}
+
+#screen-game .game-top-bar {
+    margin-bottom: 4px !important;
 }
 
 /* ===== HEADER ===== */

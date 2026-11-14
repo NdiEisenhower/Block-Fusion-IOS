@@ -1043,6 +1043,19 @@ class App {
         if (this.state.isLoggedIn) {
             Navigation.navigateTo('settings');
         } else {
+            // Check native iOS bridge first to trigger native Apple / Game Center auth sheet
+            if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) {
+                try {
+                    window.webkit.messageHandlers.appBridge.postMessage({ action: 'showLogin' });
+                    return;
+                } catch (e) {
+                    console.error('Failed to post showLogin to native iOS bridge:', e);
+                }
+            }
+            if (typeof NativeBridge !== 'undefined' && NativeBridge.app && typeof NativeBridge.app.showLogin === 'function') {
+                NativeBridge.app.showLogin();
+                return;
+            }
             this.showLoginPrompt();
         }
     }
@@ -1295,6 +1308,17 @@ class App {
             }
         });
 
+        // Notify native iOS app of login status change
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) {
+            try {
+                window.webkit.messageHandlers.appBridge.postMessage({
+                    action: 'authStatusChanged',
+                    isLoggedIn: !!this.state.isLoggedIn,
+                    displayName: this.state.isLoggedIn ? (this.state.playerName || 'Player') : null
+                });
+            } catch(e) {}
+        }
+
         this.updateOfflineIndicator();
     }
 
@@ -1340,6 +1364,20 @@ class App {
     }
 
     static showLoginPrompt() {
+        // In native iOS environment, delegate directly to native sign-in sheet
+        if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) {
+            try {
+                window.webkit.messageHandlers.appBridge.postMessage({ action: 'showLogin' });
+                return;
+            } catch (e) {
+                console.error('Failed to post showLogin to native iOS bridge:', e);
+            }
+        }
+        if (typeof NativeBridge !== 'undefined' && NativeBridge.app && typeof NativeBridge.app.showLogin === 'function') {
+            NativeBridge.app.showLogin();
+            return;
+        }
+
         if (typeof PopupManager === 'undefined') {
             Navigation.navigateTo('login-prompt');
             return;
@@ -2169,10 +2207,10 @@ class App {
             if (result.success) {
                 this.handleSuccessfulLogin(result.user, 'google');
             } else {
-                this.showToast('❌ ' + result.error);
+                this.showToast(result.error ? '⚠️ ' + result.error : '❌ Google sign-in failed');
             }
         } catch (e) {
-            this.showToast('❌ Google sign-in failed');
+            this.showToast('⚠️ On iOS, please use Sign in with Apple or Email');
             console.error(e);
         }
     }

@@ -9,12 +9,16 @@ final class MainViewController: UIViewController {
     private var topBar: NativeTopBar!
     private var bottomBar: NativeBottomBar!
     private var webView: WKWebView!
+    let bannerContainer = UIView()
     private let scriptBridge = ScriptBridge()
     private let preferences = PreferencesManager.shared
     
     private var topBarHeightConstraint: NSLayoutConstraint!
     private var bottomBarHeightConstraint: NSLayoutConstraint!
+    private var bannerBottomConstraint: NSLayoutConstraint!
+    private var bannerHeightConstraint: NSLayoutConstraint!
     private var currentScreen: String = "home"
+    var isUserLoggedIn: Bool = false
     
     private static let remoteGameUrl = "https://blockrush2k.kharitambe.co.za"
     private var currentBannerHeight: CGFloat = 0
@@ -27,8 +31,8 @@ final class MainViewController: UIViewController {
     
     private func updateSafeAreaInsets() {
         let isGame = (currentScreen == "game")
-        let top = isGame ? max(view.safeAreaInsets.top, 8.0) : 0.0
-        let bottom = isGame ? (view.safeAreaInsets.bottom > 0 ? max(view.safeAreaInsets.bottom, 6.0) : 0.0) : 0.0
+        let top: CGFloat = isGame ? 4.0 : 0.0
+        let bottom: CGFloat = isGame ? 6.0 : 0.0
         let js = """
         (function() {
             var el = document.getElementById('ios-safe-area-rules');
@@ -63,9 +67,11 @@ final class MainViewController: UIViewController {
         
         setupTopBar()
         setupBottomBar()
+        setupBannerContainer()
         setupWebView()
         
         // Ensure navigation bars stay on top of the web view in the Z-order hierarchy
+        view.bringSubviewToFront(bannerContainer)
         view.bringSubviewToFront(bottomBar)
         view.bringSubviewToFront(topBar)
         
@@ -76,6 +82,7 @@ final class MainViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // Ensure bottom navigation bar stays above webview and ads
+        view.bringSubviewToFront(bannerContainer)
         view.bringSubviewToFront(bottomBar)
     }
     
@@ -85,6 +92,7 @@ final class MainViewController: UIViewController {
         authVC.scriptBridge = scriptBridge
         authVC.onAuthSuccess = onSuccess
         let nav = UINavigationController(rootViewController: authVC)
+        nav.overrideUserInterfaceStyle = .dark
         nav.modalPresentationStyle = .pageSheet
         if let sheet = nav.sheetPresentationController {
             sheet.detents = [.large()]
@@ -97,6 +105,7 @@ final class MainViewController: UIViewController {
         let dailyVC = NativeDailyChallengeViewController()
         dailyVC.scriptBridge = scriptBridge
         let nav = UINavigationController(rootViewController: dailyVC)
+        nav.overrideUserInterfaceStyle = .dark
         nav.modalPresentationStyle = .pageSheet
         if let sheet = nav.sheetPresentationController {
             sheet.detents = [.large()]
@@ -129,35 +138,64 @@ final class MainViewController: UIViewController {
         
         topBar.setAudioEnabled(preferences.soundEnabled)
         
-        topBar.onGameCenterTapped = { [weak self] in
-            HapticManager.shared.impact(style: .medium)
-            GameKitManager.shared.showGameCenterDashboard()
-        }
-        
         topBar.onAudioTapped = { [weak self] in
             guard let self = self else { return }
             self.preferences.soundEnabled.toggle()
             self.topBar.setAudioEnabled(self.preferences.soundEnabled)
             HapticManager.shared.impact(style: .light)
+            
+            // Audible feedback on toggle (toggle_on plays bright chime, toggle_off plays soft click)
+            if self.preferences.soundEnabled {
+                NativeSoundManager.shared.play("toggle_on")
+            } else {
+                NativeSoundManager.shared.play("toggle_off")
+            }
+            
             let enabled = self.preferences.soundEnabled ? "true" : "false"
             self.scriptBridge.evaluateJavaScript("""
             if (typeof SoundManager !== 'undefined') {
                 SoundManager.enabled = \(enabled);
             }
+            if (typeof App !== 'undefined' && App.state) {
+                App.state.soundOn = \(enabled);
+                App.saveState();
+            }
+            if (typeof Navigation !== 'undefined' && typeof Navigation.renderSettings === 'function') {
+                Navigation.renderSettings();
+            }
             """)
         }
         
-        topBar.onSettingsTapped = { [weak self] in
+        topBar.onSignInTapped = { [weak self] in
+            guard let self = self else { return }
             HapticManager.shared.selection()
-            self?.scriptBridge.evaluateJavaScript("""
-            (function() {
-                try {
-                    if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
-                        Navigation.navigateTo('settings');
-                    }
-                } catch(e) {}
-            })();
+            self.presentNativeAuth()
+        }
+        
+        topBar.onLogOutTapped = { [weak self] in
+            guard let self = self else { return }
+            HapticManager.shared.impact(style: .medium)
+            self.scriptBridge.evaluateJavaScript("""
+            if (typeof App !== 'undefined' && typeof App.signOut === 'function') {
+                App.signOut();
+            }
             """)
+            self.isUserLoggedIn = false
+            self.topBar.setAuthState(isLoggedIn: false, displayName: nil)
+        }
+        
+        topBar.onSettingsTapped = { [weak self] in
+            guard let self = self else { return }
+            HapticManager.shared.selection()
+            self.bottomBar.selectTab(forScreen: "settings")
+            let js = """
+            (function() {
+                if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                    Navigation.navigateTo('settings');
+                }
+            })();
+            """
+            self.scriptBridge.evaluateJavaScript(js)
         }
         
         topBarHeightConstraint = topBar.heightAnchor.constraint(equalToConstant: 44)
@@ -209,6 +247,24 @@ final class MainViewController: UIViewController {
         ])
     }
     
+    private func setupBannerContainer() {
+        bannerContainer.accessibilityIdentifier = "bannerContainer"
+        bannerContainer.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
+        bannerContainer.clipsToBounds = true
+        bannerContainer.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bannerContainer)
+        
+        bannerBottomConstraint = bannerContainer.bottomAnchor.constraint(equalTo: bottomBar.topAnchor)
+        bannerHeightConstraint = bannerContainer.heightAnchor.constraint(equalToConstant: 0)
+        
+        NSLayoutConstraint.activate([
+            bannerContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bannerContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bannerBottomConstraint,
+            bannerHeightConstraint
+        ])
+    }
+    
     private func setupWebView() {
         let contentController = WKUserContentController()
         
@@ -227,6 +283,7 @@ final class MainViewController: UIViewController {
         contentController.add(scriptBridge, name: "socialBridge")
         contentController.add(scriptBridge, name: "appBridge")
         contentController.add(scriptBridge, name: "gameCenterBridge")
+        contentController.add(scriptBridge, name: "soundBridge")
         
         let config = WKWebViewConfiguration()
         config.userContentController = contentController
@@ -251,12 +308,12 @@ final class MainViewController: UIViewController {
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         
-        // Web view sits comfortably between top navigation bar and bottom navigation bar
+        // Web view sits comfortably between top navigation bar and banner container
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: topBar.bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: bottomBar.topAnchor)
+            webView.bottomAnchor.constraint(equalTo: bannerContainer.topAnchor)
         ])
     }
     
@@ -305,11 +362,11 @@ final class MainViewController: UIViewController {
         let target: String
         switch route {
         case "store": target = "store"
-        case "leaderboard": target = "leaderboard"
+        case "leaderboard", "ranks": target = "leaderboard"
         case "daily": target = "daily"
         case "achievements": target = "achievements"
         case "settings": target = "settings"
-        case "world": target = "world-select"
+        case "world", "worlds": target = "world-select"
         default: target = "home"
         }
         
@@ -415,7 +472,11 @@ extension MainViewController: AdMobEventListener {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.currentBannerHeight = visible ? height : 0
-            self.updateSafeAreaInsets()
+            self.bannerHeightConstraint.constant = visible ? height : 0
+            self.bannerContainer.isHidden = !visible
+            UIView.animate(withDuration: 0.25) {
+                self.view.layoutIfNeeded()
+            }
         }
     }
 }
@@ -438,8 +499,6 @@ extension MainViewController: ScriptBridgeDelegate {
     func openStoreReview() {
         if #available(iOS 14.0, *), let scene = view.window?.windowScene {
             SKStoreReviewController.requestReview(in: scene)
-        } else {
-            SKStoreReviewController.requestReview()
         }
     }
     
@@ -458,6 +517,14 @@ extension MainViewController: ScriptBridgeDelegate {
                 self.topBar.isHidden = false
             }
             self.bottomBar.isUserInteractionEnabled = !isGame
+            
+            self.bannerBottomConstraint.isActive = false
+            if isGame {
+                self.bannerBottomConstraint = self.bannerContainer.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor)
+            } else {
+                self.bannerBottomConstraint = self.bannerContainer.bottomAnchor.constraint(equalTo: self.bottomBar.topAnchor)
+            }
+            self.bannerBottomConstraint.isActive = true
             
             // On gameplay screen, smoothly collapse the top and bottom bars so board & undo button have full height
             UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseInOut], animations: {
@@ -493,18 +560,29 @@ extension MainViewController: ScriptBridgeDelegate {
             self?.presentDailyReward()
         }
     }
+    
+    func didChangeAuthStatus(isLoggedIn: Bool, displayName: String?) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.isUserLoggedIn = isLoggedIn
+            self.topBar.setAuthState(isLoggedIn: isLoggedIn, displayName: displayName)
+        }
+    }
 }
 
 // MARK: - Native Top Bar UI
 final class NativeTopBar: UIView {
     let titleLabel = UILabel()
-    let gameCenterButton = UIButton(type: .system)
     let audioButton = UIButton(type: .system)
-    let settingsButton = UIButton(type: .system)
+    let menuButton = UIButton(type: .system)
     
-    var onGameCenterTapped: (() -> Void)?
     var onAudioTapped: (() -> Void)?
+    var onSignInTapped: (() -> Void)?
+    var onLogOutTapped: (() -> Void)?
     var onSettingsTapped: (() -> Void)?
+    
+    private var isUserLoggedIn: Bool = false
+    private var currentDisplayName: String? = nil
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -540,24 +618,40 @@ final class NativeTopBar: UIView {
         proBadge.translatesAutoresizingMaskIntoConstraints = false
         addSubview(proBadge)
         
-        let buttonsStack = UIStackView()
-        buttonsStack.axis = .horizontal
-        buttonsStack.spacing = 14
-        buttonsStack.alignment = .center
-        buttonsStack.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(buttonsStack)
+        let rightStack = UIStackView()
+        rightStack.axis = .horizontal
+        rightStack.spacing = 10
+        rightStack.alignment = .center
+        rightStack.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(rightStack)
         
-        configureButton(gameCenterButton, symbolName: "trophy.circle.fill", tintColor: UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0))
-        gameCenterButton.addTarget(self, action: #selector(gcTapped), for: .touchUpInside)
-        buttonsStack.addArrangedSubview(gameCenterButton)
-        
-        configureButton(audioButton, symbolName: "speaker.wave.2.fill", tintColor: UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0))
+        // Audio Toggle
+        let audioConfig = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
+        audioButton.setImage(UIImage(systemName: "speaker.wave.2.fill", withConfiguration: audioConfig), for: .normal)
+        audioButton.tintColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
+        audioButton.translatesAutoresizingMaskIntoConstraints = false
         audioButton.addTarget(self, action: #selector(soundTapped), for: .touchUpInside)
-        buttonsStack.addArrangedSubview(audioButton)
+        NSLayoutConstraint.activate([
+            audioButton.widthAnchor.constraint(equalToConstant: 32),
+            audioButton.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        rightStack.addArrangedSubview(audioButton)
         
-        configureButton(settingsButton, symbolName: "gearshape.fill", tintColor: UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0))
-        settingsButton.addTarget(self, action: #selector(settingsTapped), for: .touchUpInside)
-        buttonsStack.addArrangedSubview(settingsButton)
+        // 3-Dot Action Bar Menu Button (Sign In / Log Out & Settings)
+        let menuConfig = UIImage.SymbolConfiguration(pointSize: 15, weight: .bold)
+        menuButton.setImage(UIImage(systemName: "ellipsis", withConfiguration: menuConfig), for: .normal)
+        menuButton.tintColor = .white
+        menuButton.backgroundColor = UIColor(white: 1.0, alpha: 0.12)
+        menuButton.layer.cornerRadius = 16
+        menuButton.layer.borderWidth = 1.0
+        menuButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.18).cgColor
+        menuButton.showsMenuAsPrimaryAction = true
+        menuButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            menuButton.widthAnchor.constraint(equalToConstant: 32),
+            menuButton.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        rightStack.addArrangedSubview(menuButton)
         
         NSLayoutConstraint.activate([
             bottomBorder.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -572,32 +666,67 @@ final class NativeTopBar: UIView {
             proBadge.centerYAnchor.constraint(equalTo: centerYAnchor),
             proBadge.heightAnchor.constraint(equalToConstant: 16),
             
-            buttonsStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            buttonsStack.centerYAnchor.constraint(equalTo: centerYAnchor)
+            rightStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
+            rightStack.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
-    }
-    
-    private func configureButton(_ button: UIButton, symbolName: String, tintColor: UIColor) {
-        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
-        button.setImage(UIImage(systemName: symbolName, withConfiguration: config), for: .normal)
-        button.tintColor = tintColor
-        button.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 32),
-            button.heightAnchor.constraint(equalToConstant: 32)
-        ])
+        
+        setAuthState(isLoggedIn: false, displayName: nil)
     }
     
     func setAudioEnabled(_ enabled: Bool) {
         let name = enabled ? "speaker.wave.2.fill" : "speaker.slash.fill"
-        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
+        let config = UIImage.SymbolConfiguration(pointSize: 17, weight: .semibold)
         audioButton.setImage(UIImage(systemName: name, withConfiguration: config), for: .normal)
         audioButton.tintColor = enabled ? UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0) : UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
     }
     
-    @objc private func gcTapped() { onGameCenterTapped?() }
+    func setAuthState(isLoggedIn: Bool, displayName: String?) {
+        self.isUserLoggedIn = isLoggedIn
+        self.currentDisplayName = displayName
+        
+        let settingsAction = UIAction(
+            title: "Settings",
+            image: UIImage(systemName: "gearshape.fill")
+        ) { [weak self] _ in
+            self?.onSettingsTapped?()
+        }
+        
+        if isLoggedIn {
+            let name = (displayName?.isEmpty == false) ? displayName! : "Player"
+            let playerAction = UIAction(
+                title: name,
+                image: UIImage(systemName: "person.crop.circle.fill"),
+                attributes: .disabled
+            ) { _ in }
+            
+            let logOutAction = UIAction(
+                title: "Log Out",
+                image: UIImage(systemName: "rectangle.portrait.and.arrow.right"),
+                attributes: .destructive
+            ) { [weak self] _ in
+                self?.onLogOutTapped?()
+            }
+            
+            menuButton.menu = UIMenu(title: "Account", children: [playerAction, settingsAction, logOutAction])
+            menuButton.tintColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
+            menuButton.layer.borderColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 0.4).cgColor
+            menuButton.backgroundColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 0.16)
+        } else {
+            let signInAction = UIAction(
+                title: "Sign In",
+                image: UIImage(systemName: "person.badge.plus")
+            ) { [weak self] _ in
+                self?.onSignInTapped?()
+            }
+            
+            menuButton.menu = UIMenu(title: "Menu", children: [signInAction, settingsAction])
+            menuButton.tintColor = .white
+            menuButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.18).cgColor
+            menuButton.backgroundColor = UIColor(white: 1.0, alpha: 0.12)
+        }
+    }
+    
     @objc private func soundTapped() { onAudioTapped?() }
-    @objc private func settingsTapped() { onSettingsTapped?() }
 }
 
 // MARK: - Native Bottom Navigation Bar UI
@@ -611,11 +740,11 @@ final class NativeBottomBar: UIView {
     }
     
     private let tabs: [TabItem] = [
-        TabItem(id: "play", title: "Play", symbolName: "gamecontroller.fill", targetScreen: "home"),
-        TabItem(id: "worlds", title: "Worlds", symbolName: "map.fill", targetScreen: "world-select"),
-        TabItem(id: "daily", title: "Daily", symbolName: "calendar.badge.clock", targetScreen: "daily"),
-        TabItem(id: "ranks", title: "Rankings", symbolName: "trophy.fill", targetScreen: "leaderboard"),
-        TabItem(id: "shop", title: "Shop", symbolName: "bag.fill", targetScreen: "store")
+        TabItem(id: "main", title: "Main", symbolName: "house.fill", targetScreen: "home"),
+        TabItem(id: "worlds", title: "Worlds", symbolName: "globe.americas.fill", targetScreen: "world-select"),
+        TabItem(id: "ranks", title: "Ranks", symbolName: "trophy.fill", targetScreen: "leaderboard"),
+        TabItem(id: "store", title: "Store", symbolName: "bag.fill", targetScreen: "store"),
+        TabItem(id: "settings", title: "Settings", symbolName: "gearshape.fill", targetScreen: "settings")
     ]
     
     var onTabSelected: ((TabItem) -> Void)?
@@ -632,11 +761,25 @@ final class NativeBottomBar: UIView {
         setupUI()
     }
     
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // Expand top hit-test area by 28pt so the elevated Ranks medallion catches taps
+        let hitFrame = bounds.inset(by: UIEdgeInsets(top: -28, left: 0, bottom: 0, right: 0))
+        return hitFrame.contains(point)
+    }
+    
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if !self.isUserInteractionEnabled || self.isHidden || self.alpha < 0.01 {
             return nil
         }
         if self.point(inside: point, with: event) {
+            // Check elevated ranks button first
+            if buttonViews.count > 2 {
+                let elevatedBtn = buttonViews[2]
+                let pt = self.convert(point, to: elevatedBtn)
+                if elevatedBtn.point(inside: pt, with: event) {
+                    return elevatedBtn
+                }
+            }
             let tabWidth = bounds.width / CGFloat(max(1, buttonViews.count))
             let tappedIndex = Int(point.x / tabWidth)
             if tappedIndex >= 0 && tappedIndex < buttonViews.count {
@@ -648,18 +791,30 @@ final class NativeBottomBar: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 0.98)
+        clipsToBounds = false
+        backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 0.95)
+        layer.cornerRadius = 24
+        layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        
+        // Ambient glow / drop shadow
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.45
+        layer.shadowRadius = 14
+        layer.shadowOffset = CGSize(width: 0, height: -4)
         
         let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         let blurView = UIVisualEffectView(effect: blurEffect)
         blurView.isUserInteractionEnabled = false
+        blurView.layer.cornerRadius = 24
+        blurView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        blurView.layer.masksToBounds = true
         blurView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(blurView)
         sendSubviewToBack(blurView)
         
         let topBorder = UIView()
         topBorder.isUserInteractionEnabled = false
-        topBorder.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
+        topBorder.backgroundColor = UIColor(white: 1.0, alpha: 0.12)
         topBorder.translatesAutoresizingMaskIntoConstraints = false
         addSubview(topBorder)
         
@@ -668,6 +823,7 @@ final class NativeBottomBar: UIView {
         stackView.distribution = .fillEqually
         stackView.alignment = .fill
         stackView.isUserInteractionEnabled = true
+        stackView.clipsToBounds = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
         
@@ -688,7 +844,7 @@ final class NativeBottomBar: UIView {
             topBorder.topAnchor.constraint(equalTo: topAnchor),
             topBorder.leadingAnchor.constraint(equalTo: leadingAnchor),
             topBorder.trailingAnchor.constraint(equalTo: trailingAnchor),
-            topBorder.heightAnchor.constraint(equalToConstant: 0.5),
+            topBorder.heightAnchor.constraint(equalToConstant: 0.75),
             
             stackView.topAnchor.constraint(equalTo: topAnchor),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -716,11 +872,11 @@ final class NativeBottomBar: UIView {
             index = 0
         case "world-select", "level-select":
             index = 1
-        case "daily":
-            index = 2
         case "leaderboard", "achievements":
-            index = 3
+            index = 2
         case "store":
+            index = 3
+        case "settings":
             index = 4
         default:
             return
@@ -742,17 +898,26 @@ final class NativeBottomBar: UIView {
 final class TabButtonView: UIButton {
     let item: NativeBottomBar.TabItem
     let index: Int
+    let isElevated: Bool
     
+    // Regular Tab Views
+    private let selectionPill = UIView()
     private let iconImageView = UIImageView()
     private let titleLabelCustom = UILabel()
     private let activeDot = UIView()
     
+    // Elevated Center Medallion View (for Ranks)
+    private let medallionView = UIView()
+    
     private let activeColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
     private let inactiveColor = UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1.0)
+    private let goldActiveColor = UIColor(red: 251/255, green: 191/255, blue: 36/255, alpha: 1.0)
+    private let goldMutedColor = UIColor(red: 217/255, green: 119/255, blue: 6/255, alpha: 0.9)
     
     init(item: NativeBottomBar.TabItem, index: Int) {
         self.item = item
         self.index = index
+        self.isElevated = (item.id == "ranks")
         super.init(frame: .zero)
         setupView()
     }
@@ -762,15 +927,37 @@ final class TabButtonView: UIButton {
     }
     
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        // Expand hit-test area by 10pt all around to guarantee touch responsiveness
-        let expanded = bounds.insetBy(dx: -10, dy: -10)
-        return expanded.contains(point)
+        if isElevated {
+            // Expand upwards for the elevated circular medallion
+            let expanded = bounds.inset(by: UIEdgeInsets(top: -26, left: -6, bottom: -6, right: -6))
+            return expanded.contains(point)
+        }
+        return bounds.insetBy(dx: -6, dy: -6).contains(point)
     }
     
     private func setupView() {
         backgroundColor = .clear
         isExclusiveTouch = true
         isUserInteractionEnabled = true
+        clipsToBounds = false
+        
+        if isElevated {
+            setupElevatedView()
+        } else {
+            setupStandardView()
+        }
+    }
+    
+    private func setupStandardView() {
+        // Soft glowing selection pill behind icon
+        selectionPill.backgroundColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 0.16)
+        selectionPill.layer.cornerRadius = 13
+        selectionPill.layer.borderWidth = 1.0
+        selectionPill.layer.borderColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 0.3).cgColor
+        selectionPill.alpha = 0
+        selectionPill.isUserInteractionEnabled = false
+        selectionPill.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(selectionPill)
         
         let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
         iconImageView.image = UIImage(systemName: item.symbolName, withConfiguration: config)
@@ -789,40 +976,128 @@ final class TabButtonView: UIButton {
         addSubview(titleLabelCustom)
         
         activeDot.backgroundColor = activeColor
-        activeDot.layer.cornerRadius = 2
+        activeDot.layer.cornerRadius = 1.5
+        activeDot.layer.shadowColor = activeColor.cgColor
+        activeDot.layer.shadowRadius = 4
+        activeDot.layer.shadowOpacity = 0.8
+        activeDot.layer.shadowOffset = .zero
         activeDot.alpha = 0
         activeDot.isUserInteractionEnabled = false
         activeDot.translatesAutoresizingMaskIntoConstraints = false
         addSubview(activeDot)
         
         NSLayoutConstraint.activate([
-            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
-            iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 22),
-            iconImageView.heightAnchor.constraint(equalToConstant: 22),
+            selectionPill.centerXAnchor.constraint(equalTo: centerXAnchor),
+            selectionPill.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            selectionPill.widthAnchor.constraint(equalToConstant: 44),
+            selectionPill.heightAnchor.constraint(equalToConstant: 26),
             
-            titleLabelCustom.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 3),
+            iconImageView.centerXAnchor.constraint(equalTo: selectionPill.centerXAnchor),
+            iconImageView.centerYAnchor.constraint(equalTo: selectionPill.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 20),
+            iconImageView.heightAnchor.constraint(equalToConstant: 20),
+            
+            titleLabelCustom.topAnchor.constraint(equalTo: selectionPill.bottomAnchor, constant: 2),
             titleLabelCustom.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
             titleLabelCustom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
             
             activeDot.topAnchor.constraint(equalTo: titleLabelCustom.bottomAnchor, constant: 2),
             activeDot.centerXAnchor.constraint(equalTo: centerXAnchor),
-            activeDot.widthAnchor.constraint(equalToConstant: 4),
-            activeDot.heightAnchor.constraint(equalToConstant: 4)
+            activeDot.widthAnchor.constraint(equalToConstant: 12),
+            activeDot.heightAnchor.constraint(equalToConstant: 3)
+        ])
+    }
+    
+    private func setupElevatedView() {
+        // Floating circular golden medallion lifted above navigation bar
+        medallionView.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        medallionView.layer.cornerRadius = 24
+        medallionView.layer.borderWidth = 3.5
+        medallionView.layer.borderColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0).cgColor
+        medallionView.layer.shadowColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.65).cgColor
+        medallionView.layer.shadowOffset = CGSize(width: 0, height: 3)
+        medallionView.layer.shadowRadius = 8
+        medallionView.layer.shadowOpacity = 0.6
+        medallionView.isUserInteractionEnabled = false
+        medallionView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(medallionView)
+        
+        let config = UIImage.SymbolConfiguration(pointSize: 21, weight: .bold)
+        iconImageView.image = UIImage(systemName: item.symbolName, withConfiguration: config)
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.tintColor = .white
+        iconImageView.isUserInteractionEnabled = false
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        medallionView.addSubview(iconImageView)
+        
+        titleLabelCustom.text = item.title
+        titleLabelCustom.font = UIFont.systemFont(ofSize: 10, weight: .heavy)
+        titleLabelCustom.textColor = goldMutedColor
+        titleLabelCustom.textAlignment = .center
+        titleLabelCustom.isUserInteractionEnabled = false
+        titleLabelCustom.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabelCustom)
+        
+        activeDot.backgroundColor = goldActiveColor
+        activeDot.layer.cornerRadius = 1.5
+        activeDot.layer.shadowColor = goldActiveColor.cgColor
+        activeDot.layer.shadowRadius = 4
+        activeDot.layer.shadowOpacity = 0.8
+        activeDot.layer.shadowOffset = .zero
+        activeDot.alpha = 0
+        activeDot.isUserInteractionEnabled = false
+        activeDot.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(activeDot)
+        
+        NSLayoutConstraint.activate([
+            medallionView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            medallionView.topAnchor.constraint(equalTo: topAnchor, constant: -16),
+            medallionView.widthAnchor.constraint(equalToConstant: 48),
+            medallionView.heightAnchor.constraint(equalToConstant: 48),
+            
+            iconImageView.centerXAnchor.constraint(equalTo: medallionView.centerXAnchor),
+            iconImageView.centerYAnchor.constraint(equalTo: medallionView.centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            
+            titleLabelCustom.topAnchor.constraint(equalTo: medallionView.bottomAnchor, constant: 2),
+            titleLabelCustom.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
+            titleLabelCustom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            
+            activeDot.topAnchor.constraint(equalTo: titleLabelCustom.bottomAnchor, constant: 2),
+            activeDot.centerXAnchor.constraint(equalTo: centerXAnchor),
+            activeDot.widthAnchor.constraint(equalToConstant: 12),
+            activeDot.heightAnchor.constraint(equalToConstant: 3)
         ])
     }
     
     func setSelected(_ isSelected: Bool, animated: Bool) {
-        let block = {
-            self.iconImageView.tintColor = isSelected ? self.activeColor : self.inactiveColor
-            self.titleLabelCustom.textColor = isSelected ? self.activeColor : self.inactiveColor
-            self.activeDot.alpha = isSelected ? 1.0 : 0.0
-            self.transform = isSelected ? CGAffineTransform(scaleX: 1.06, y: 1.06) : .identity
-        }
-        if animated {
-            UIView.animate(withDuration: 0.15, delay: 0, options: [.curveEaseOut], animations: block)
+        if isElevated {
+            let block = {
+                self.medallionView.transform = isSelected ? CGAffineTransform(scaleX: 1.10, y: 1.10) : .identity
+                self.medallionView.layer.shadowRadius = isSelected ? 14 : 8
+                self.medallionView.layer.shadowOpacity = isSelected ? 0.9 : 0.6
+                self.titleLabelCustom.textColor = isSelected ? self.goldActiveColor : self.goldMutedColor
+                self.activeDot.alpha = isSelected ? 1.0 : 0.0
+            }
+            if animated {
+                UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.68, initialSpringVelocity: 0.5, options: [.allowUserInteraction], animations: block)
+            } else {
+                block()
+            }
         } else {
-            block()
+            let block = {
+                self.selectionPill.alpha = isSelected ? 1.0 : 0.0
+                self.iconImageView.tintColor = isSelected ? self.activeColor : self.inactiveColor
+                self.iconImageView.transform = isSelected ? CGAffineTransform(scaleX: 1.14, y: 1.14) : .identity
+                self.titleLabelCustom.textColor = isSelected ? self.activeColor : self.inactiveColor
+                self.activeDot.alpha = isSelected ? 1.0 : 0.0
+            }
+            if animated {
+                UIView.animate(withDuration: 0.32, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [.allowUserInteraction], animations: block)
+            } else {
+                block()
+            }
         }
     }
 }
@@ -886,6 +1161,12 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         fetchOfflineStatus()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.overrideUserInterfaceStyle = .dark
+        navigationController?.navigationBar.tintColor = .white
+    }
+    
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -896,8 +1177,27 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         
         let closeItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeTapped))
         navigationItem.rightBarButtonItem = closeItem
-        navigationController?.navigationBar.tintColor = .white
-        navigationController?.navigationBar.barStyle = .black
+        
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithOpaqueBackground()
+        navBarAppearance.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
+        navBarAppearance.titleTextAttributes = [
+            .foregroundColor: UIColor.white,
+            .font: UIFont.systemFont(ofSize: 18, weight: .bold)
+        ]
+        navBarAppearance.shadowColor = .clear
+        
+        navigationItem.standardAppearance = navBarAppearance
+        navigationItem.scrollEdgeAppearance = navBarAppearance
+        navigationItem.compactAppearance = navBarAppearance
+        
+        if let navBar = navigationController?.navigationBar {
+            navBar.standardAppearance = navBarAppearance
+            navBar.scrollEdgeAppearance = navBarAppearance
+            navBar.compactAppearance = navBarAppearance
+            navBar.tintColor = .white
+            navBar.overrideUserInterfaceStyle = .dark
+        }
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.keyboardDismissMode = .onDrag
@@ -1303,24 +1603,56 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     
     @objc private func googleSignInTapped() {
         HapticManager.shared.impact(style: .medium)
+        
+        let alert = UIAlertController(
+            title: "Sign in with Apple Recommended",
+            message: "On iOS, Sign in with Apple provides seamless 1-tap cloud sync. Google Web Sign-In is restricted on local iOS apps by Google OAuth policy.\n\nWould you like to use Sign in with Apple or Email?",
+            preferredStyle: .actionSheet
+        )
+        alert.overrideUserInterfaceStyle = .dark
+        
+        alert.addAction(UIAlertAction(title: " Sign in with Apple (Recommended)", style: .default) { [weak self] _ in
+            self?.appleSignInTapped()
+        })
+        
+        alert.addAction(UIAlertAction(title: "✉️ Sign in with Email", style: .default) { [weak self] _ in
+            self?.emailTextField.becomeFirstResponder()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Try Google Web Sign-In", style: .default) { [weak self] _ in
+            self?.executeGoogleSignIn()
+        })
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        if let popover = alert.popoverPresentationController {
+            popover.sourceView = googleSignInButton
+            popover.sourceRect = googleSignInButton.bounds
+        }
+        present(alert, animated: true)
+    }
+    
+    private func executeGoogleSignIn() {
         setLoading(true)
-        scriptBridge?.evaluateJavaScript("""
-        (async function() {
-            try {
-                if (typeof App !== 'undefined' && App.handleGoogleSignIn) {
-                    await App.handleGoogleSignIn();
-                    return JSON.stringify({ success: true });
-                }
-                return JSON.stringify({ success: false, error: 'App not loaded' });
-            } catch(e) {
-                return JSON.stringify({ success: false, error: e.message });
-            }
-        })();
-        """) { [weak self] (_, _) in
+        let body = """
+        if (typeof App !== 'undefined' && App.handleGoogleSignIn) {
+            await App.handleGoogleSignIn();
+            return JSON.stringify({ success: true });
+        }
+        return JSON.stringify({ success: false, error: 'App not loaded' });
+        """
+        scriptBridge?.callAsyncJavaScript(body) { [weak self] result in
             DispatchQueue.main.async {
                 self?.setLoading(false)
-                self?.dismiss(animated: true) {
-                    self?.onAuthSuccess?()
+                switch result {
+                case .success(let val):
+                    if let str = val as? String, str.contains("success") {
+                        self?.dismiss(animated: true) {
+                            self?.onAuthSuccess?()
+                        }
+                    }
+                case .failure:
+                    break
                 }
             }
         }
@@ -1329,19 +1661,14 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     @objc private func anonymousSignInTapped() {
         HapticManager.shared.impact(style: .medium)
         setLoading(true)
-        scriptBridge?.evaluateJavaScript("""
-        (async function() {
-            try {
-                if (typeof App !== 'undefined' && App.handleAnonymousSignIn) {
-                    await App.handleAnonymousSignIn();
-                    return JSON.stringify({ success: true });
-                }
-                return JSON.stringify({ success: false, error: 'App not loaded' });
-            } catch(e) {
-                return JSON.stringify({ success: false, error: e.message });
-            }
-        })();
-        """) { [weak self] (_, _) in
+        let body = """
+        if (typeof App !== 'undefined' && App.handleAnonymousSignIn) {
+            await App.handleAnonymousSignIn();
+            return JSON.stringify({ success: true });
+        }
+        return JSON.stringify({ success: false, error: 'App not loaded' });
+        """
+        scriptBridge?.callAsyncJavaScript(body) { [weak self] result in
             DispatchQueue.main.async {
                 self?.setLoading(false)
                 self?.dismiss(animated: true) {
@@ -1353,6 +1680,7 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     
     @objc private func forgotPasswordTapped() {
         let alert = UIAlertController(title: "Reset Password", message: "Enter your registered email address to receive password reset instructions.", preferredStyle: .alert)
+        alert.overrideUserInterfaceStyle = .dark
         alert.addTextField { tf in
             tf.placeholder = "you@example.com"
             tf.text = self.emailTextField.text
@@ -1364,6 +1692,7 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
             let escaped = email.replacingOccurrences(of: "'", with: "\\'")
             self?.scriptBridge?.evaluateJavaScript("if (typeof FirebaseService !== 'undefined') FirebaseService.sendPasswordReset('\(escaped)');")
             let confirmation = UIAlertController(title: "Sent", message: "If an account exists for \(email), a reset link has been sent.", preferredStyle: .alert)
+            confirmation.overrideUserInterfaceStyle = .dark
             confirmation.addAction(UIAlertAction(title: "OK", style: .default))
             self?.present(confirmation, animated: true)
         }))
@@ -1437,44 +1766,44 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     
     private func performSignIn(email: String, password: String) {
         setLoading(true)
-        let escapedEmail = email.replacingOccurrences(of: "'", with: "\\'")
-        let escapedPassword = password.replacingOccurrences(of: "'", with: "\\'")
-        
-        let js = """
-        (async function() {
-            try {
-                if (typeof FirebaseService !== 'undefined') {
-                    const res = await FirebaseService.signInWithEmail('\(escapedEmail)', '\(escapedPassword)');
-                    if (res && res.success) {
-                        if (typeof App !== 'undefined' && App.handleSuccessfulLogin) {
-                            App.handleSuccessfulLogin(res.user, 'email');
-                        }
-                        return JSON.stringify({ success: true, user: res.user });
-                    } else {
-                        return JSON.stringify({ success: false, error: (res && res.error) || 'Invalid credentials' });
-                    }
+        let body = """
+        if (typeof FirebaseService !== 'undefined') {
+            const res = await FirebaseService.signInWithEmail(email, password);
+            if (res && res.success) {
+                if (typeof App !== 'undefined' && App.handleSuccessfulLogin) {
+                    App.handleSuccessfulLogin(res.user, 'email');
                 }
-                return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
-            } catch(e) {
-                return JSON.stringify({ success: false, error: e.message || 'Sign in failed' });
+                return JSON.stringify({ success: true, user: res.user });
+            } else {
+                return JSON.stringify({ success: false, error: (res && res.error) || 'Invalid credentials' });
             }
-        })();
+        }
+        return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
         """
         
-        scriptBridge?.evaluateJavaScript(js) { [weak self] (result: Any?, error: Error?) in
+        scriptBridge?.callAsyncJavaScript(body, arguments: ["email": email, "password": password]) { [weak self] result in
             DispatchQueue.main.async {
                 self?.setLoading(false)
-                if let str = result as? String,
-                   let data = str.data(using: .utf8),
-                   let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let success = dict["success"] as? Bool, success {
-                    HapticManager.shared.notification(type: .success)
-                    self?.dismiss(animated: true) {
-                        self?.onAuthSuccess?()
+                switch result {
+                case .success(let val):
+                    if let str = val as? String,
+                       let data = str.data(using: .utf8),
+                       let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let success = dict["success"] as? Bool, success {
+                        HapticManager.shared.notification(type: .success)
+                        self?.dismiss(animated: true) {
+                            self?.onAuthSuccess?()
+                        }
+                    } else if let str = val as? String,
+                              let data = str.data(using: .utf8),
+                              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                              let err = dict["error"] as? String {
+                        self?.showError(err)
+                    } else {
+                        self?.showError("Sign-in failed. Please check credentials.")
                     }
-                } else {
-                    let err = (result as? String) ?? error?.localizedDescription ?? "Sign-in failed. Please check credentials."
-                    self?.showError(err)
+                case .failure(let err):
+                    self?.showError(err.localizedDescription)
                 }
             }
         }
@@ -1482,52 +1811,57 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     
     private func performSignUp(firstName: String, lastName: String, fullDisplayName: String, email: String, password: String) {
         setLoading(true)
-        let escapedFirst = firstName.replacingOccurrences(of: "'", with: "\\'")
-        let escapedLast = lastName.replacingOccurrences(of: "'", with: "\\'")
-        let escapedName = fullDisplayName.replacingOccurrences(of: "'", with: "\\'")
-        let escapedEmail = email.replacingOccurrences(of: "'", with: "\\'")
-        let escapedPassword = password.replacingOccurrences(of: "'", with: "\\'")
-        
-        let js = """
-        (async function() {
-            try {
-                if (typeof FirebaseService !== 'undefined') {
-                    const res = await FirebaseService.signUpWithEmail('\(escapedEmail)', '\(escapedPassword)', '\(escapedName)');
-                    if (res && res.success) {
-                        if (typeof App !== 'undefined') {
-                            App.state.firstName = '\(escapedFirst)';
-                            App.state.lastName = '\(escapedLast)';
-                            App.state.playerName = '\(escapedName)';
-                            if (App.handleSuccessfulLogin) {
-                                App.handleSuccessfulLogin(res.user, 'email');
-                            }
-                        }
-                        return JSON.stringify({ success: true, user: res.user });
-                    } else {
-                        return JSON.stringify({ success: false, error: (res && res.error) || 'Registration failed' });
+        let body = """
+        if (typeof FirebaseService !== 'undefined') {
+            const res = await FirebaseService.signUpWithEmail(email, password, displayName);
+            if (res && res.success) {
+                if (typeof App !== 'undefined') {
+                    App.state.firstName = firstName;
+                    App.state.lastName = lastName;
+                    App.state.playerName = displayName;
+                    if (App.handleSuccessfulLogin) {
+                        App.handleSuccessfulLogin(res.user, 'email');
                     }
                 }
-                return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
-            } catch(e) {
-                return JSON.stringify({ success: false, error: e.message || 'Sign up failed' });
+                return JSON.stringify({ success: true, user: res.user });
+            } else {
+                return JSON.stringify({ success: false, error: (res && res.error) || 'Registration failed' });
             }
-        })();
+        }
+        return JSON.stringify({ success: false, error: 'FirebaseService not loaded' });
         """
         
-        scriptBridge?.evaluateJavaScript(js) { [weak self] (result: Any?, error: Error?) in
+        let args: [String: Any] = [
+            "email": email,
+            "password": password,
+            "displayName": fullDisplayName,
+            "firstName": firstName,
+            "lastName": lastName
+        ]
+        
+        scriptBridge?.callAsyncJavaScript(body, arguments: args) { [weak self] result in
             DispatchQueue.main.async {
                 self?.setLoading(false)
-                if let str = result as? String,
-                   let data = str.data(using: .utf8),
-                   let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let success = dict["success"] as? Bool, success {
-                    HapticManager.shared.notification(type: .success)
-                    self?.dismiss(animated: true) {
-                        self?.onAuthSuccess?()
+                switch result {
+                case .success(let val):
+                    if let str = val as? String,
+                       let data = str.data(using: .utf8),
+                       let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let success = dict["success"] as? Bool, success {
+                        HapticManager.shared.notification(type: .success)
+                        self?.dismiss(animated: true) {
+                            self?.onAuthSuccess?()
+                        }
+                    } else if let str = val as? String,
+                              let data = str.data(using: .utf8),
+                              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                              let err = dict["error"] as? String {
+                        self?.showError(err)
+                    } else {
+                        self?.showError("Registration failed. Please try again.")
                     }
-                } else {
-                    let err = (result as? String) ?? error?.localizedDescription ?? "Registration failed. Please try again."
-                    self?.showError(err)
+                case .failure(let err):
+                    self?.showError(err.localizedDescription)
                 }
             }
         }
@@ -1621,14 +1955,39 @@ final class NativeDailyChallengeViewController: UIViewController {
         loadChallengeData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.overrideUserInterfaceStyle = .dark
+        navigationController?.navigationBar.tintColor = .white
+    }
+    
     private func setupUI() {
         title = "Daily Challenge"
         view.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
         
         let closeItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeTapped))
         navigationItem.rightBarButtonItem = closeItem
-        navigationController?.navigationBar.tintColor = .white
-        navigationController?.navigationBar.barStyle = .black
+        
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithOpaqueBackground()
+        navBarAppearance.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
+        navBarAppearance.titleTextAttributes = [
+            .foregroundColor: UIColor.white,
+            .font: UIFont.systemFont(ofSize: 18, weight: .bold)
+        ]
+        navBarAppearance.shadowColor = .clear
+        
+        navigationItem.standardAppearance = navBarAppearance
+        navigationItem.scrollEdgeAppearance = navBarAppearance
+        navigationItem.compactAppearance = navBarAppearance
+        
+        if let navBar = navigationController?.navigationBar {
+            navBar.standardAppearance = navBarAppearance
+            navBar.scrollEdgeAppearance = navBarAppearance
+            navBar.compactAppearance = navBarAppearance
+            navBar.tintColor = .white
+            navBar.overrideUserInterfaceStyle = .dark
+        }
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)

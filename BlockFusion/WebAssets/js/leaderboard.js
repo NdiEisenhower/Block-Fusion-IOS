@@ -78,6 +78,7 @@ class Leaderboard {
     }
 
     static async loadCountries() {
+        if (!this.isUserLoggedIn()) return;
         if (typeof FirebaseService !== 'undefined' && FirebaseService.initialized) {
             try {
                 this.allCountries = await FirebaseService.getCountriesPaginated(this.currentTimeframe);
@@ -175,9 +176,58 @@ class Leaderboard {
         }
     }
 
-    // Smart render - shows top 10 + user's position with neighbors
+    static isUserLoggedIn() {
+        return (typeof App !== 'undefined' && App.state && App.state.isLoggedIn) || 
+               (typeof FirebaseService !== 'undefined' && FirebaseService.currentUser != null);
+    }
+
+    static renderLoginRequired() {
+        this.isLoading = false;
+        const list = document.getElementById('leaderboard-list');
+        const paginationInfo = document.getElementById('pagination-info');
+        const btnFindMe = document.getElementById('btn-find-me');
+        const toggleBtn = document.getElementById('btn-toggle-view');
+        
+        if (btnFindMe) btnFindMe.style.display = 'none';
+        if (toggleBtn) toggleBtn.style.display = 'none';
+        if (paginationInfo) paginationInfo.style.display = 'none';
+        document.querySelectorAll('#btn-first-page, #btn-prev-page, #btn-next-page, #btn-last-page, #page-indicator').forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        // Hide country and filter controls when locked
+        const countrySelect = document.getElementById('leaderboard-country-filter');
+        if (countrySelect && countrySelect.parentElement) {
+            countrySelect.parentElement.style.display = 'none';
+        }
+
+        const titleEl = document.querySelector('#leaderboard-content p');
+        if (titleEl) titleEl.style.display = 'none';
+
+        if (list) {
+            list.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; text-align: center;">
+                    <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; font-size: 34px; margin-bottom: 18px; border: 1.5px solid rgba(245, 158, 11, 0.35); box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);">
+                        🔒
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 800; color: #ffffff; margin: 0 0 10px 0;">Rankings Locked</h3>
+                    <p style="font-size: 14px; color: #94a3b8; max-width: 290px; line-height: 1.5; margin: 0 0 24px 0;">
+                        Sign in to view global rankings, compete with players worldwide, and track your climb!
+                    </p>
+                    <button class="btn btn-primary" onclick="App.showLoginPrompt()" style="padding: 12px 32px; font-size: 15px; font-weight: 700; border-radius: 12px; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35); cursor: pointer;">
+                        Sign In to View
+                    </button>
+                </div>
+            `;
+        }
+    }
+
     // Smart render - shows top 10 + user's position with neighbors
     static async renderSmart() {
+        if (!this.isUserLoggedIn()) {
+            this.renderLoginRequired();
+            return;
+        }
         if (this.isLoading) return;
         this.isLoading = true;
 
@@ -519,6 +569,21 @@ class Leaderboard {
 
     // Main render method - delegates to smart or paginated
     static async render() {
+        if (!this.isUserLoggedIn()) {
+            this.renderLoginRequired();
+            return;
+        }
+
+        // Restore filter bar & title if previously hidden
+        const countrySelect = document.getElementById('leaderboard-country-filter');
+        if (countrySelect && countrySelect.parentElement) {
+            countrySelect.parentElement.style.display = '';
+        }
+        const titleEl = document.querySelector('#leaderboard-content p');
+        if (titleEl) titleEl.style.display = '';
+        const toggleBtn = document.getElementById('btn-toggle-view');
+        if (toggleBtn) toggleBtn.style.display = '';
+
         if (this.viewMode === 'smart') {
             await this.renderSmart();
         } else {
@@ -528,6 +593,10 @@ class Leaderboard {
 
     // Paginated render (original leaderboard)
     static async renderPaginated() {
+        if (!this.isUserLoggedIn()) {
+            this.renderLoginRequired();
+            return;
+        }
         if (this.isLoading) return;
         this.isLoading = true;
 

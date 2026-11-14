@@ -776,8 +776,13 @@ class FirebaseService {
             }
         } catch (error) {
             let msg = 'Sign-in failed';
-            if (error.code === 'auth/popup-closed-by-user') msg = 'Cancelled';
-            if (error.code === 'auth/popup-blocked') msg = 'Pop-up blocked';
+            if (error.code === 'auth/popup-closed-by-user') {
+                msg = 'Cancelled';
+            } else if (error.code === 'auth/popup-blocked') {
+                msg = 'Pop-up blocked';
+            } else if (error.code === 'auth/unauthorized-domain') {
+                msg = 'On iOS, please use Sign in with Apple or Email';
+            }
             this.logCrash('google_signin_error', error.code);
             return { success: false, error: msg };
         }
