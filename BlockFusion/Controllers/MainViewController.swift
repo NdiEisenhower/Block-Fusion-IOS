@@ -62,6 +62,11 @@ final class MainViewController: UIViewController {
         setupTopBar()
         setupBottomBar()
         setupWebView()
+        
+        // Ensure navigation bars stay on top of the web view in the Z-order hierarchy
+        view.bringSubviewToFront(bottomBar)
+        view.bringSubviewToFront(topBar)
+        
         setupManagers()
         loadGame()
     }
@@ -111,9 +116,13 @@ final class MainViewController: UIViewController {
         topBar.onSettingsTapped = { [weak self] in
             HapticManager.shared.selection()
             self?.scriptBridge.evaluateJavaScript("""
-            if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
-                Navigation.navigateTo('settings');
-            }
+            (function() {
+                try {
+                    if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                        Navigation.navigateTo('settings');
+                    }
+                } catch(e) {}
+            })();
             """)
         }
         
@@ -134,11 +143,27 @@ final class MainViewController: UIViewController {
         bottomBar.onTabSelected = { [weak self] tab in
             guard let self = self else { return }
             HapticManager.shared.selection()
-            self.scriptBridge.evaluateJavaScript("""
-            if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
-                Navigation.navigateTo('\(tab.targetScreen)');
-            }
-            """)
+            print("🔘 Native bottom bar tab selected: \(tab.id) -> \(tab.targetScreen)")
+            let js = """
+            (function() {
+                try {
+                    if (typeof Navigation !== 'undefined' && typeof Navigation.navigateTo === 'function') {
+                        Navigation.navigateTo('\(tab.targetScreen)');
+                    } else if (typeof window.Navigation !== 'undefined') {
+                        window.Navigation.navigateTo('\(tab.targetScreen)');
+                    } else {
+                        var target = document.getElementById('screen-\(tab.targetScreen)');
+                        if (target) {
+                            document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+                            target.classList.add('active');
+                        }
+                    }
+                } catch(e) {
+                    console.error('Tab navigation error:', e);
+                }
+            })();
+            """
+            self.scriptBridge.evaluateJavaScript(js)
         }
         
         bottomBarHeightConstraint = bottomBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -58)
@@ -393,18 +418,27 @@ extension MainViewController: ScriptBridgeDelegate {
             self.currentScreen = screen
             let isGame = (screen == "game")
             
+            if !isGame {
+                self.bottomBar.isHidden = false
+                self.topBar.isHidden = false
+            }
+            self.bottomBar.isUserInteractionEnabled = !isGame
+            
             // On gameplay screen, smoothly collapse the top and bottom bars so board & undo button have full height
             UIView.animate(withDuration: 0.22, delay: 0, options: [.curveEaseInOut], animations: {
                 self.topBar.alpha = isGame ? 0.0 : 1.0
-                self.topBar.isHidden = isGame
                 self.topBarHeightConstraint.constant = isGame ? 0 : 44
                 
                 self.bottomBar.alpha = isGame ? 0.0 : 1.0
-                self.bottomBar.isHidden = isGame
                 self.bottomBarHeightConstraint.constant = isGame ? 0 : -58
                 
                 self.view.layoutIfNeeded()
-            }, completion: nil)
+            }, completion: { _ in
+                if isGame {
+                    self.bottomBar.isHidden = true
+                    self.topBar.isHidden = true
+                }
+            })
             
             if !isGame {
                 self.bottomBar.selectTab(forScreen: screen)
@@ -556,11 +590,13 @@ final class NativeBottomBar: UIView {
         
         let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.isUserInteractionEnabled = false
         blurView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(blurView)
         sendSubviewToBack(blurView)
         
         let topBorder = UIView()
+        topBorder.isUserInteractionEnabled = false
         topBorder.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
         topBorder.translatesAutoresizingMaskIntoConstraints = false
         addSubview(topBorder)
@@ -569,6 +605,7 @@ final class NativeBottomBar: UIView {
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
         stackView.alignment = .fill
+        stackView.isUserInteractionEnabled = true
         stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
         
@@ -590,10 +627,10 @@ final class NativeBottomBar: UIView {
             topBorder.trailingAnchor.constraint(equalTo: trailingAnchor),
             topBorder.heightAnchor.constraint(equalToConstant: 0.5),
             
-            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
-            stackView.heightAnchor.constraint(equalToConstant: 48)
+            stackView.topAnchor.constraint(equalTo: topAnchor),
+            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
         
         updateSelection(index: 0, animated: false)
@@ -601,10 +638,6 @@ final class NativeBottomBar: UIView {
     
     @objc private func tabTapped(_ sender: TabButtonView) {
         let index = sender.index
-        guard index != selectedIndex else {
-            onTabSelected?(tabs[index])
-            return
-        }
         updateSelection(index: index, animated: true)
         onTabSelected?(tabs[index])
     }
@@ -639,12 +672,12 @@ final class NativeBottomBar: UIView {
 }
 
 // MARK: - Tab Button Component
-final class TabButtonView: UIControl {
+final class TabButtonView: UIButton {
     let item: NativeBottomBar.TabItem
     let index: Int
     
     private let iconImageView = UIImageView()
-    private let titleLabel = UILabel()
+    private let titleLabelCustom = UILabel()
     private let activeDot = UIView()
     
     private let activeColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
@@ -662,6 +695,10 @@ final class TabButtonView: UIControl {
     }
     
     private func setupView() {
+        backgroundColor = .clear
+        isExclusiveTouch = true
+        isUserInteractionEnabled = true
+        
         let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
         iconImageView.image = UIImage(systemName: item.symbolName, withConfiguration: config)
         iconImageView.contentMode = .scaleAspectFit
@@ -670,13 +707,13 @@ final class TabButtonView: UIControl {
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(iconImageView)
         
-        titleLabel.text = item.title
-        titleLabel.font = UIFont.systemFont(ofSize: 10, weight: .bold)
-        titleLabel.textColor = inactiveColor
-        titleLabel.textAlignment = .center
-        titleLabel.isUserInteractionEnabled = false
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(titleLabel)
+        titleLabelCustom.text = item.title
+        titleLabelCustom.font = UIFont.systemFont(ofSize: 10, weight: .bold)
+        titleLabelCustom.textColor = inactiveColor
+        titleLabelCustom.textAlignment = .center
+        titleLabelCustom.isUserInteractionEnabled = false
+        titleLabelCustom.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(titleLabelCustom)
         
         activeDot.backgroundColor = activeColor
         activeDot.layer.cornerRadius = 2
@@ -686,16 +723,16 @@ final class TabButtonView: UIControl {
         addSubview(activeDot)
         
         NSLayoutConstraint.activate([
-            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
             iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            iconImageView.widthAnchor.constraint(equalToConstant: 20),
-            iconImageView.heightAnchor.constraint(equalToConstant: 20),
+            iconImageView.widthAnchor.constraint(equalToConstant: 22),
+            iconImageView.heightAnchor.constraint(equalToConstant: 22),
             
-            titleLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 2),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
+            titleLabelCustom.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 3),
+            titleLabelCustom.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
+            titleLabelCustom.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -2),
             
-            activeDot.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 2),
+            activeDot.topAnchor.constraint(equalTo: titleLabelCustom.bottomAnchor, constant: 2),
             activeDot.centerXAnchor.constraint(equalTo: centerXAnchor),
             activeDot.widthAnchor.constraint(equalToConstant: 4),
             activeDot.heightAnchor.constraint(equalToConstant: 4)
@@ -705,7 +742,7 @@ final class TabButtonView: UIControl {
     func setSelected(_ isSelected: Bool, animated: Bool) {
         let block = {
             self.iconImageView.tintColor = isSelected ? self.activeColor : self.inactiveColor
-            self.titleLabel.textColor = isSelected ? self.activeColor : self.inactiveColor
+            self.titleLabelCustom.textColor = isSelected ? self.activeColor : self.inactiveColor
             self.activeDot.alpha = isSelected ? 1.0 : 0.0
             self.transform = isSelected ? CGAffineTransform(scaleX: 1.06, y: 1.06) : .identity
         }
