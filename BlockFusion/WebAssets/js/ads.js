@@ -15,9 +15,9 @@ class AdService {
         },
         // iOS Production Ad Units
         ios: {
-            banner: 'ca-app-pub-4541991465223368/5021200371',
-            interstitial: 'ca-app-pub-4541991465223368/6641883584',
-            rewarded: 'ca-app-pub-4541991465223368/3339070860'
+            banner: 'ca-app-pub-4255859216659691/6387045959',
+            interstitial: 'ca-app-pub-4255859216659691/7221704767',
+            rewarded: 'ca-app-pub-4255859216659691/3713704595'
         },
         // Huawei Production Ad Unit IDs
         huawei: {
@@ -359,7 +359,27 @@ class AdService {
     // ANDROID (AdMob) INITIALIZATION
     // ============================================================
     static initAdMob() {
-        console.log('📱 Initializing Ads for Android/Huawei...');
+        console.log('📱 Initializing Ads for Android/iOS/Huawei...');
+
+        // Check if iOS bridge is available
+        if (typeof window.iOS !== 'undefined' || (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge)) {
+            const ids = this.getAdUnitIds();
+            if (typeof window.iOS !== 'undefined' && typeof window.iOS.initAds === 'function') {
+                window.iOS.initAds(ids.banner || "", ids.interstitial || "", ids.rewarded || "");
+            } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.adBridge) {
+                window.webkit.messageHandlers.adBridge.postMessage({
+                    action: 'initAds',
+                    bannerId: ids.banner || "",
+                    interId: ids.interstitial || "",
+                    rewardedId: ids.rewarded || ""
+                });
+            }
+            console.log('✅ Ads initialized via iOS bridge');
+            this.loadAndroidBanner();
+            this.loadInterstitialAd();
+            this.loadRewardedAd();
+            return;
+        }
 
         // Check if Android bridge is available
         if (typeof window.Android !== 'undefined' && window.Android !== null) {

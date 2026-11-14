@@ -45,6 +45,36 @@ enum NativeBridgeScript {
                     .adsbygoogle {
                         display: none !important;
                     }
+
+                    /* Universal High-Contrast Visible Text Rules for iOS */
+                    :root, html, body, #app {
+                        color: #F1F5F9 !important;
+                        -webkit-text-fill-color: initial;
+                    }
+                    h1, h2, h3, h4, h5, h6, .game-title, .world-name, .level-name {
+                        color: #FFFFFF !important;
+                        -webkit-text-fill-color: #FFFFFF !important;
+                    }
+                    .login-card, .login-container, .modal, .popup {
+                        color: #F1F5F9 !important;
+                    }
+                    .login-card h2, .popup-title, .modal h2 {
+                        color: #FFFFFF !important;
+                        -webkit-text-fill-color: #FFFFFF !important;
+                    }
+                    .login-card p, .benefit-item, .item-desc, .popup-subtitle, .stat-label {
+                        color: #CBD5E1 !important;
+                        -webkit-text-fill-color: #CBD5E1 !important;
+                    }
+                    input, select, textarea {
+                        color: #FFFFFF !important;
+                        -webkit-text-fill-color: #FFFFFF !important;
+                        background-color: #1E293B !important;
+                    }
+                    input::placeholder, textarea::placeholder {
+                        color: #94A3B8 !important;
+                        -webkit-text-fill-color: #94A3B8 !important;
+                    }
                 `;
                 if (document.head) {
                     document.head.appendChild(safeStyle);
@@ -88,6 +118,7 @@ enum NativeBridgeScript {
             notifyScreenChanged: function(screen) { postToNative('appBridge', 'screenChanged', { screen: screen }); },
             showLogin: function() { postToNative('appBridge', 'showLogin'); },
             showDailyReward: function() { postToNative('appBridge', 'showDailyReward'); },
+            initAds: function(bannerId, interId, rewardedId) { postToNative('adBridge', 'initAds', { bannerId: bannerId, interId: interId, rewardedId: rewardedId }); },
             showBannerAd: function(adUnitId) { postToNative('adBridge', 'showBannerAd', { adUnitId: adUnitId }); },
             hideBannerAd: function() { postToNative('adBridge', 'hideBannerAd'); },
             showInterstitialAd: function(adUnitId) { postToNative('adBridge', 'showInterstitialAd', { adUnitId: adUnitId }); },

@@ -541,6 +541,7 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
 
 .login-card {
     background: var(--bg-surface);
+    color: var(--text-primary, #F1F5F9);
     border-radius: var(--radius-lg);
     padding: var(--space-6);
     width: 100%;
@@ -549,6 +550,24 @@ ins.adsbygoogle[data-ad-status="unfilled"] {
     box-shadow: var(--shadow-lg);
     position: relative;
     margin: auto 0;
+}
+
+.login-card h2 {
+    color: var(--text-primary, #FFFFFF) !important;
+    font-size: 22px;
+    font-weight: 800;
+    margin: 8px 0 12px 0;
+}
+
+.benefit-item {
+    padding: var(--space-2) 0;
+    font-size: var(--font-caption);
+    color: var(--text-secondary, #CBD5E1) !important;
+    border-bottom: 1px solid var(--bg-card);
+}
+
+input, select, textarea {
+    color: var(--text-primary, #FFFFFF);
 }
 
 .login-icon {

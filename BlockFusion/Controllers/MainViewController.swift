@@ -58,6 +58,7 @@ final class MainViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        overrideUserInterfaceStyle = .dark
         view.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
         
         setupTopBar()
@@ -93,12 +94,12 @@ final class MainViewController: UIViewController {
     }
     
     func presentDailyReward() {
-        let dailyVC = NativeDailyRewardViewController()
+        let dailyVC = NativeDailyChallengeViewController()
         dailyVC.scriptBridge = scriptBridge
         let nav = UINavigationController(rootViewController: dailyVC)
         nav.modalPresentationStyle = .pageSheet
         if let sheet = nav.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
+            sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
         }
         present(nav, animated: true)
@@ -262,6 +263,7 @@ final class MainViewController: UIViewController {
     private func setupManagers() {
         AdMobManager.shared.presentingViewController = self
         AdMobManager.shared.delegate = self
+        AdMobManager.shared.initialize()
         
         GameKitManager.shared.presentingViewController = self
         GameKitManager.shared.authenticateLocalPlayer()
@@ -878,6 +880,7 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        overrideUserInterfaceStyle = .dark
         setupUI()
         setupKeyboardObservers()
         fetchOfflineStatus()
@@ -1187,6 +1190,8 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
         textField.placeholder = placeholder
         textField.attributedPlaceholder = NSAttributedString(string: placeholder, attributes: [.foregroundColor: UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1.0)])
         textField.textColor = .white
+        textField.tintColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
+        textField.keyboardAppearance = .dark
         textField.font = UIFont.systemFont(ofSize: 15)
         textField.isSecureTextEntry = isSecure
         textField.delegate = self
@@ -1554,28 +1559,70 @@ final class NativeAuthViewController: UIViewController, UITextFieldDelegate {
     }
 }
 
-// MARK: - Native Daily Reward View Controller
-final class NativeDailyRewardViewController: UIViewController {
+// MARK: - Native Daily Challenge View Controller
+final class NativeDailyChallengeViewController: UIViewController {
     
     weak var scriptBridge: ScriptBridge?
     
-    private let rewards = [100, 200, 300, 500, 750, 1000, 2000]
-    private var currentStreak: Int = 1
-    private var isClaimedToday: Bool = false
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     
-    private let titleLabel = UILabel()
-    private let subtitleLabel = UILabel()
-    private let gridStack = UIStackView()
-    private let claimButton = UIButton(type: .system)
+    private let headerStack = UIStackView()
+    private let streakPill = UIView()
+    private let streakLabel = UILabel()
+    private let dateLabel = UILabel()
+    
+    // Main Challenge Card
+    private let cardView = UIView()
+    private let iconLabel = UILabel()
+    private let challengeTitleLabel = UILabel()
+    private let challengeDescLabel = UILabel()
+    private let rewardBadge = UIView()
+    private let rewardLabel = UILabel()
+    
+    private let progressTrack = UIView()
+    private let progressFill = UIView()
+    private var progressWidthConstraint: NSLayoutConstraint?
+    private let progressTextLabel = UILabel()
+    
+    // Stats Card
+    private let statsCard = UIView()
+    private let statsHeaderLabel = UILabel()
+    private let statLevelsLabel = UILabel()
+    private let statMergesLabel = UILabel()
+    private let statCoinsLabel = UILabel()
+    private let statMovesLabel = UILabel()
+    
+    // Streak Row
+    private let streakRow = UIStackView()
+    
+    // Buttons
+    private let actionButton = UIButton(type: .system)
+    private let secondaryButton = UIButton(type: .system)
+    
+    // State
+    private var challengeGoal: Int = 50
+    private var challengeReward: Int = 100
+    private var challengeType: String = "merge"
+    private var challengeIcon: String = "🎯"
+    private var challengeDesc: String = "Complete today's daily challenge"
+    private var isDone: Bool = false
+    private var streakDays: Int = 1
+    private var levelsCount: Int = 0
+    private var mergesCount: Int = 0
+    private var coinsCount: Int = 0
+    private var movesCount: Int = 0
+    private var highestTile: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        overrideUserInterfaceStyle = .dark
         setupUI()
-        loadDailyStatus()
+        loadChallengeData()
     }
     
     private func setupUI() {
-        title = "Daily Streak Reward"
+        title = "Daily Challenge"
         view.backgroundColor = UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0)
         
         let closeItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeTapped))
@@ -1583,220 +1630,448 @@ final class NativeDailyRewardViewController: UIViewController {
         navigationController?.navigationBar.tintColor = .white
         navigationController?.navigationBar.barStyle = .black
         
-        titleLabel.text = "📅 7-Day Login Streak"
-        titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
-        titleLabel.textColor = .white
-        titleLabel.textAlignment = .center
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(titleLabel)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
         
-        subtitleLabel.text = "Check in every day to claim bonus gold coins!"
-        subtitleLabel.font = UIFont.systemFont(ofSize: 13, weight: .medium)
-        subtitleLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
-        subtitleLabel.textAlignment = .center
-        subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(subtitleLabel)
-        
-        gridStack.axis = .vertical
-        gridStack.spacing = 10
-        gridStack.distribution = .fillEqually
-        gridStack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(gridStack)
-        
-        claimButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
-        claimButton.setTitle("💰 Claim Daily Reward", for: .normal)
-        claimButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
-        claimButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-        claimButton.layer.cornerRadius = 14
-        claimButton.layer.masksToBounds = true
-        claimButton.addTarget(self, action: #selector(claimTapped), for: .touchUpInside)
-        claimButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(claimButton)
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentView)
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
-            subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            gridStack.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 20),
-            gridStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            gridStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            claimButton.topAnchor.constraint(equalTo: gridStack.bottomAnchor, constant: 24),
-            claimButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            claimButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            claimButton.heightAnchor.constraint(equalToConstant: 50),
-            claimButton.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
-    }
-    
-    private func loadDailyStatus() {
-        scriptBridge?.evaluateJavaScript("""
-        (function() {
-            var s = (typeof App !== 'undefined' && App.state) ? App.state : {};
-            return JSON.stringify({
-                streak: s.streakDays || 1,
-                claimed: !!s.dailyChallengeDone
-            });
-        })();
-        """) { [weak self] (result, _) in
-            if let str = result as? String,
-               let data = str.data(using: .utf8),
-               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                let streak = dict["streak"] as? Int ?? 1
-                let claimed = dict["claimed"] as? Bool ?? false
-                DispatchQueue.main.async {
-                    self?.currentStreak = max(1, min(7, streak))
-                    self?.isClaimedToday = claimed
-                    self?.renderGrid()
-                    self?.updateClaimButton()
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self?.renderGrid()
-                    self?.updateClaimButton()
-                }
-            }
-        }
-    }
-    
-    private func renderGrid() {
-        gridStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        // 1. Header Stack (Streak + Date)
+        headerStack.axis = .horizontal
+        headerStack.spacing = 10
+        headerStack.alignment = .center
+        headerStack.distribution = .equalCentering
+        headerStack.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(headerStack)
+        
+        streakPill.backgroundColor = UIColor(red: 233/255, green: 69/255, blue: 96/255, alpha: 0.25)
+        streakPill.layer.cornerRadius = 14
+        streakPill.layer.borderWidth = 1
+        streakPill.layer.borderColor = UIColor(red: 233/255, green: 69/255, blue: 96/255, alpha: 0.6).cgColor
+        streakPill.translatesAutoresizingMaskIntoConstraints = false
+        
+        streakLabel.text = "🔥 1 Day Streak"
+        streakLabel.font = UIFont.systemFont(ofSize: 13, weight: .bold)
+        streakLabel.textColor = UIColor(red: 255/255, green: 107/255, blue: 107/255, alpha: 1.0)
+        streakLabel.translatesAutoresizingMaskIntoConstraints = false
+        streakPill.addSubview(streakLabel)
+        
+        NSLayoutConstraint.activate([
+            streakLabel.topAnchor.constraint(equalTo: streakPill.topAnchor, constant: 5),
+            streakLabel.bottomAnchor.constraint(equalTo: streakPill.bottomAnchor, constant: -5),
+            streakLabel.leadingAnchor.constraint(equalTo: streakPill.leadingAnchor, constant: 12),
+            streakLabel.trailingAnchor.constraint(equalTo: streakPill.trailingAnchor, constant: -12)
+        ])
+        
+        dateLabel.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        dateLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        headerStack.addArrangedSubview(streakPill)
+        headerStack.addArrangedSubview(dateLabel)
+        
+        // 2. Main Challenge Card
+        cardView.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 0.95)
+        cardView.layer.cornerRadius = 18
+        cardView.layer.borderWidth = 1.5
+        cardView.layer.borderColor = UIColor(white: 1.0, alpha: 0.12).cgColor
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(cardView)
+        
+        iconLabel.text = "🎯"
+        iconLabel.font = UIFont.systemFont(ofSize: 42)
+        iconLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(iconLabel)
+        
+        challengeTitleLabel.text = "Today's Goal"
+        challengeTitleLabel.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        challengeTitleLabel.textColor = .white
+        challengeTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(challengeTitleLabel)
+        
+        challengeDescLabel.text = "Merge tiles to complete today's goal"
+        challengeDescLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        challengeDescLabel.textColor = UIColor(red: 203/255, green: 213/255, blue: 225/255, alpha: 1.0)
+        challengeDescLabel.numberOfLines = 2
+        challengeDescLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(challengeDescLabel)
+        
+        rewardBadge.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.18)
+        rewardBadge.layer.cornerRadius = 10
+        rewardBadge.layer.borderWidth = 1
+        rewardBadge.layer.borderColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.5).cgColor
+        rewardBadge.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(rewardBadge)
+        
+        rewardLabel.text = "🏆 Reward: +100 Coins"
+        rewardLabel.font = UIFont.systemFont(ofSize: 13, weight: .bold)
+        rewardLabel.textColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        rewardLabel.translatesAutoresizingMaskIntoConstraints = false
+        rewardBadge.addSubview(rewardLabel)
+        
+        NSLayoutConstraint.activate([
+            rewardLabel.topAnchor.constraint(equalTo: rewardBadge.topAnchor, constant: 4),
+            rewardLabel.bottomAnchor.constraint(equalTo: rewardBadge.bottomAnchor, constant: -4),
+            rewardLabel.leadingAnchor.constraint(equalTo: rewardBadge.leadingAnchor, constant: 10),
+            rewardLabel.trailingAnchor.constraint(equalTo: rewardBadge.trailingAnchor, constant: -10)
+        ])
+        
+        // Progress Track & Fill
+        progressTrack.backgroundColor = UIColor(white: 1.0, alpha: 0.08)
+        progressTrack.layer.cornerRadius = 5
+        progressTrack.layer.masksToBounds = true
+        progressTrack.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(progressTrack)
+        
+        progressFill.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        progressFill.layer.cornerRadius = 5
+        progressFill.translatesAutoresizingMaskIntoConstraints = false
+        progressTrack.addSubview(progressFill)
+        
+        progressTextLabel.text = "Progress: 0%"
+        progressTextLabel.font = UIFont.systemFont(ofSize: 12, weight: .semibold)
+        progressTextLabel.textColor = UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        progressTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        cardView.addSubview(progressTextLabel)
+        
+        NSLayoutConstraint.activate([
+            iconLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+            iconLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 16),
+            iconLabel.widthAnchor.constraint(equalToConstant: 48),
+            
+            challengeTitleLabel.leadingAnchor.constraint(equalTo: iconLabel.trailingAnchor, constant: 12),
+            challengeTitleLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            challengeTitleLabel.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 16),
+            
+            challengeDescLabel.leadingAnchor.constraint(equalTo: challengeTitleLabel.leadingAnchor),
+            challengeDescLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            challengeDescLabel.topAnchor.constraint(equalTo: challengeTitleLabel.bottomAnchor, constant: 4),
+            
+            rewardBadge.leadingAnchor.constraint(equalTo: challengeTitleLabel.leadingAnchor),
+            rewardBadge.topAnchor.constraint(equalTo: challengeDescLabel.bottomAnchor, constant: 8),
+            
+            progressTrack.topAnchor.constraint(equalTo: rewardBadge.bottomAnchor, constant: 14),
+            progressTrack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+            progressTrack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            progressTrack.heightAnchor.constraint(equalToConstant: 10),
+            
+            progressFill.topAnchor.constraint(equalTo: progressTrack.topAnchor),
+            progressFill.bottomAnchor.constraint(equalTo: progressTrack.bottomAnchor),
+            progressFill.leadingAnchor.constraint(equalTo: progressTrack.leadingAnchor),
+            
+            progressTextLabel.topAnchor.constraint(equalTo: progressTrack.bottomAnchor, constant: 6),
+            progressTextLabel.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 16),
+            progressTextLabel.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -16),
+            progressTextLabel.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -16)
+        ])
+        
+        progressWidthConstraint = progressFill.widthAnchor.constraint(equalTo: progressTrack.widthAnchor, multiplier: 0.0)
+        progressWidthConstraint?.isActive = true
+        
+        // 3. Stats Card
+        statsCard.backgroundColor = UIColor(red: 24/255, green: 32/255, blue: 47/255, alpha: 0.9)
+        statsCard.layer.cornerRadius = 14
+        statsCard.layer.borderWidth = 1
+        statsCard.layer.borderColor = UIColor(white: 1.0, alpha: 0.08).cgColor
+        statsCard.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(statsCard)
+        
+        statsHeaderLabel.text = "📊 Today's Activity"
+        statsHeaderLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        statsHeaderLabel.textColor = .white
+        statsHeaderLabel.translatesAutoresizingMaskIntoConstraints = false
+        statsCard.addSubview(statsHeaderLabel)
         
         let row1 = UIStackView()
         row1.axis = .horizontal
-        row1.spacing = 8
         row1.distribution = .fillEqually
+        row1.spacing = 10
+        row1.translatesAutoresizingMaskIntoConstraints = false
         
         let row2 = UIStackView()
         row2.axis = .horizontal
-        row2.spacing = 8
         row2.distribution = .fillEqually
+        row2.spacing = 10
+        row2.translatesAutoresizingMaskIntoConstraints = false
         
-        for day in 1...7 {
-            let card = createDayCard(day: day, reward: rewards[day - 1])
-            if day <= 4 {
-                row1.addArrangedSubview(card)
-            } else {
-                row2.addArrangedSubview(card)
-            }
-        }
+        formatStat(label: statLevelsLabel, title: "Levels", val: "0")
+        formatStat(label: statMergesLabel, title: "Merges", val: "0")
+        formatStat(label: statCoinsLabel, title: "Coins", val: "0")
+        formatStat(label: statMovesLabel, title: "Best Moves", val: "-")
         
-        gridStack.addArrangedSubview(row1)
-        gridStack.addArrangedSubview(row2)
-    }
-    
-    private func createDayCard(day: Int, reward: Int) -> UIView {
-        let card = UIView()
-        card.layer.cornerRadius = 10
-        card.translatesAutoresizingMaskIntoConstraints = false
-        card.heightAnchor.constraint(equalToConstant: 74).isActive = true
+        row1.addArrangedSubview(statLevelsLabel)
+        row1.addArrangedSubview(statMergesLabel)
+        row2.addArrangedSubview(statCoinsLabel)
+        row2.addArrangedSubview(statMovesLabel)
         
-        let isPast = day < currentStreak || (day == currentStreak && isClaimedToday)
-        let isCurrent = day == currentStreak && !isClaimedToday
-        
-        if isCurrent {
-            card.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 0.2)
-            card.layer.borderWidth = 2
-            card.layer.borderColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0).cgColor
-        } else if isPast {
-            card.backgroundColor = UIColor(red: 16/255, green: 185/255, blue: 129/255, alpha: 0.15)
-            card.layer.borderWidth = 1
-            card.layer.borderColor = UIColor(red: 16/255, green: 185/255, blue: 129/255, alpha: 0.5).cgColor
-        } else {
-            card.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
-            card.layer.borderWidth = 1
-            card.layer.borderColor = UIColor(white: 1.0, alpha: 0.08).cgColor
-        }
-        
-        let dayLabel = UILabel()
-        dayLabel.text = "Day \(day)"
-        dayLabel.font = UIFont.systemFont(ofSize: 11, weight: .bold)
-        dayLabel.textColor = isCurrent ? UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0) : UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
-        dayLabel.textAlignment = .center
-        dayLabel.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(dayLabel)
-        
-        let iconLabel = UILabel()
-        iconLabel.text = isPast ? "✅" : (day == 7 ? "👑" : "💰")
-        iconLabel.font = UIFont.systemFont(ofSize: 18)
-        iconLabel.textAlignment = .center
-        iconLabel.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(iconLabel)
-        
-        let rewardLabel = UILabel()
-        rewardLabel.text = "+\(reward)"
-        rewardLabel.font = UIFont.systemFont(ofSize: 12, weight: .heavy)
-        rewardLabel.textColor = .white
-        rewardLabel.textAlignment = .center
-        rewardLabel.translatesAutoresizingMaskIntoConstraints = false
-        card.addSubview(rewardLabel)
+        let statsStack = UIStackView(arrangedSubviews: [row1, row2])
+        statsStack.axis = .vertical
+        statsStack.spacing = 8
+        statsStack.translatesAutoresizingMaskIntoConstraints = false
+        statsCard.addSubview(statsStack)
         
         NSLayoutConstraint.activate([
-            dayLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 6),
-            dayLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            statsHeaderLabel.topAnchor.constraint(equalTo: statsCard.topAnchor, constant: 12),
+            statsHeaderLabel.leadingAnchor.constraint(equalTo: statsCard.leadingAnchor, constant: 14),
+            statsHeaderLabel.trailingAnchor.constraint(equalTo: statsCard.trailingAnchor, constant: -14),
             
-            iconLabel.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            iconLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            
-            rewardLabel.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -6),
-            rewardLabel.centerXAnchor.constraint(equalTo: card.centerXAnchor)
+            statsStack.topAnchor.constraint(equalTo: statsHeaderLabel.bottomAnchor, constant: 10),
+            statsStack.leadingAnchor.constraint(equalTo: statsCard.leadingAnchor, constant: 14),
+            statsStack.trailingAnchor.constraint(equalTo: statsCard.trailingAnchor, constant: -14),
+            statsStack.bottomAnchor.constraint(equalTo: statsCard.bottomAnchor, constant: -14)
         ])
         
-        return card
+        // 4. Action Buttons
+        actionButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+        actionButton.setTitle("🎯 Play Challenge", for: .normal)
+        actionButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        actionButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        actionButton.layer.cornerRadius = 14
+        actionButton.layer.masksToBounds = true
+        actionButton.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
+        actionButton.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(actionButton)
+        
+        secondaryButton.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
+        secondaryButton.setTitle("Close", for: .normal)
+        secondaryButton.setTitleColor(UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0), for: .normal)
+        secondaryButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        secondaryButton.layer.cornerRadius = 14
+        secondaryButton.layer.borderWidth = 1
+        secondaryButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.1).cgColor
+        secondaryButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+        secondaryButton.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(secondaryButton)
+        
+        NSLayoutConstraint.activate([
+            headerStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            headerStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            headerStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            cardView.topAnchor.constraint(equalTo: headerStack.bottomAnchor, constant: 14),
+            cardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            cardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            statsCard.topAnchor.constraint(equalTo: cardView.bottomAnchor, constant: 14),
+            statsCard.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            statsCard.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            
+            actionButton.topAnchor.constraint(equalTo: statsCard.bottomAnchor, constant: 20),
+            actionButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            actionButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            actionButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            secondaryButton.topAnchor.constraint(equalTo: actionButton.bottomAnchor, constant: 10),
+            secondaryButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            secondaryButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            secondaryButton.heightAnchor.constraint(equalToConstant: 44),
+            secondaryButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+        ])
     }
     
-    private func updateClaimButton() {
-        if isClaimedToday {
-            claimButton.isEnabled = false
-            claimButton.backgroundColor = UIColor(red: 30/255, green: 41/255, blue: 59/255, alpha: 1.0)
-            claimButton.setTitle("✅ Claimed for Today!", for: .normal)
-            claimButton.setTitleColor(UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0), for: .normal)
-        } else {
-            let reward = rewards[currentStreak - 1]
-            claimButton.isEnabled = true
-            claimButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
-            claimButton.setTitle("💰 Claim +\(reward) Coins", for: .normal)
-            claimButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
-        }
+    private func formatStat(label: UILabel, title: String, val: String) {
+        label.numberOfLines = 2
+        label.textAlignment = .center
+        label.backgroundColor = UIColor(white: 1.0, alpha: 0.04)
+        label.layer.cornerRadius = 8
+        label.layer.masksToBounds = true
+        label.font = UIFont.systemFont(ofSize: 12)
+        
+        let attr = NSMutableAttributedString(string: "\(val)\n", attributes: [
+            .font: UIFont.systemFont(ofSize: 15, weight: .bold),
+            .foregroundColor: UIColor.white
+        ])
+        attr.append(NSAttributedString(string: title, attributes: [
+            .font: UIFont.systemFont(ofSize: 11, weight: .semibold),
+            .foregroundColor: UIColor(red: 148/255, green: 163/255, blue: 184/255, alpha: 1.0)
+        ]))
+        label.attributedText = attr
     }
     
-    @objc private func claimTapped() {
-        guard !isClaimedToday else { return }
-        let reward = rewards[currentStreak - 1]
-        let nextStreak = currentStreak >= 7 ? 1 : currentStreak + 1
-        
-        HapticManager.shared.notification(type: .success)
-        
+    private func loadChallengeData() {
         let js = """
         (function() {
-            if (typeof App !== 'undefined' && App.state) {
-                App.state.coins = (App.state.coins || 0) + \(reward);
-                App.state.dailyChallengeDone = true;
-                App.state.streakDays = \(nextStreak);
-                App.saveState();
-                App.updateAllCoinDisplays();
-                if (typeof FirebaseService !== 'undefined') {
-                    FirebaseService.saveUserData(App.state);
-                }
-                App.showToast('🎉 +\(reward) Daily Bonus Coins Claimed!');
+            if (typeof DailyChallenge !== 'undefined' && typeof DailyChallenge.checkDailyReset === 'function') {
+                DailyChallenge.checkDailyReset();
             }
+            var challenge = (typeof DailyChallenge !== 'undefined' && typeof DailyChallenge.getDailyChallenge === 'function')
+                ? DailyChallenge.getDailyChallenge() : null;
+            var s = (typeof App !== 'undefined' && App.state) ? App.state : {};
+            var prog = s.dailyProgress || { levels: 0, merges: 0, coins: 0, moves: Infinity };
+            return JSON.stringify({
+                challenge: challenge,
+                done: !!s.dailyChallengeDone,
+                streak: s.currentStreak || s.streakDays || 1,
+                progress: prog,
+                highestTile: s.highestTileEver || 0,
+                date: new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+            });
         })();
         """
         
-        scriptBridge?.evaluateJavaScript(js) { [weak self] (_, _) in
+        scriptBridge?.evaluateJavaScript(js) { [weak self] (result, _) in
+            guard let self = self,
+                  let str = result as? String,
+                  let data = str.data(using: .utf8),
+                  let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                return
+            }
+            
             DispatchQueue.main.async {
-                self?.isClaimedToday = true
-                self?.renderGrid()
-                self?.updateClaimButton()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    self?.dismiss(animated: true)
+                self.parsePayload(dict)
+            }
+        }
+    }
+    
+    private func parsePayload(_ dict: [String: Any]) {
+        self.isDone = dict["done"] as? Bool ?? false
+        self.streakDays = dict["streak"] as? Int ?? 1
+        self.highestTile = dict["highestTile"] as? Int ?? 0
+        let dateStr = dict["date"] as? String ?? "Today"
+        
+        streakLabel.text = "🔥 \(streakDays) Day Streak"
+        dateLabel.text = "📅 \(dateStr)"
+        
+        if let prog = dict["progress"] as? [String: Any] {
+            self.levelsCount = prog["levels"] as? Int ?? 0
+            self.mergesCount = prog["merges"] as? Int ?? 0
+            self.coinsCount = prog["coins"] as? Int ?? 0
+            let rawMoves = prog["moves"] as? Int ?? -1
+            self.movesCount = (rawMoves > 0 && rawMoves < 999999) ? rawMoves : -1
+        }
+        
+        formatStat(label: statLevelsLabel, title: "Levels", val: "\(levelsCount)")
+        formatStat(label: statMergesLabel, title: "Merges", val: "\(mergesCount)")
+        formatStat(label: statCoinsLabel, title: "Coins", val: "\(coinsCount)")
+        formatStat(label: statMovesLabel, title: "Best Moves", val: movesCount > 0 ? "\(movesCount)" : "-")
+        
+        var currentProgress = 0
+        var goal = 50
+        
+        if let ch = dict["challenge"] as? [String: Any] {
+            self.challengeIcon = ch["icon"] as? String ?? "🎯"
+            self.challengeDesc = ch["desc"] as? String ?? "Complete today's challenge"
+            self.challengeReward = ch["reward"] as? Int ?? 100
+            self.challengeGoal = ch["goal"] as? Int ?? 50
+            self.challengeType = ch["type"] as? String ?? "merge"
+            goal = self.challengeGoal
+            
+            iconLabel.text = challengeIcon
+            challengeDescLabel.text = challengeDesc
+            rewardLabel.text = "🏆 Reward: +\(challengeReward) Coins"
+            
+            switch challengeType {
+            case "reach":
+                currentProgress = highestTile
+                progressTextLabel.text = "Highest Tile: \(highestTile) / \(goal)"
+            case "moves":
+                currentProgress = movesCount > 0 ? movesCount : 0
+                progressTextLabel.text = "Best Moves: \(movesCount > 0 ? "\(movesCount)" : "-") / \(goal)"
+            case "levels":
+                currentProgress = levelsCount
+                progressTextLabel.text = "Levels Today: \(levelsCount) / \(goal)"
+            case "coins":
+                currentProgress = coinsCount
+                progressTextLabel.text = "Coins Today: \(coinsCount) / \(goal)"
+            default: // merge
+                currentProgress = mergesCount
+                progressTextLabel.text = "Merges: \(mergesCount) / \(goal)"
+            }
+        }
+        
+        let pct = goal > 0 ? min(1.0, max(0.0, Double(currentProgress) / Double(goal))) : (isDone ? 1.0 : 0.0)
+        let pctInt = Int(pct * 100)
+        
+        if isDone {
+            challengeTitleLabel.text = "✅ Completed!"
+            cardView.layer.borderColor = UIColor(red: 34/255, green: 197/255, blue: 94/255, alpha: 0.8).cgColor
+            cardView.backgroundColor = UIColor(red: 20/255, green: 35/255, blue: 45/255, alpha: 0.95)
+            progressFill.backgroundColor = UIColor(red: 34/255, green: 197/255, blue: 94/255, alpha: 1.0)
+            progressTextLabel.text = "✅ Completed today! Come back tomorrow."
+            progressTextLabel.textColor = UIColor(red: 34/255, green: 197/255, blue: 94/255, alpha: 1.0)
+            
+            actionButton.setTitle("▶ Keep Playing", for: .normal)
+            actionButton.backgroundColor = UIColor(red: 56/255, green: 189/255, blue: 248/255, alpha: 1.0)
+            actionButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        } else if pct >= 1.0 {
+            // Reached goal but not yet claimed!
+            challengeTitleLabel.text = "🎉 Goal Reached!"
+            progressFill.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+            progressTextLabel.text = "Goal Reached! (100%)"
+            actionButton.setTitle("💰 Claim +\(challengeReward) Coins", for: .normal)
+            actionButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+            actionButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        } else {
+            challengeTitleLabel.text = "Today's Goal"
+            progressTextLabel.text = "\(progressTextLabel.text ?? "") (\(pctInt)%)"
+            actionButton.setTitle("🎯 Play to Complete", for: .normal)
+            actionButton.backgroundColor = UIColor(red: 245/255, green: 158/255, blue: 11/255, alpha: 1.0)
+            actionButton.setTitleColor(UIColor(red: 15/255, green: 23/255, blue: 42/255, alpha: 1.0), for: .normal)
+        }
+        
+        progressWidthConstraint?.isActive = false
+        progressWidthConstraint = progressFill.widthAnchor.constraint(equalTo: progressTrack.widthAnchor, multiplier: CGFloat(isDone ? 1.0 : pct))
+        progressWidthConstraint?.isActive = true
+        UIView.animate(withDuration: 0.35) {
+            self.cardView.layoutIfNeeded()
+        }
+    }
+    
+    @objc private func actionButtonTapped() {
+        if !isDone && actionButton.title(for: .normal)?.contains("Claim") == true {
+            // Claim Reward
+            HapticManager.shared.notification(type: .success)
+            let reward = self.challengeReward
+            let nextStreak = self.streakDays + 1
+            let js = """
+            (function() {
+                if (typeof App !== 'undefined' && App.state) {
+                    App.state.coins = (App.state.coins || 0) + \(reward);
+                    App.state.dailyChallengeDone = true;
+                    App.state.currentStreak = \(nextStreak);
+                    App.state.streakDays = \(nextStreak);
+                    App.saveState();
+                    App.updateAllCoinDisplays();
+                    if (typeof FirebaseService !== 'undefined') {
+                        FirebaseService.saveUserData(App.state);
+                    }
+                    App.showToast('🎉 +\(reward) Daily Challenge Reward Claimed!');
+                }
+            })();
+            """
+            scriptBridge?.evaluateJavaScript(js) { [weak self] (_, _) in
+                DispatchQueue.main.async {
+                    self?.isDone = true
+                    self?.loadChallengeData()
                 }
             }
+            return
+        }
+        
+        // Play / Keep Playing: Dismiss and launch game!
+        HapticManager.shared.selection()
+        dismiss(animated: true) { [weak self] in
+            let js = """
+            if (typeof App !== 'undefined' && typeof App.continueGame === 'function') {
+                App.continueGame();
+            } else if (typeof Navigation !== 'undefined') {
+                Navigation.navigateTo('game');
+            }
+            """
+            self?.scriptBridge?.evaluateJavaScript(js)
         }
     }
     

@@ -50,9 +50,15 @@ final class AdMobManager: NSObject {
     
     // MARK: - Initialization
     func initialize(bannerId: String? = nil, interId: String? = nil, rewardedId: String? = nil) {
+        #if DEBUG
+        bannerAdUnitId = "ca-app-pub-3940256099942544/2934735716"
+        interstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910"
+        rewardedAdUnitId = "ca-app-pub-3940256099942544/1712485313"
+        #else
         if let b = bannerId, !b.isEmpty { bannerAdUnitId = b }
         if let i = interId, !i.isEmpty { interstitialAdUnitId = i }
         if let r = rewardedId, !r.isEmpty { rewardedAdUnitId = r }
+        #endif
         
         AppTrackingManager.shared.requestAuthorization { [weak self] _ in
             self?.startSdk()
@@ -94,10 +100,14 @@ final class AdMobManager: NSObject {
         }
         
         #if canImport(GoogleMobileAds)
-        guard let vc = presentingViewController else { return }
+        guard let vc = presentingViewController else {
+            print("⚠️ AdMob presentingViewController is nil, cannot show banner")
+            return
+        }
         
+        let width = containerView.bounds.width > 0 ? containerView.bounds.width : UIScreen.main.bounds.width
         if bannerView == nil {
-            let adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(containerView.bounds.width)
+            let adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width)
             let banner = GADBannerView(adSize: adSize)
             banner.adUnitID = bannerAdUnitId
             banner.rootViewController = vc
@@ -115,6 +125,7 @@ final class AdMobManager: NSObject {
         }
         
         bannerView?.isHidden = false
+        containerView.bringSubviewToFront(bannerView!)
         bannerView?.load(GADRequest())
         isBannerVisible = true
         delegate?.onBannerVisibilityChanged(visible: true, height: 50)

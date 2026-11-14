@@ -18,6 +18,10 @@ html {
     color-scheme: light dark;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary, #F1F5F9);
+}
+
 /* Force light color scheme for game content to prevent dark mode issues */
 #app,
 .screen,

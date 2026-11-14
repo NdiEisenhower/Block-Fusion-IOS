@@ -3,18 +3,11 @@ class Navigation {
     static async navigateTo(screenId) {
         try { SoundManager.click(); } catch (e) { }
 
-        // iOS-specific: Intercept leaderboard if user is not signed in
-        if (screenId === 'leaderboard') {
-            const isUserLoggedIn = (typeof FirebaseService !== 'undefined' && FirebaseService.currentUser && !FirebaseService.currentUser.isAnonymous);
-            if (!isUserLoggedIn) {
-                if (typeof window.iOS !== 'undefined' && typeof window.iOS.showLogin === 'function') {
-                    window.iOS.showLogin();
-                    return;
-                } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) {
-                    window.webkit.messageHandlers.appBridge.postMessage({ action: 'showLogin' });
-                    return;
-                }
-            }
+        // iOS-specific: Notify native bottom navigation and top bar of active screen
+        if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { 
+            window.iOS.notifyScreenChanged(screenId); 
+        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) { 
+            window.webkit.messageHandlers.appBridge.postMessage({ action: 'screenChanged', screen: screenId }); 
         }
 
         // iOS-specific: Intercept daily challenge to open native modal on iOS if registered
@@ -26,13 +19,6 @@ class Navigation {
                 window.webkit.messageHandlers.appBridge.postMessage({ action: 'showDailyReward' });
                 return;
             }
-        }
-
-        // iOS-specific: Notify native bottom navigation and top bar of active screen
-        if (typeof window.iOS !== 'undefined' && typeof window.iOS.notifyScreenChanged === 'function') { 
-            window.iOS.notifyScreenChanged(screenId); 
-        } else if (typeof window.webkit !== 'undefined' && window.webkit.messageHandlers && window.webkit.messageHandlers.appBridge) { 
-            window.webkit.messageHandlers.appBridge.postMessage({ action: 'screenChanged', screen: screenId }); 
         }
 
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
